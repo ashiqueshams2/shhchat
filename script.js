@@ -24,6 +24,8 @@ function escapeHtml(text) {
 }
 
 // Firebase operations (Assuming Firebase is initialized in index.html)
+import { getDatabase, ref, set, push, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
 
 // Create or join a room
 async function createOrJoinRoom(roomCode, userName) {
@@ -38,22 +40,23 @@ async function createOrJoinRoom(roomCode, userName) {
     chatData.currentUser = user;
 
     // Store user in Firebase
-    await firebase.database().ref(`users/${userId}`).set(user);
+    await set(ref(database, 'users/' + userId), user);
 
     // Generate or use room code
     if (!roomCode) {
         roomCode = generateRoomCode();
     }
-    const roomRef = firebase.database().ref(`rooms/${roomCode}`);
-    const snapshot = await roomRef.once('value');
+    const roomRef = ref(database, 'rooms/' + roomCode);
+    const snapshot = await get(roomRef);
+
     if (!snapshot.exists()) {
-        await roomRef.set({
+        await set(roomRef, {
             code: roomCode,
             createdAt: Date.now(),
             users: { [userId]: true }
         });
     } else {
-        await roomRef.child(`users/${userId}`).set(true);
+        await set(ref(roomRef, 'users/' + userId), true);
     }
 
     chatData.currentRoom = roomCode;
@@ -69,7 +72,8 @@ function addSystemMessage(text) {
         timestamp: Date.now()
     };
 
-    firebase.database().ref(`rooms/${chatData.currentRoom}/messages`).push(message);
+    const messagesRef = ref(database, 'rooms/' + chatData.currentRoom + '/messages');
+    push(messagesRef, message);
 }
 
 function sendMessage() {
@@ -86,10 +90,11 @@ function sendMessage() {
         timestamp: Date.now()
     };
 
-    firebase.database().ref(`rooms/${chatData.currentRoom}/messages`).push(message);
+    const messagesRef = ref(database, 'rooms/' + chatData.currentRoom + '/messages');
+    push(messagesRef, message);
     messageInput.value = '';
     chatData.currentUser.lastSeen = Date.now();
-    firebase.database().ref(`users/${chatData.currentUser.id}/lastSeen`).set(Date.now());
+    set(ref(database, 'users/' + chatData.currentUser.id + '/lastSeen'), Date.now());
 }
 
 function addMessageToDOM(message) {
@@ -111,14 +116,14 @@ function addMessageToDOM(message) {
 }
 
 function listenForMessages() {
-    const roomRef = firebase.database().ref(`rooms/${chatData.currentRoom}/messages`);
+    const roomRef = ref(database, 'rooms/' + chatData.currentRoom + '/messages');
     roomRef.on('child_added', snapshot => {
         addMessageToDOM(snapshot.val());
     });
 }
 
 function updateOnlineCount() {
-    const roomRef = firebase.database().ref(`rooms/${chatData.currentRoom}/users`);
+    const roomRef = ref(database, 'rooms/' + chatData.currentRoom + '/users');
     roomRef.on('value', snapshot => {
         const users = snapshot.val();
         const count = users ? Object.keys(users).length : 0;
@@ -129,21 +134,21 @@ function updateOnlineCount() {
 async function leaveRoom() {
     if (!chatData.currentRoom || !chatData.currentUser) return;
     if (confirm('Leave room? It will be deleted if empty.')) {
-        const roomRef = firebase.database().ref(`rooms/${chatData.currentRoom}`);
-        const userRef = firebase.database().ref(`users/${chatData.currentUser.id}`);
+        const roomRef = ref(database, 'rooms/' + chatData.currentRoom);
+        const userRef = ref(database, 'users/' + chatData.currentUser.id);
         addSystemMessage(`${chatData.currentUser.name} left the chat`);
 
         // Remove user from room
-        await roomRef.child(`users/${chatData.currentUser.id}`).remove();
+        await set(ref(roomRef, 'users/' + chatData.currentUser.id), null);
 
         // Delete room if empty
-        const snapshot = await roomRef.child('users').once('value');
+        const snapshot = await get(ref(roomRef, 'users'));
         if (!snapshot.exists() || Object.keys(snapshot.val()).length === 0) {
-            await roomRef.remove();
+            await set(roomRef, null);
         }
 
         // Remove user
-        await userRef.remove();
+        await set(userRef, null);
         chatData.currentUser = null;
         chatData.currentRoom = null;
 
