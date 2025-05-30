@@ -54,23 +54,25 @@
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-        import { getDatabase, ref, set, push, child, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+        import { getDatabase, ref, set, push, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
 
         // Firebase configuration
         const firebaseConfig = {
-              apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200",
-  authDomain: "shh-chat-db9d0.firebaseapp.com",
-  databaseURL: "https://shh-chat-db9d0-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "shh-chat-db9d0",
-  storageBucket: "shh-chat-db9d0.firebasestorage.app",
-  messagingSenderId: "20040883450",
-  appId: "1:20040883450:web:833660405c634b2aaffd43",
-  measurementId: "G-D7B8720EXN"
+            apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200",
+            authDomain: "shh-chat-db9d0.firebaseapp.com",
+            databaseURL: "https://shh-chat-db9d0-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "shh-chat-db9d0",
+            storageBucket: "shh-chat-db9d0.firebasestorage.app",
+            messagingSenderId: "20040883450",
+            appId: "1:20040883450:web:833660405c634b2aaffd43",
+            measurementId: "G-D7B8720EXN"
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const auth = getAuth(app);
 
         // In-memory state for chat data
         const chatData = {
@@ -132,6 +134,29 @@
             chatData.currentRoom = roomCode;
             addSystemMessage(`${userName} joined the chat`);
             return { roomCode, userId };
+        }
+
+        // Firebase Authentication Example (modular approach)
+        function signUpUser(email, password) {
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+                    console.log("User signed up:", user.uid);
+                })
+                .catch(error => {
+                    console.error("Error signing up:", error.message);
+                });
+        }
+
+        function logInUser(email, password) {
+            signInWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+                    console.log("User logged in:", user.uid);
+                })
+                .catch(error => {
+                    console.error("Error logging in:", error.message);
+                });
         }
 
         function addSystemMessage(text) {
