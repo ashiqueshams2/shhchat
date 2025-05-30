@@ -1,19 +1,3 @@
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200",
-    authDomain: "shh-chat-db9d0.firebaseapp.com",
-    databaseURL: "https://shh-chat-db9d0-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "shh-chat-db9d0",
-    storageBucket: "shh-chat-db9d0.firebasestorage.app",
-    messagingSenderId: "20040883450",
-    appId: "1:20040883450:web:833660405c634b2aaffd43",
-    measurementId: "G-D7B8720EXN"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
 // In-memory state
 const chatData = {
     currentUser: null,
@@ -39,7 +23,9 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Firebase operations
+// Firebase operations (Assuming Firebase is initialized in index.html)
+
+// Create or join a room
 async function createOrJoinRoom(roomCode, userName) {
     const userId = generateUserId();
     const user = {
@@ -51,14 +37,14 @@ async function createOrJoinRoom(roomCode, userName) {
 
     chatData.currentUser = user;
 
-    // Store user
-    await database.ref(`users/${userId}`).set(user);
+    // Store user in Firebase
+    await firebase.database().ref(`users/${userId}`).set(user);
 
     // Generate or use room code
     if (!roomCode) {
         roomCode = generateRoomCode();
     }
-    const roomRef = database.ref(`rooms/${roomCode}`);
+    const roomRef = firebase.database().ref(`rooms/${roomCode}`);
     const snapshot = await roomRef.once('value');
     if (!snapshot.exists()) {
         await roomRef.set({
@@ -83,7 +69,7 @@ function addSystemMessage(text) {
         timestamp: Date.now()
     };
 
-    database.ref(`rooms/${chatData.currentRoom}/messages`).push(message);
+    firebase.database().ref(`rooms/${chatData.currentRoom}/messages`).push(message);
 }
 
 function sendMessage() {
@@ -100,10 +86,10 @@ function sendMessage() {
         timestamp: Date.now()
     };
 
-    database.ref(`rooms/${chatData.currentRoom}/messages`).push(message);
+    firebase.database().ref(`rooms/${chatData.currentRoom}/messages`).push(message);
     messageInput.value = '';
     chatData.currentUser.lastSeen = Date.now();
-    database.ref(`users/${chatData.currentUser.id}/lastSeen`).set(Date.now());
+    firebase.database().ref(`users/${chatData.currentUser.id}/lastSeen`).set(Date.now());
 }
 
 function addMessageToDOM(message) {
@@ -125,14 +111,14 @@ function addMessageToDOM(message) {
 }
 
 function listenForMessages() {
-    const roomRef = database.ref(`rooms/${chatData.currentRoom}/messages`);
+    const roomRef = firebase.database().ref(`rooms/${chatData.currentRoom}/messages`);
     roomRef.on('child_added', snapshot => {
         addMessageToDOM(snapshot.val());
     });
 }
 
 function updateOnlineCount() {
-    const roomRef = database.ref(`rooms/${chatData.currentRoom}/users`);
+    const roomRef = firebase.database().ref(`rooms/${chatData.currentRoom}/users`);
     roomRef.on('value', snapshot => {
         const users = snapshot.val();
         const count = users ? Object.keys(users).length : 0;
@@ -143,8 +129,8 @@ function updateOnlineCount() {
 async function leaveRoom() {
     if (!chatData.currentRoom || !chatData.currentUser) return;
     if (confirm('Leave room? It will be deleted if empty.')) {
-        const roomRef = database.ref(`rooms/${chatData.currentRoom}`);
-        const userRef = database.ref(`users/${chatData.currentUser.id}`);
+        const roomRef = firebase.database().ref(`rooms/${chatData.currentRoom}`);
+        const userRef = firebase.database().ref(`users/${chatData.currentUser.id}`);
         addSystemMessage(`${chatData.currentUser.name} left the chat`);
 
         // Remove user from room
