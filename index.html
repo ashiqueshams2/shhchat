@@ -15,178 +15,142 @@
 
 html {
     height: 100%;
-    -webkit-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape on iOS */
     text-size-adjust: 100%;
 }
 
 body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f0f2f5; /* Lighter background */
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    height: 100%;
+    min-height: 100vh; /* Ensure body at least fills viewport height */
+    height: 100%;     /* Make body take full viewport height if possible */
     color: #333;
     line-height: 1.6;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: contain; /* Prevents pull-to-refresh or scrolling beyond content on body */
 }
 
 .container {
     width: 100%;
-    max-width: 420px;
+    max-width: 420px; /* Slightly wider */
     background-color: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    overflow: hidden;
+    border-radius: 12px; /* More rounded */
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1); /* Softer shadow */
+    overflow: hidden; /* Crucial: clips content and helps define boundaries */
     display: flex;
     flex-direction: column;
-    height: clamp(500px, 85vh, 700px);
-    max-height: 85vh;
+    /* Responsive height, ensures container itself doesn't grow indefinitely */
+    height: clamp(450px, 90vh, 700px); /* Min height, preferred viewport height, max height */
+    max-height: 90vh; /* Explicit max-height related to viewport */
 }
 
 /* Welcome Screen */
 .welcome-card {
-    padding: 40px 30px;
+    padding: 30px 25px; /* More padding */
     text-align: center;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    flex-grow: 1; /* Takes up available space if chat is hidden */
+    display: flex; /* Added */
+    flex-direction: column; /* Added */
+    justify-content: center; /* Added */
 }
 
 .welcome-title {
-    font-size: 2.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 8px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-}
-
-.chat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: white;
-    padding: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-size: 2rem; /* Larger title */
+    color: #1a73e8; /* Primary color */
+    margin-bottom: 10px;
+    font-weight: 600;
 }
 
 .welcome-subtitle {
-    color: #64748b;
-    font-size: 1.1rem;
-    margin-bottom: 35px;
-    font-weight: 400;
+    color: #5f6368; /* Subtler subtitle color */
+    font-size: 1rem;
+    margin-bottom: 30px;
 }
 
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     text-align: left;
 }
 
 .form-label {
-    font-size: 0.95rem;
-    color: #374151;
+    font-size: 0.9rem;
+    color: #3c4043;
     margin-bottom: 8px;
     display: block;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .form-input {
     width: 100%;
-    padding: 16px 20px;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
+    padding: 12px 15px; /* More padding */
+    border: 1px solid #dadce0; /* Lighter border */
+    border-radius: 8px; /* More rounded */
     font-size: 1rem;
-    transition: all 0.2s ease-in-out;
-    background: white;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .form-input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    transform: translateY(-1px);
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2); /* Focus ring */
 }
 
 .join-btn {
     width: 100%;
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 12px 15px;
+    background: #1a73e8; /* Primary color */
     color: white;
     border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
+    border-radius: 8px;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: background-color 0.2s ease-in-out;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .join-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    background: #1765cc; /* Darker shade on hover */
 }
 
 .join-btn:disabled {
-    background: #e5e7eb;
+    background: #e0e0e0;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
 }
 
-/* Chat Interface - FIXED LAYOUT */
+/* Chat Interface */
 .chat-container {
-    display: none;
+    display: none; /* Initially hidden */
     flex-direction: column;
     width: 100%;
-    height: 100%;
-    position: relative;
+    height: 100%; /* Make chat-container fill .container */
+    flex-grow: 1; /* Ensures it takes all space within .container if .container uses flex */
+    overflow: hidden; /* Very important for containing sticky elements and scroll context */
 }
 
 .chat-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1a73e8;
     color: white;
-    padding: 20px 24px;
+    padding: 15px 20px; /* More padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    /* CRITICAL: Remove sticky positioning that was causing issues */
-    position: relative;
-    z-index: 100;
-    flex-shrink: 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-bottom: 1px solid #1765cc; /* Subtle border */
+    /* Sticky positioning */
+    position: sticky;
+    top: 0;
+    z-index: 100; /* Ensure it's above messages */
+    width: 100%; /* Ensure it spans full width */
+    flex-shrink: 0; /* Prevent header from shrinking */
 }
 
-.room-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.header-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    padding: 6px;
-}
-
-.room-details h3 {
-    font-size: 1.2rem;
+.room-info h3 {
+    font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 2px;
 }
 
 .online-count {
@@ -200,74 +164,49 @@ body {
 .online-dot {
     width: 8px;
     height: 8px;
-    background: #10b981;
+    background: #34a853; /* Green dot */
     border-radius: 50%;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
 }
 
 .chat-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
 .action-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border: none;
-    background: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.15); /* More subtle */
     color: white;
-    border-radius: 10px;
+    border-radius: 8px; /* More rounded */
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1.1rem; /* Larger icons */
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease-in-out;
-    backdrop-filter: blur(10px);
+    transition: background-color 0.2s ease-in-out;
 }
 
 .action-btn:hover {
     background: rgba(255,255,255,0.25);
-    transform: translateY(-1px);
 }
 
-/* FIXED: Messages container with proper scrolling */
 .messages-container {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    flex: 1; /* Key: allows this to grow and shrink to fill space */
+    padding: 15px;
+    overflow-y: auto; /* This MUST be the scrolling container */
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    background: #f8fafc;
-    /* CRITICAL: This ensures it takes remaining height */
-    min-height: 0;
-    -webkit-overflow-scrolling: touch;
+    gap: 12px; /* More space between messages */
+    background-color: #f8f9fa; /* Light background for messages area */
+    -webkit-overflow-scrolling: touch; /* For momentum scrolling on touch devices */
 }
 
 .message {
     display: flex;
     flex-direction: column;
-    max-width: 80%;
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    max-width: 85%; /* Slightly wider messages */
 }
 
 .message.own {
@@ -279,33 +218,30 @@ body {
 }
 
 .message-bubble {
-    padding: 12px 18px;
-    border-radius: 20px;
+    padding: 10px 15px; /* More padding */
+    border-radius: 18px; /* Bubble shape */
     font-size: 0.95rem;
     line-height: 1.5;
-    word-wrap: break-word;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    word-wrap: break-word; /* Ensure long words wrap */
 }
 
 .message.own .message-bubble {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1a73e8;
     color: white;
-    border-bottom-right-radius: 6px;
+    border-bottom-right-radius: 4px; /* Tail effect */
 }
 
 .message.other .message-bubble {
-    background: white;
-    color: #374151;
-    border-bottom-left-radius: 6px;
-    border: 1px solid #e5e7eb;
+    background: #e9ebee; /* Lighter grey for other messages */
+    color: #202124; /* Darker text for readability */
+    border-bottom-left-radius: 4px; /* Tail effect */
 }
 
 .message-info {
-    font-size: 0.75rem;
-    color: #64748b;
-    margin-bottom: 6px;
-    padding: 0 8px;
-    font-weight: 500;
+    font-size: 0.75rem; /* Smaller info text */
+    color: #5f6368;
+    margin-bottom: 4px; /* Space between info and bubble */
+    padding: 0 5px;
 }
 
 .message.own .message-info {
@@ -316,87 +252,78 @@ body {
     text-align: left;
 }
 
-/* FIXED: Input container positioning */
 .message-input-container {
-    padding: 20px 24px;
+    padding: 15px;
     display: flex;
-    gap: 12px;
-    border-top: 1px solid #e5e7eb;
-    background: white;
-    /* CRITICAL: Remove sticky positioning */
-    position: relative;
-    z-index: 100;
-    flex-shrink: 0;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    gap: 10px;
+    border-top: 1px solid #dadce0; /* Clearer separator */
+    background-color: #fff;
+    /* Sticky positioning */
+    position: sticky;
+    bottom: 0;
+    z-index: 100; /* Ensure it's above messages */
+    width: 100%; /* Ensure it spans full width */
+    flex-shrink: 0; /* Prevent input area from shrinking */
 }
 
 .message-input {
     flex: 1;
-    padding: 14px 20px;
-    border: 2px solid #e5e7eb;
-    border-radius: 25px;
+    padding: 12px 15px;
+    border: 1px solid #dadce0;
+    border-radius: 20px; /* Pill shape */
     font-size: 0.95rem;
-    transition: all 0.2s ease-in-out;
-    background: white;
 }
 
 .message-input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }
 
 .send-btn {
-    width: 48px;
-    height: 48px;
+    width: 44px; /* Larger send button */
+    height: 44px;
     border: none;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1a73e8;
     color: white;
-    border-radius: 50%;
+    border-radius: 50%; /* Circular button */
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    font-size: 1.5rem; /* Larger send icon */
+    transition: background-color 0.2s ease-in-out;
 }
 
 .send-btn:hover {
-    transform: translateY(-1px) scale(1.05);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    background: #1765cc;
 }
 
 .send-btn:disabled {
-    background: #e5e7eb;
+    background-color: #e0e0e0;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
 }
 
 .system-message {
     text-align: center;
-    color: #64748b;
+    color: #5f6368;
     font-size: 0.85rem;
-    padding: 12px 0;
+    padding: 8px 0;
     font-style: italic;
-    background: rgba(100, 116, 139, 0.1);
-    border-radius: 12px;
-    margin: 8px 0;
 }
 
 .loading {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 4px;
-    height: 20px;
+    gap: 5px;
+    height: 20px; /* Ensure it has height for alignment */
 }
 
 .loading-dot {
-    width: 6px;
-    height: 6px;
-    background: white;
+    width: 8px;
+    height: 8px;
+    background: white; /* Dots are white on blue button */
     border-radius: 50%;
     animation: loadingPulse 1.4s infinite ease-in-out;
 }
@@ -416,74 +343,61 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.6);
-    display: none;
+    background-color: rgba(0,0,0,0.5);
+    display: none; /* Hidden by default */
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
+    z-index: 1000; /* Ensure modal is on top of everything */
 }
 
 .modal-content {
     background-color: white;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     width: 90%;
-    max-width: 380px;
+    max-width: 350px;
     text-align: center;
-    transform: scale(0.9);
-    transition: transform 0.2s ease-out;
-}
-
-.modal-backdrop[style*="flex"] .modal-content {
-    transform: scale(1);
 }
 
 .modal-message {
-    font-size: 1.1rem;
-    color: #374151;
-    margin-bottom: 24px;
-    line-height: 1.5;
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 20px;
 }
 
 .modal-buttons {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .modal-button {
-    padding: 12px 24px;
-    border-radius: 10px;
+    padding: 10px 20px;
+    border-radius: 6px;
     border: none;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    min-width: 80px;
+    transition: background-color 0.2s, color 0.2s;
 }
 
 .modal-button.confirm {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #1a73e8;
     color: white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .modal-button.confirm:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    background-color: #1765cc;
 }
 
 .modal-button.cancel {
-    background-color: #f3f4f6;
-    color: #374151;
-    border: 1px solid #d1d5db;
+    background-color: #e0e0e0;
+    color: #333;
 }
 
 .modal-button.cancel:hover {
-    background-color: #e5e7eb;
-    transform: translateY(-1px);
+    background-color: #d5d5d5;
 }
 
 /* Media Queries */
@@ -491,65 +405,30 @@ body {
     .container {
         margin: 0;
         border-radius: 0;
-        height: 100vh;
-        max-height: 100vh;
+        height: 100%; /* Use 100% to fill the viewport height on small screens */
+        max-height: 100vh; /* Ensure it respects viewport height */
         box-shadow: none;
     }
 
     .chat-container {
-        height: 100vh;
+        height: 100%; /* Full height on mobile */
         border-radius: 0;
     }
 
     .messages-container {
-        padding: 16px;
+        padding: 10px; /* Slightly less padding on mobile */
     }
 
     .message-input-container {
-        padding: 16px;
+        padding: 10px; /* Slightly less padding on mobile */
     }
-
-    .welcome-card {
-        padding: 30px 20px;
-    }
-
-    .welcome-title {
-        font-size: 2rem;
-    }
-
-    .chat-icon {
-        width: 40px;
-        height: 40px;
-    }
-}
-
-/* Scrollbar Styling */
-.messages-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.messages-container::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 3px;
-}
-
-.messages-container::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-
-.messages-container::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
 }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="welcome-card" id="welcomeScreen">
-            <h1 class="welcome-title">
-                <img src="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png" alt="Shh" class="chat-icon">
-                Shh Chat
-            </h1>
+            <h1 class="welcome-title">Shh Chat 🤫</h1>
             <p class="welcome-subtitle">Join or create a temporary chat room</p>
             <form id="joinForm">
                 <div class="form-group">
@@ -569,13 +448,10 @@ body {
         <div class="chat-container" id="chatContainer">
             <div class="chat-header">
                 <div class="room-info">
-                    <img src="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png" alt="Shh" class="header-icon">
-                    <div class="room-details">
-                        <h3 id="roomTitle">Room</h3>
-                        <div class="online-count">
-                            <div class="online-dot"></div>
-                            <span id="onlineCount">0 online</span>
-                        </div>
+                    <h3 id="roomTitle">Room</h3>
+                    <div class="online-count">
+                        <div class="online-dot"></div>
+                        <span id="onlineCount">0 online</span>
                     </div>
                 </div>
                 <div class="chat-actions">
@@ -605,6 +481,8 @@ body {
 
     <script type="module">
         // Import Firebase modules
+        // Make sure you are using a recent version of Firebase SDK. 9.6.0 is a bit old.
+        // Consider updating to a more recent v9 or v10. E.g., 9.15.0 or latest.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
         import { 
             getDatabase, 
@@ -613,13 +491,12 @@ body {
             push, 
             get, 
             onChildAdded, 
-            onChildRemoved,
             onValue,
             remove,
-            serverTimestamp
+            serverTimestamp // For more accurate timestamps
         } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
 
-        // --- DOM Element Declarations ---
+        // --- DOM Element Declarations (Moved Up) ---
         const welcomeScreen = document.getElementById('welcomeScreen');
         const chatContainer = document.getElementById('chatContainer');
         const joinForm = document.getElementById('joinForm');
@@ -634,14 +511,17 @@ body {
         const leaveRoomBtn = document.getElementById('leaveRoomBtn');
         const joinBtn = document.getElementById('joinBtn');
 
-        // Modal Elements
+        // Modal Elements (Moved Up)
         const customModal = document.getElementById('customModal');
         const modalMessageText = document.getElementById('modalMessageText');
         const modalConfirmBtn = document.getElementById('modalConfirmBtn');
         const modalCancelBtn = document.getElementById('modalCancelBtn');
         let modalConfirmCallback = null;
 
-        // --- Modal Functions ---
+
+        // --- Modal Functions (Moved Up) ---
+        // It's good practice to define functions before they are called,
+        // especially if one might be called during an early initialization error.
         function showCustomAlert(message) {
             if (modalMessageText && customModal && modalConfirmBtn && modalCancelBtn) {
                 modalMessageText.textContent = message;
@@ -655,8 +535,9 @@ body {
                     };
                 });
             } else {
+                // Fallback if modal elements are not yet ready (should not happen with current order)
                 console.error("Modal elements not ready for alert:", message);
-                alert(message);
+                alert(message); // Basic fallback
                 return Promise.resolve(true);
             }
         }
@@ -674,12 +555,13 @@ body {
                     };
                 });
             } else {
+                // Fallback
                 console.error("Modal elements not ready for confirm:", message);
-                return Promise.resolve(window.confirm(message));
+                return Promise.resolve(window.confirm(message)); // Basic fallback
             }
         }
         
-        // Attach listeners to modal buttons
+        // Attach listeners to modal buttons now that they are defined
         if (modalConfirmBtn) {
             modalConfirmBtn.addEventListener('click', () => {
                 if (modalConfirmCallback) modalConfirmCallback(true);
@@ -691,7 +573,10 @@ body {
             });
         }
 
+
         // --- Firebase Configuration and Initialization ---
+        // CRITICAL: Replace ALL placeholder values below with your actual Firebase project configuration.
+        // The databaseURL MUST be in the format: https://<YOUR-PROJECT-ID>-default-rtdb.firebaseio.com (or your specific region if not us-central1)
         const firebaseConfig = {
             apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200",
             authDomain: "shh-chat-db9d0.firebaseapp.com",
@@ -711,8 +596,9 @@ body {
             console.log("Firebase initialized successfully.");
         } catch (error) {
             console.error("Firebase initialization error:", error);
+            // showCustomAlert is now defined and its elements are also defined.
             showCustomAlert(`Firebase initialization error. Please check your configuration and the console. Error: ${error.message}`);
-            if (joinBtn) {
+            if (joinBtn) { // Check if joinBtn exists before trying to disable
                 joinBtn.disabled = true;
                 joinBtn.textContent = 'Firebase Error';
             }
@@ -722,8 +608,7 @@ body {
         const chatData = {
             currentUser: null,
             currentRoom: null,
-            messageListeners: [],
-            userMessages: new Map() // Track messages by userId for deletion
+            messageListeners: [] // To store unsubscribe functions for listeners
         };
 
         // --- Utility functions ---
@@ -828,13 +713,11 @@ body {
             }
         }
 
-        function addMessageToDOM(message, messageKey) {
+        function addMessageToDOM(message) {
             if (!messagesContainer || !chatData.currentUser) return;
 
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
-            messageDiv.dataset.messageKey = messageKey; // Store Firebase key
-            messageDiv.dataset.userId = message.userId; // Store user ID for filtering
 
             if (message.type === 'system') {
                 messageDiv.className = 'system-message';
@@ -851,40 +734,9 @@ body {
                     <div class="message-info">${safeUserName} • ${time}</div>
                     <div class="message-bubble">${safeMessageText}</div>
                 `;
-
-                // Track user messages for potential deletion
-                if (!chatData.userMessages.has(message.userId)) {
-                    chatData.userMessages.set(message.userId, []);
-                }
-                chatData.userMessages.get(message.userId).push(messageKey);
             }
-            
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight; 
-        }
-
-        function removeMessageFromDOM(messageKey) {
-            const messageElement = messagesContainer.querySelector(`[data-message-key="${messageKey}"]`);
-            if (messageElement) {
-                messageElement.style.animation = 'slideOut 0.3s ease-in';
-                setTimeout(() => {
-                    if (messageElement.parentNode) {
-                        messageElement.parentNode.removeChild(messageElement);
-                    }
-                }, 300);
-            }
-        }
-
-        function removeUserMessagesFromDOM(userId) {
-            const userMessages = messagesContainer.querySelectorAll(`[data-user-id="${userId}"]`);
-            userMessages.forEach(messageElement => {
-                messageElement.style.animation = 'slideOut 0.3s ease-in';
-                setTimeout(() => {
-                    if (messageElement.parentNode) {
-                        messageElement.parentNode.removeChild(messageElement);
-                    }
-                }, 300);
-            });
         }
 
         function listenForMessages() {
@@ -893,20 +745,166 @@ body {
             chatData.messageListeners = [];
 
             const messagesQuery = ref(database, `rooms/${chatData.currentRoom}/messages`);
-            
-            // Listen for new messages
-            const unsubscribeAdded = onChildAdded(messagesQuery, (snapshot) => {
+            const unsubscribe = onChildAdded(messagesQuery, (snapshot) => {
                 const message = snapshot.val();
                 if (message) { 
-                    addMessageToDOM(message, snapshot.key);
+                    addMessageToDOM(message);
                 }
             }, (error) => {
                 console.error("Error listening for messages:", error);
                 showCustomAlert("Error fetching messages. Please try refreshing.");
             });
+            chatData.messageListeners.push(unsubscribe);
+        }
+
+        function updateOnlineCount() {
+            if (!chatData.currentRoom || !database) return;
+            const usersRef = ref(database, `rooms/${chatData.currentRoom}/users`);
             
-            // Listen for removed messages
-            const unsubscribeRemoved = onChildRemoved(messagesQuery, (snapshot) => {
-                removeMessageFromDOM(snapshot.key);
+            const unsubscribe = onValue(usersRef, (snapshot) => {
+                const users = snapshot.val();
+                const count = users ? Object.keys(users).length : 0;
+                onlineCountEl.textContent = `${count} online`;
             }, (error) => {
-                console.
+                console.error("Error updating online count:", error);
+            });
+            chatData.messageListeners.push(unsubscribe);
+        }
+
+        async function leaveRoom() {
+            if (!chatData.currentRoom || !chatData.currentUser || !database) return;
+            
+            const confirmed = await showCustomConfirm('Leave room? The room will be deleted if you are the last one.');
+            if (!confirmed) return;
+
+            addSystemMessage(`${chatData.currentUser.name} left the chat.`); 
+
+            const roomUsersRef = ref(database, `rooms/${chatData.currentRoom}/users`);
+            const currentUserInRoomRef = ref(database, `rooms/${chatData.currentRoom}/users/${chatData.currentUser.id}`);
+            
+            try {
+                await remove(currentUserInRoomRef);
+                const snapshot = await get(roomUsersRef);
+                if (!snapshot.exists() || Object.keys(snapshot.val() || {}).length === 0) {
+                    await remove(ref(database, `rooms/${chatData.currentRoom}`));
+                    console.log(`Room ${chatData.currentRoom} deleted as it was empty.`);
+                }
+            } catch (error) {
+                console.error("Error leaving room:", error);
+                showCustomAlert(`Error leaving room: ${error.message}`);
+            } finally {
+                chatData.messageListeners.forEach(unsubscribe => unsubscribe());
+                chatData.messageListeners = [];
+                chatData.currentUser = null;
+                chatData.currentRoom = null;
+
+                chatContainer.style.display = 'none';
+                welcomeScreen.style.display = 'flex'; // Changed from 'block' to 'flex'
+                displayNameInput.value = '';
+                roomCodeInput.value = '';
+                messagesContainer.innerHTML = '<div class="system-message">Messages disappear when everyone leaves.</div>'; 
+                displayNameInput.focus();
+            }
+        }
+
+        async function shareRoom() {
+            if (!chatData.currentRoom) return;
+            const shareText = `Join my Shh Chat room! Code: ${chatData.currentRoom}\nOr use this link: ${window.location.href}`;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(shareText);
+                    showCustomAlert('Room code and link copied to clipboard!');
+                } else {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = shareText;
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        showCustomAlert('Room code and link copied to clipboard (fallback)!');
+                    } catch (err) {
+                        showCustomAlert('Failed to copy. Please copy manually:\n' + shareText);
+                    }
+                    document.body.removeChild(textArea);
+                }
+            } catch (err) {
+                console.error('Could not copy text: ', err);
+                showCustomAlert('Failed to copy room details. Please try again or copy manually.');
+            }
+        }
+
+        // --- Event Listeners ---
+        joinForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!database) { 
+                showCustomAlert("Cannot join: Firebase is not connected.");
+                return;
+            }
+            const displayName = displayNameInput.value.trim();
+            const roomCode = roomCodeInput.value.trim().toUpperCase();
+
+            if (!displayName) {
+                showCustomAlert('Please enter your name.');
+                return;
+            }
+            if (displayName.length > 25) { 
+                showCustomAlert('Name must be 25 characters or less.');
+                return;
+            }
+            if (roomCode && (roomCode.length < 4 || roomCode.length > 10)) { 
+                 showCustomAlert('Room code must be between 4 and 10 characters if provided.');
+                 return;
+            }
+
+            const originalBtnText = joinBtn.innerHTML;
+            joinBtn.innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+            joinBtn.disabled = true;
+
+            try {
+                const result = await createOrJoinRoom(roomCode, displayName);
+                if (result && result.roomCode) {
+                    welcomeScreen.style.display = 'none';
+                    chatContainer.style.display = 'flex';
+                    roomTitle.textContent = `Room: ${result.roomCode}`;
+                    messagesContainer.innerHTML = '<div class="system-message">Welcome! Messages disappear when everyone leaves.</div>'; 
+                    
+                    listenForMessages();
+                    updateOnlineCount();
+                    
+                    messageInput.focus();
+                }
+            } catch (error) {
+                console.error("Join form submission error:", error);
+                showCustomAlert("An unexpected error occurred while joining the room.");
+            } finally {
+                joinBtn.innerHTML = originalBtnText;
+                joinBtn.disabled = false;
+            }
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); 
+                sendMessage();
+            }
+        });
+
+        shareRoomBtn.addEventListener('click', shareRoom);
+        leaveRoomBtn.addEventListener('click', leaveRoom);
+
+        // Initial UI setup
+        displayNameInput.focus();
+        messagesContainer.innerHTML = '<div class="system-message">Messages disappear when everyone leaves.</div>';
+
+        window.addEventListener('beforeunload', (event) => {
+            if (chatData.currentRoom && chatData.currentUser) {
+                event.preventDefault(); 
+                event.returnValue = ''; 
+            }
+        });
+
+    </script>
+</body>
+</html>
