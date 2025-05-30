@@ -28,12 +28,19 @@
             border-radius: 12px; /* More rounded */
             box-shadow: 0 8px 24px rgba(0,0,0,0.1); /* Softer shadow */
             overflow: hidden; /* Ensures child elements conform to border radius */
+            display: flex; /* Added to manage children layout */
+            flex-direction: column; /* Added */
+            height: clamp(400px, 90vh, 700px); /* Added: Responsive height for the container */
         }
 
         /* Welcome Screen */
         .welcome-card {
             padding: 30px 25px; /* More padding */
             text-align: center;
+            flex-grow: 1; /* Added to allow it to take space if chat is hidden */
+            display: flex; /* Added */
+            flex-direction: column; /* Added */
+            justify-content: center; /* Added */
         }
         .welcome-title {
             font-size: 2rem; /* Larger title */
@@ -98,9 +105,11 @@
         .chat-container {
             display: none; /* Initially hidden */
             flex-direction: column;
-            height: 600px; /* Taller chat */
-            max-width: 420px;
+            /* height: 600px; /* Taller chat - REMOVED, parent .container now controls height */
+            /* max-width: 420px; /* REMOVED, inherited from .container */
             width: 100%;
+            flex-grow: 1; /* Added to take available space in .container */
+            overflow: hidden; /* Added to ensure children are contained */
         }
         .chat-header {
             background: #1a73e8;
@@ -110,6 +119,10 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #1765cc; /* Subtle border */
+            position: sticky; /* <<< MODIFIED */
+            top: 0;           /* <<< ADDED */
+            z-index: 10;      /* <<< ADDED */
+            width: 100%;      /* <<< ADDED */
         }
         .room-info h3 {
             font-size: 1.1rem;
@@ -150,9 +163,9 @@
             background: rgba(255,255,255,0.25);
         }
         .messages-container {
-            flex: 1;
+            flex: 1; /*MODIFIED*/
             padding: 15px;
-            overflow-y: auto;
+            overflow-y: auto; /* This is where the scrolling happens */
             display: flex;
             flex-direction: column;
             gap: 12px; /* More space between messages */
@@ -204,6 +217,10 @@
             gap: 10px;
             border-top: 1px solid #dadce0; /* Clearer separator */
             background-color: #fff;
+            position: sticky; /* <<< MODIFIED */
+            bottom: 0;        /* <<< ADDED */
+            z-index: 10;      /* <<< ADDED */
+            width: 100%;      /* <<< ADDED */
         }
         .message-input {
             flex: 1;
@@ -326,7 +343,7 @@
             .container {
                 margin: 0;
                 border-radius: 0;
-                height: 100vh;
+                height: 100vh; /* Ensure it takes full viewport height */
                 box-shadow: none;
             }
             .chat-container {
@@ -496,12 +513,12 @@
         // The databaseURL MUST be in the format: https://<YOUR-PROJECT-ID>-default-rtdb.firebaseio.com (or your specific region if not us-central1)
         const firebaseConfig = {
             apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200",
-  authDomain: "shh-chat-db9d0.firebaseapp.com",
-  databaseURL: "https://shh-chat-db9d0-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "shh-chat-db9d0",
-  storageBucket: "shh-chat-db9d0.firebasestorage.app",
-  messagingSenderId: "20040883450",
-  appId: "1:20040883450:web:833660405c634b2aaffd43"
+            authDomain: "shh-chat-db9d0.firebaseapp.com",
+            databaseURL: "https://shh-chat-db9d0-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "shh-chat-db9d0",
+            storageBucket: "shh-chat-db9d0.firebasestorage.app",
+            messagingSenderId: "20040883450",
+            appId: "1:20040883450:web:833660405c634b2aaffd43"
         };
         
         let app;
@@ -716,7 +733,7 @@
                 chatData.currentRoom = null;
 
                 chatContainer.style.display = 'none';
-                welcomeScreen.style.display = 'block';
+                welcomeScreen.style.display = 'flex'; // Changed from 'block' to 'flex'
                 displayNameInput.value = '';
                 roomCodeInput.value = '';
                 messagesContainer.innerHTML = '<div class="system-message">Messages disappear when everyone leaves.</div>'; 
