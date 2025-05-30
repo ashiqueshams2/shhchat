@@ -8,43 +8,44 @@
 </head>
 <body>
     <div class="container">
-        <!-- Sign-Up Form -->
-        <div id="signUpForm" class="auth-form">
-            <h2>Sign Up</h2>
-            <form id="signUp">
-                <input type="email" id="email" placeholder="Enter your email" required>
-                <input type="password" id="password" placeholder="Enter your password" required>
-                <button type="submit">Sign Up</button>
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="auth-form">
+            <h1 class="welcome-title">Shh Chat</h1>
+            <p class="welcome-subtitle">Join a temporary chat room</p>
+            <form id="joinForm">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="displayName" placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Room Code (optional)</label>
+                    <input type="text" class="form-input" id="roomCode" placeholder="Enter code or leave blank">
+                </div>
+                <button type="submit" class="join-btn">Join</button>
             </form>
-            <p>Already have an account? <a href="javascript:void(0)" onclick="showSignInForm()">Sign In</a></p>
-        </div>
-
-        <!-- Sign-In Form -->
-        <div id="signInForm" class="auth-form" style="display:none;">
-            <h2>Sign In</h2>
-            <form id="signIn">
-                <input type="email" id="signInEmail" placeholder="Enter your email" required>
-                <input type="password" id="signInPassword" placeholder="Enter your password" required>
-                <button type="submit">Sign In</button>
-            </form>
-            <p>Don't have an account? <a href="javascript:void(0)" onclick="showSignUpForm()">Sign Up</a></p>
         </div>
 
         <!-- Chat Interface (Hidden by default) -->
         <div id="chatContainer" class="chat-container" style="display:none;">
             <div class="chat-header">
-                <h3 id="roomTitle">Room</h3>
-                <div class="online-count">
-                    <span id="onlineCount">0 online</span>
+                <div class="room-info">
+                    <h3 id="roomTitle">Room</h3>
+                    <div class="online-count">
+                        <div class="online-dot"></div>
+                        <span id="onlineCount">0 online</span>
+                    </div>
                 </div>
-                <button onclick="leaveRoom()">Leave Room</button>
+                <div class="chat-actions">
+                    <button class="action-btn" onclick="shareRoom()" title="Share Room">↗</button>
+                    <button class="action-btn" onclick="leaveRoom()" title="Leave Room">×</button>
+                </div>
             </div>
             <div id="messagesContainer" class="messages-container">
                 <div class="system-message">Messages disappear when everyone leaves.</div>
             </div>
             <div class="message-input-container">
-                <input type="text" id="messageInput" placeholder="Message..." maxlength="500">
-                <button onclick="sendMessage()">Send</button>
+                <input type="text" class="message-input" id="messageInput" placeholder="Message..." maxlength="500">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">→</button>
             </div>
         </div>
     </div>
@@ -52,8 +53,8 @@
     <!-- Firebase and custom script -->
     <script type="module">
         // Import Firebase modules
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
         import { getDatabase, ref, set, push, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
 
         // Firebase configuration
@@ -81,83 +82,147 @@
 
         // Show sign-up form
         function showSignUpForm() {
-            document.getElementById("signUpForm").style.display = "block";
-            document.getElementById("signInForm").style.display = "none";
+            document.getElementById("welcomeScreen").style.display = "block";
+            document.getElementById("chatContainer").style.display = "none";
         }
 
-        // Show sign-in form
-        function showSignInForm() {
-            document.getElementById("signUpForm").style.display = "none";
-            document.getElementById("signInForm").style.display = "block";
-        }
-
-        // Handle sign-up
-        document.getElementById("signUp").addEventListener("submit", function (e) {
-            e.preventDefault();
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log("User signed up:", user.uid);
-                    showChatInterface();
-                })
-                .catch((error) => {
-                    console.error("Error signing up:", error.message);
-                });
-        });
-
-        // Handle sign-in
-        document.getElementById("signIn").addEventListener("submit", function (e) {
-            e.preventDefault();
-            const email = document.getElementById("signInEmail").value;
-            const password = document.getElementById("signInPassword").value;
-
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log("User signed in:", user.uid);
-                    showChatInterface();
-                })
-                .catch((error) => {
-                    console.error("Error signing in:", error.message);
-                });
-        });
-
-        // Show chat interface after sign-up/sign-in
+        // Show chat interface
         function showChatInterface() {
-            document.getElementById("signUpForm").style.display = "none";
-            document.getElementById("signInForm").style.display = "none";
+            document.getElementById("welcomeScreen").style.display = "none";
             document.getElementById("chatContainer").style.display = "block";
         }
 
-        // Chat operations
+        // Create or join a room
+        async function createOrJoinRoom(roomCode, userName) {
+            const userId = Math.random().toString(36).substring(2, 15);
+            const user = {
+                id: userId,
+                name: userName,
+                joinedAt: Date.now(),
+                lastSeen: Date.now()
+            };
+
+            chatData.currentUser = user;
+
+            // Store user data in Firebase
+            await set(ref(database, 'users/' + userId), user);
+
+            // Generate or use room code
+            if (!roomCode) {
+                roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            }
+            const roomRef = ref(database, 'rooms/' + roomCode);
+            const snapshot = await get(roomRef);
+
+            if (!snapshot.exists()) {
+                await set(roomRef, {
+                    code: roomCode,
+                    createdAt: Date.now(),
+                    users: { [userId]: true }
+                });
+            } else {
+                await set(ref(roomRef, 'users/' + userId), true);
+            }
+
+            chatData.currentRoom = roomCode;
+            addSystemMessage(`${userName} joined the chat`);
+            return { roomCode, userId };
+        }
+
+        // Add system message
+        function addSystemMessage(text) {
+            const message = {
+                id: Math.random().toString(36).substring(2, 15),
+                type: 'system',
+                text: text,
+                timestamp: Date.now()
+            };
+
+            const messagesRef = ref(database, 'rooms/' + chatData.currentRoom + '/messages');
+            push(messagesRef, message);
+        }
+
+        // Send message to room
         function sendMessage() {
-            const messageInput = document.getElementById("messageInput");
+            const messageInput = document.getElementById('messageInput');
             const text = messageInput.value.trim();
             if (!text || !chatData.currentUser || !chatData.currentRoom) return;
 
             const message = {
                 id: Math.random().toString(36).substring(2, 15),
-                type: "user",
+                type: 'user',
                 text: text,
                 userId: chatData.currentUser.id,
                 userName: chatData.currentUser.name,
-                timestamp: Date.now(),
+                timestamp: Date.now()
             };
 
-            const messagesRef = ref(database, "rooms/" + chatData.currentRoom + "/messages");
+            const messagesRef = ref(database, 'rooms/' + chatData.currentRoom + '/messages');
             push(messagesRef, message);
-            messageInput.value = "";
+            messageInput.value = '';
         }
 
-        function leaveRoom() {
-            if (confirm("Leave room? It will be deleted if empty.")) {
-                // Your logic for leaving room
-                showSignUpForm();
+        // Add message to DOM
+        function addMessageToDOM(message) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            if (message.type === 'system') {
+                messageDiv.className = 'system-message';
+                messageDiv.textContent = message.text;
+            } else {
+                const isOwn = message.userId === chatData.currentUser.id;
+                messageDiv.className = `message ${isOwn ? 'own' : ''}`;
+                messageDiv.innerHTML = `
+                    <div class="message-info">${message.userName} • ${new Date(message.timestamp).toLocaleTimeString()}</div>
+                    <div class="message-bubble">${message.text}</div>
+                `;
             }
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
+
+        // Listen for new messages
+        function listenForMessages() {
+            const roomRef = ref(database, 'rooms/' + chatData.currentRoom + '/messages');
+            roomRef.on('child_added', snapshot => {
+                addMessageToDOM(snapshot.val());
+            });
+        }
+
+        // Update online user count
+        function updateOnlineCount() {
+            const roomRef = ref(database, 'rooms/' + chatData.currentRoom + '/users');
+            roomRef.on('value', snapshot => {
+                const users = snapshot.val();
+                const count = users ? Object.keys(users).length : 0;
+                document.getElementById('onlineCount').textContent = `${count} online`;
+            });
+        }
+
+        // Form submission for room joining
+        document.getElementById('joinForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const displayName = document.getElementById('displayName').value.trim();
+            const roomCode = document.getElementById('roomCode').value.trim().toUpperCase();
+            if (!displayName) {
+                alert('Enter a name');
+                return;
+            }
+
+            const result = await createOrJoinRoom(roomCode, displayName);
+            document.getElementById('roomTitle').textContent = `Room ${result.roomCode}`;
+            listenForMessages();
+            updateOnlineCount();
+            showChatInterface();
+        });
+
+        // Send message on Enter
+        document.getElementById('messageInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
     </script>
 </body>
 </html>
