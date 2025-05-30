@@ -26,6 +26,11 @@ html {
     text-size-adjust: 100%;
 }
 
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     background: #f0f2f5; /* Lighter background */
     display: flex;
@@ -61,7 +66,10 @@ body {
     flex-direction: column;
     justify-content: center;
     overflow: hidden; /* Prevents scrolling */
+    height: 100vh;    /* Add this line */
+    max-height: 100vh;/* Add this line */
 }
+
 .welcome-title {
     font-size: 2rem; /* Larger title */
     color: #1a73e8; /* Primary color */
