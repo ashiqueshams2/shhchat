@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shh Chat 🤫</title>
+
+    <link rel="apple-touch-icon" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a73e8">
+
     <style>
        /* General Styles */
 * {
@@ -480,9 +487,6 @@ body {
 
 
     <script type="module">
-        // Import Firebase modules
-        // Make sure you are using a recent version of Firebase SDK. 9.6.0 is a bit old.
-        // Consider updating to a more recent v9 or v10. E.g., 9.15.0 or latest.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
         import { 
             getDatabase, 
@@ -490,13 +494,16 @@ body {
             set, 
             push, 
             get, 
-            onChildAdded, 
+            onChildAdded,
+            onChildRemoved, // Added for message deletion
             onValue,
             remove,
-            serverTimestamp // For more accurate timestamps
+            update, // Added for multi-path deletes
+            serverTimestamp,
+            query // Added for potential future ordering, though not strictly needed with push keys
         } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
 
-        // --- DOM Element Declarations (Moved Up) ---
+        // --- DOM Element Declarations ---
         const welcomeScreen = document.getElementById('welcomeScreen');
         const chatContainer = document.getElementById('chatContainer');
         const joinForm = document.getElementById('joinForm');
@@ -511,17 +518,12 @@ body {
         const leaveRoomBtn = document.getElementById('leaveRoomBtn');
         const joinBtn = document.getElementById('joinBtn');
 
-        // Modal Elements (Moved Up)
         const customModal = document.getElementById('customModal');
         const modalMessageText = document.getElementById('modalMessageText');
         const modalConfirmBtn = document.getElementById('modalConfirmBtn');
         const modalCancelBtn = document.getElementById('modalCancelBtn');
         let modalConfirmCallback = null;
 
-
-        // --- Modal Functions (Moved Up) ---
-        // It's good practice to define functions before they are called,
-        // especially if one might be called during an early initialization error.
         function showCustomAlert(message) {
             if (modalMessageText && customModal && modalConfirmBtn && modalCancelBtn) {
                 modalMessageText.textContent = message;
@@ -535,9 +537,8 @@ body {
                     };
                 });
             } else {
-                // Fallback if modal elements are not yet ready (should not happen with current order)
                 console.error("Modal elements not ready for alert:", message);
-                alert(message); // Basic fallback
+                alert(message); 
                 return Promise.resolve(true);
             }
         }
@@ -555,13 +556,11 @@ body {
                     };
                 });
             } else {
-                // Fallback
                 console.error("Modal elements not ready for confirm:", message);
-                return Promise.resolve(window.confirm(message)); // Basic fallback
+                return Promise.resolve(window.confirm(message));
             }
         }
         
-        // Attach listeners to modal buttons now that they are defined
         if (modalConfirmBtn) {
             modalConfirmBtn.addEventListener('click', () => {
                 if (modalConfirmCallback) modalConfirmCallback(true);
@@ -573,16 +572,12 @@ body {
             });
         }
 
-
-        // --- Firebase Configuration and Initialization ---
-        // CRITICAL: Replace ALL placeholder values below with your actual Firebase project configuration.
-        // The databaseURL MUST be in the format: https://<YOUR-PROJECT-ID>-default-rtdb.firebaseio.com (or your specific region if not us-central1)
         const firebaseConfig = {
-            apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200",
+            apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200", // Replace with your actual config
             authDomain: "shh-chat-db9d0.firebaseapp.com",
             databaseURL: "https://shh-chat-db9d0-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "shh-chat-db9d0",
-            storageBucket: "shh-chat-db9d0.firebasestorage.app",
+            storageBucket: "shh-chat-db9d0.appspot.com", // Corrected common typo: firebasestorage.app -> appspot.com for storageBucket
             messagingSenderId: "20040883450",
             appId: "1:20040883450:web:833660405c634b2aaffd43"
         };
@@ -596,22 +591,19 @@ body {
             console.log("Firebase initialized successfully.");
         } catch (error) {
             console.error("Firebase initialization error:", error);
-            // showCustomAlert is now defined and its elements are also defined.
             showCustomAlert(`Firebase initialization error. Please check your configuration and the console. Error: ${error.message}`);
-            if (joinBtn) { // Check if joinBtn exists before trying to disable
+            if (joinBtn) { 
                 joinBtn.disabled = true;
                 joinBtn.textContent = 'Firebase Error';
             }
         }
 
-        // In-memory state for chat data
         const chatData = {
             currentUser: null,
             currentRoom: null,
-            messageListeners: [] // To store unsubscribe functions for listeners
+            messageListeners: [] 
         };
 
-        // --- Utility functions ---
         function generateRoomCode() {
             return Math.random().toString(36).substring(2, 8).toUpperCase();
         }
@@ -631,7 +623,6 @@ body {
             return div.innerHTML;
         }
 
-        // --- Firebase operations ---
         async function createOrJoinRoom(roomCode, userName) {
             if (!database) {
                  showCustomAlert("Database not initialized. Cannot join room.");
@@ -663,7 +654,7 @@ body {
                     await set(ref(database, `${roomRefPath}/users/${userId}`), {name: userName, joinedAt: serverTimestamp()});
                 }
                 chatData.currentRoom = effectiveRoomCode;
-                addSystemMessage(`${userName} joined the chat.`);
+                addSystemMessage(`${userName} joined the chat.`); // System message sent before other messages load
                 return { roomCode: effectiveRoomCode, userId };
 
             } catch (error) {
@@ -676,7 +667,7 @@ body {
         async function addSystemMessage(text) {
             if (!chatData.currentRoom || !database) return;
             const message = {
-                id: generateUserId(),
+                id: generateUserId(), // Though Firebase will assign its own key
                 type: 'system',
                 text: text,
                 timestamp: serverTimestamp()
@@ -695,7 +686,7 @@ body {
             if (!text || !chatData.currentUser || !chatData.currentRoom) return;
 
             const message = {
-                id: generateUserId(),
+                id: generateUserId(), // Client-side ID, primarily for local use if needed before Firebase key
                 type: 'user',
                 text: text,
                 userId: chatData.currentUser.id,
@@ -713,14 +704,17 @@ body {
             }
         }
 
-        function addMessageToDOM(message) {
-            if (!messagesContainer || !chatData.currentUser) return;
+        function addMessageToDOM(message, messageId) { // messageId is the Firebase key
+            if (!messagesContainer || !chatData.currentUser && message.type !== 'system') return;
 
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
+            messageDiv.setAttribute('data-message-id', messageId); // For easy removal
 
             if (message.type === 'system') {
-                messageDiv.className = 'system-message';
+                messageDiv.className = 'system-message'; // Overrides .message, ensure this is intended or combine
+                messageDiv.classList.add('message'); // Add back .message if common styling is needed
+                messageDiv.setAttribute('data-message-id', messageId); 
                 messageDiv.textContent = escapeHtml(message.text);
             } else {
                 const isOwn = message.userId === chatData.currentUser.id;
@@ -741,20 +735,44 @@ body {
 
         function listenForMessages() {
             if (!chatData.currentRoom || !database) return;
+            
+            // Unsubscribe from previous listeners
             chatData.messageListeners.forEach(unsubscribe => unsubscribe());
             chatData.messageListeners = [];
 
-            const messagesQuery = ref(database, `rooms/${chatData.currentRoom}/messages`);
-            const unsubscribe = onChildAdded(messagesQuery, (snapshot) => {
+            // Clear messages currently in DOM for this new room session (the initial system message from join will be re-added if it's part of the DB or handled separately)
+            // messagesContainer.innerHTML = ''; // Keep this if you want a clean slate before loading.
+                                          // The current join process adds a welcome message locally, then listenForMessages.
+                                          // If the welcome message is not in DB, it'll be overwritten if we clear here without re-adding.
+                                          // Given current flow, it's okay to not clear here, as `onChildAdded` will append.
+
+            const messagesQueryRef = query(ref(database, `rooms/${chatData.currentRoom}/messages`)); // No specific ordering needed as push keys are chronological
+
+            const onChildAddedUnsubscribe = onChildAdded(messagesQueryRef, (snapshot) => {
                 const message = snapshot.val();
+                const messageId = snapshot.key;
                 if (message) { 
-                    addMessageToDOM(message);
+                    // Avoid re-adding if element already exists (can happen with some listener setups, less likely here)
+                    if (!document.querySelector(`.message[data-message-id="${messageId}"]`)) {
+                        addMessageToDOM(message, messageId);
+                    }
                 }
             }, (error) => {
-                console.error("Error listening for messages:", error);
-                showCustomAlert("Error fetching messages. Please try refreshing.");
+                console.error("Error listening for added messages:", error);
+                showCustomAlert("Error fetching new messages.");
             });
-            chatData.messageListeners.push(unsubscribe);
+            chatData.messageListeners.push(onChildAddedUnsubscribe);
+
+            const onChildRemovedUnsubscribe = onChildRemoved(messagesQueryRef, (snapshot) => {
+                const messageId = snapshot.key;
+                const messageElement = document.querySelector(`.message[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.remove();
+                }
+            }, (error) => {
+                console.error("Error listening for removed messages:", error);
+            });
+            chatData.messageListeners.push(onChildRemovedUnsubscribe);
         }
 
         function updateOnlineCount() {
@@ -768,26 +786,58 @@ body {
             }, (error) => {
                 console.error("Error updating online count:", error);
             });
-            chatData.messageListeners.push(unsubscribe);
+            chatData.messageListeners.push(unsubscribe); // Add to listeners to be cleaned up on leave
         }
 
         async function leaveRoom() {
             if (!chatData.currentRoom || !chatData.currentUser || !database) return;
             
-            const confirmed = await showCustomConfirm('Leave room? The room will be deleted if you are the last one.');
+            const confirmed = await showCustomConfirm('Leave room? Your messages will be removed if others remain. The room is deleted if you are the last one.');
             if (!confirmed) return;
 
-            addSystemMessage(`${chatData.currentUser.name} left the chat.`); 
+            const leavingUserId = chatData.currentUser.id;
+            const leavingUserName = chatData.currentUser.name;
+            const currentRoomCode = chatData.currentRoom;
 
-            const roomUsersRef = ref(database, `rooms/${chatData.currentRoom}/users`);
-            const currentUserInRoomRef = ref(database, `rooms/${chatData.currentRoom}/users/${chatData.currentUser.id}`);
+            // Send "left chat" message before removing user or messages
+            // This message will persist even if other messages by the user are removed.
+            await addSystemMessage(`${leavingUserName} left the chat.`); 
+
+            const roomUsersRef = ref(database, `rooms/${currentRoomCode}/users`);
+            const currentUserInRoomRef = ref(database, `rooms/${currentRoomCode}/users/${leavingUserId}`);
             
             try {
+                // Remove user from the list of users in the room
                 await remove(currentUserInRoomRef);
-                const snapshot = await get(roomUsersRef);
-                if (!snapshot.exists() || Object.keys(snapshot.val() || {}).length === 0) {
-                    await remove(ref(database, `rooms/${chatData.currentRoom}`));
-                    console.log(`Room ${chatData.currentRoom} deleted as it was empty.`);
+
+                const usersSnapshot = await get(roomUsersRef);
+                const remainingUsers = usersSnapshot.val();
+                const isRoomEmpty = !usersSnapshot.exists() || Object.keys(remainingUsers || {}).length === 0;
+
+                if (isRoomEmpty) {
+                    // If room is empty, remove the entire room
+                    await remove(ref(database, `rooms/${currentRoomCode}`));
+                    console.log(`Room ${currentRoomCode} deleted as it was empty.`);
+                } else {
+                    // If other users remain, remove messages from the leaving user
+                    const messagesRef = ref(database, `rooms/${currentRoomCode}/messages`);
+                    const messagesSnapshot = await get(messagesRef);
+                    if (messagesSnapshot.exists()) {
+                        const allMessages = messagesSnapshot.val();
+                        const updates = {};
+                        let messagesDeleted = false;
+                        for (const messageId in allMessages) {
+                            // Only delete 'user' type messages from the leaving user
+                            if (allMessages[messageId].userId === leavingUserId && allMessages[messageId].type === 'user') {
+                                updates[`rooms/${currentRoomCode}/messages/${messageId}`] = null; // Mark for deletion
+                                messagesDeleted = true;
+                            }
+                        }
+                        if (messagesDeleted) {
+                            await update(ref(database), updates); // Perform multi-path update to delete messages
+                            console.log(`Removed messages from user ${leavingUserId} in room ${currentRoomCode}`);
+                        }
+                    }
                 }
             } catch (error) {
                 console.error("Error leaving room:", error);
@@ -799,9 +849,10 @@ body {
                 chatData.currentRoom = null;
 
                 chatContainer.style.display = 'none';
-                welcomeScreen.style.display = 'flex'; // Changed from 'block' to 'flex'
+                welcomeScreen.style.display = 'flex'; 
                 displayNameInput.value = '';
                 roomCodeInput.value = '';
+                // Clear messages on client side, as new room/welcome screen is shown
                 messagesContainer.innerHTML = '<div class="system-message">Messages disappear when everyone leaves.</div>'; 
                 displayNameInput.focus();
             }
@@ -809,12 +860,20 @@ body {
 
         async function shareRoom() {
             if (!chatData.currentRoom) return;
-            const shareText = `Join my Shh Chat room! Code: ${chatData.currentRoom}\nOr use this link: ${window.location.href}`;
+            const roomLink = `${window.location.origin}${window.location.pathname}?room=${chatData.currentRoom}`;
+            const shareText = `Join my Shh Chat room!\nCode: ${chatData.currentRoom}\nLink: ${roomLink}`;
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(shareText);
                     showCustomAlert('Room code and link copied to clipboard!');
-                } else {
+                } else if (navigator.share) {
+                    await navigator.share({
+                        title: 'Shh Chat Room',
+                        text: `Join my Shh Chat room! Code: ${chatData.currentRoom}`,
+                        url: roomLink,
+                    });
+                }
+                else {
                     const textArea = document.createElement("textarea");
                     textArea.value = shareText;
                     document.body.appendChild(textArea);
@@ -829,8 +888,10 @@ body {
                     document.body.removeChild(textArea);
                 }
             } catch (err) {
-                console.error('Could not copy text: ', err);
-                showCustomAlert('Failed to copy room details. Please try again or copy manually.');
+                console.error('Could not copy/share text: ', err);
+                if (err.name !== 'AbortError') { // AbortError happens if user cancels share dialog
+                   showCustomAlert('Failed to copy/share room details. Please try again or copy manually.');
+                }
             }
         }
 
@@ -842,7 +903,7 @@ body {
                 return;
             }
             const displayName = displayNameInput.value.trim();
-            const roomCode = roomCodeInput.value.trim().toUpperCase();
+            let roomCode = roomCodeInput.value.trim().toUpperCase();
 
             if (!displayName) {
                 showCustomAlert('Please enter your name.');
@@ -857,6 +918,15 @@ body {
                  return;
             }
 
+            // Check for room code in URL query params (for joining via link)
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomFromUrl = urlParams.get('room');
+            if (roomFromUrl && !roomCode) {
+                roomCode = roomFromUrl.toUpperCase();
+                roomCodeInput.value = roomCode; // Optionally populate the input
+            }
+
+
             const originalBtnText = joinBtn.innerHTML;
             joinBtn.innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
             joinBtn.disabled = true;
@@ -867,7 +937,13 @@ body {
                     welcomeScreen.style.display = 'none';
                     chatContainer.style.display = 'flex';
                     roomTitle.textContent = `Room: ${result.roomCode}`;
-                    messagesContainer.innerHTML = '<div class="system-message">Welcome! Messages disappear when everyone leaves.</div>'; 
+                    
+                    // Update URL without reloading page, to reflect current room
+                    // and allow easy sharing/bookmarking of the current room.
+                    const newUrl = `${window.location.pathname}?room=${result.roomCode}`;
+                    history.pushState({room: result.roomCode}, '', newUrl);
+
+                    messagesContainer.innerHTML = '<div class="system-message">Welcome! Messages are temporary.</div>'; 
                     
                     listenForMessages();
                     updateOnlineCount();
@@ -896,14 +972,65 @@ body {
 
         // Initial UI setup
         displayNameInput.focus();
+        // If room code in URL on page load, prefill it
+        const initialUrlParams = new URLSearchParams(window.location.search);
+        const initialRoomFromUrl = initialUrlParams.get('room');
+        if (initialRoomFromUrl) {
+            roomCodeInput.value = initialRoomFromUrl.toUpperCase();
+        }
         messagesContainer.innerHTML = '<div class="system-message">Messages disappear when everyone leaves.</div>';
 
-        window.addEventListener('beforeunload', (event) => {
+
+        window.addEventListener('beforeunload', async (event) => {
+            // This is tricky. Most modern browsers heavily restrict `beforeunload` actions.
+            // Trying to do async operations like `leaveRoom` here is unreliable and often blocked.
+            // The best practice is to rely on Firebase's presence system if you need robust "user disconnected" logic.
+            // For now, this simple confirmation might work on some browsers for explicit navigation.
             if (chatData.currentRoom && chatData.currentUser) {
+                // The message in `returnValue` is often ignored by modern browsers.
+                // `event.preventDefault()` is the key to trigger a generic browser confirm dialog.
                 event.preventDefault(); 
-                event.returnValue = ''; 
+                event.returnValue = 'Are you sure you want to leave? Your session will end.'; 
+                // Note: You cannot reliably call `leaveRoom()` here and guarantee its completion.
             }
         });
+
+        // Handle back/forward navigation to potentially rejoin or leave room context
+        window.addEventListener('popstate', (event) => {
+            const state = event.state;
+            if (chatData.currentRoom) { // If user was in a room
+                const urlParams = new URLSearchParams(window.location.search);
+                const roomFromUrl = urlParams.get('room');
+                if (!roomFromUrl || roomFromUrl !== chatData.currentRoom) {
+                    // User navigated away from the room URL (e.g., back to no query params)
+                    // or to a different room URL. Treat as leaving the current room.
+                    // No confirmation here, as it's a browser navigation action.
+                    // Call a "silent" leave or reset.
+                    
+                    chatData.messageListeners.forEach(unsubscribe => unsubscribe());
+                    chatData.messageListeners = [];
+                    // Don't remove user from Firebase here as it might be unintentional nav
+                    // Better to rely on timeout / Firebase presence for actual disconnects if not explicit leave.
+                    // For now, just reset UI:
+                    chatContainer.style.display = 'none';
+                    welcomeScreen.style.display = 'flex';
+                    roomCodeInput.value = roomFromUrl ? roomFromUrl.toUpperCase() : '';
+                    displayNameInput.value = chatData.currentUser ? chatData.currentUser.name : ''; // Keep display name
+                    messagesContainer.innerHTML = '<div class="system-message">Navigated away. Rejoin or create a new room.</div>';
+                    // Reset part of chatData, but keep currentUser name perhaps
+                    // chatData.currentRoom = null; // This should be reset if we are truly leaving room context
+                    console.log("Navigated away from room context.");
+                }
+            } else {
+                 // If user was not in a room, but URL now has a room, prefill it.
+                const urlParams = new URLSearchParams(window.location.search);
+                const roomFromUrl = urlParams.get('room');
+                 if (roomFromUrl) {
+                    roomCodeInput.value = roomFromUrl.toUpperCase();
+                }
+            }
+        });
+
 
     </script>
 </body>
