@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shh Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div class="welcome-card" id="welcomeScreen">
+            <h1 class="welcome-title">Shh Chat</h1>
+            <p class="welcome-subtitle">Join a temporary chat room</p>
+            <form id="joinForm">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="displayName" placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Room Code (optional)</label>
+                    <input type="text" class="form-input" id="roomCode" placeholder="Enter code or leave blank">
+                </div>
+                <button type="submit" class="join-btn">Join</button>
+            </form>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-header">
+                <div class="room-info">
+                    <h3 id="roomTitle">Room</h3>
+                    <div class="online-count">
+                        <div class="online-dot"></div>
+                        <span id="onlineCount">0 online</span>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button class="action-btn" onclick="shareRoom()" title="Share Room">↗</button>
+                    <button class="action-btn" onclick="leaveRoom()" title="Leave Room">×</button>
+                </div>
+            </div>
+            <div class="messages-container" id="messagesContainer">
+                <div class="system-message">Messages disappear when everyone leaves.</div>
+            </div>
+            <div class="message-input-container">
+                <input type="text" class="message-input" id="messageInput" placeholder="Message..." maxlength="500">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">→</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
