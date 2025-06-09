@@ -2,1050 +2,688 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Shh Chat 🤫</title>
-
-    <link rel="apple-touch-icon" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a73e8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat App - Modern</title>
     <style>
-       /* General Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', Arial, sans-serif;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-html {
-    height: 100%;
-    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape on iOS */
-    text-size-adjust: 100%;
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+            background: linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%); /* New Gradient */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            overflow: hidden; 
+        }
 
-html, body {
-    height: 100%;
-    overflow: hidden;
-}
+        /* Login Screen Styles */
+        .login-screen {
+            background: white;
+            padding: 35px 40px; /* Increased padding */
+            border-radius: 24px; /* More pronounced rounding */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px; /* Slightly wider */
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+        }
 
-body {
-    background: #f0f2f5; /* Lighter background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* Ensure body at least fills viewport height */
-    height: 100%;     /* Make body take full viewport height if possible */
-    color: #333;
-    line-height: 1.6;
-    overscroll-behavior-y: contain; /* Prevents pull-to-refresh or scrolling beyond content on body */
-}
+        .login-screen h1 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #333; /* Darker for modern feel */
+            font-weight: 600;
+        }
+        .login-screen h1 .emoji { /* Style for emoji if needed */
+             margin-right: 8px;
+        }
 
-.container {
-    width: 100%;
-    max-width: 420px; /* Slightly wider */
-    background-color: white;
-    border-radius: 12px; /* More rounded */
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1); /* Softer shadow */
-    overflow: hidden; /* Crucial: clips content and helps define boundaries */
-    display: flex;
-    flex-direction: column;
-    /* Responsive height, ensures container itself doesn't grow indefinitely */
-    height: clamp(450px, 90vh, 700px); /* Min height, preferred viewport height, max height */
-    max-height: 90vh; /* Explicit max-height related to viewport */
-}
+        .login-screen p.instructions {
+            margin-bottom: 30px; /* More space */
+            color: #555;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
 
-/* Welcome Screen */
-.welcome-card { 
-    padding: 30px 25px;
-    text-align: center;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden; /* Prevents scrolling */
-    height: 100vh;    /* Add this line */
-    max-height: 100vh;/* Add this line */
-}
+        .login-input {
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd; /* Softer border */
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+        }
 
-.welcome-title {
-    font-size: 2rem; /* Larger title */
-    color: #1a73e8; /* Primary color */
-    margin-bottom: 10px;
-    font-weight: 600;
-}
+        .login-input:focus {
+            border-color: #6a82fb; /* Match new gradient */
+            box-shadow: 0 0 0 4px rgba(106, 130, 251, 0.15);
+        }
 
-.welcome-subtitle {
-    color: #5f6368; /* Subtler subtitle color */
-    font-size: 1rem;
-    margin-bottom: 30px;
-}
+        .login-button {
+            background: linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 1em; /* Relative font size */
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+            margin-top: 10px;
+            box-sizing: border-box;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Space between icon and text */
+        }
 
-.form-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
+        .login-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(106, 130, 251, 0.3);
+        }
 
-.form-label {
-    font-size: 0.9rem;
-    color: #3c4043;
-    margin-bottom: 8px;
-    display: block;
-    font-weight: 500;
-}
+        #generatedCodeDisplay {
+            margin-top: 25px;
+            font-size: 1em;
+            color: #28a745; /* Bootstrap success green */
+            font-weight: 500;
+            padding: 12px;
+            background-color: #e9f7ef; /* Lighter green */
+            border-radius: 10px;
+            border: 1px solid #c3e6cb; /* Softer green border */
+            line-height: 1.4;
+            width: 100%; 
+            word-wrap: break-word; 
+        }
+        #generatedCodeDisplay:empty {
+            display: none;
+        }
 
-.form-input {
-    width: 100%;
-    padding: 12px 15px; /* More padding */
-    border: 1px solid #dadce0; /* Lighter border */
-    border-radius: 8px; /* More rounded */
-    font-size: 1rem;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
+        /* Chat Screen Styles */
+        .chat-screen {
+            display: none; 
+            width: 100vw;   
+            height: 100vh;  
+            position: fixed; 
+            top: 0;
+            left: 0;
+            background: #f4f7f6; /* Light neutral background for chat area */
+        }
 
-.form-input:focus {
-    outline: none;
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2); /* Focus ring */
-}
+        .chat-container {
+            width: 100%;    
+            height: 100%;   
+            border-radius: 0; 
+            box-shadow: none;   
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #fff; /* Main chat container background */
+        }
 
-.join-btn {
-    width: 100%;
-    padding: 12px 15px;
-    background: #1a73e8; /* Primary color */
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
+        .chat-header {
+            background: #fff; /* Cleaner white header */
+            color: #333; /* Dark text on white */
+            padding: 15px 20px;
+            text-align: left; /* Align header content left */
+            position: relative; 
+            flex-shrink: 0; 
+            border-bottom: 1px solid #eee; /* Subtle separator */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-header-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px; /* Small gap between info lines */
+        }
 
-.join-btn:hover {
-    background: #1765cc; /* Darker shade on hover */
-}
+        .chat-header-title {
+            font-size: 1.1em; 
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Space between icon and title */
+        }
+        
+        .chat-details {
+            font-size: 0.75em; 
+            color: #777;
+            display: flex;
+            flex-direction: column; /* Stack details vertically */
+            gap: 1px;
+        }
+        .chat-participants-list {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .chat-participants-list .participant-icon {
+            font-size: 0.9em;
+        }
 
-.join-btn:disabled {
-    background: #e0e0e0;
-    cursor: not-allowed;
-}
 
-/* Chat Interface */
-.chat-container { /* update */
-    display: none; /* Initially hidden */
-    flex-direction: column;
-    width: 100%;
-    height: 100vh;
-    max-height: 100vh;
-    overflow: hidden;
-}
+        .status-indicator-container {
+            display: flex;
+            align-items: center;
+            font-size: 0.75em;
+            color: #555;
+        }
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #4ade80; /* Green for online */
+            margin-right: 6px;
+        }
+        
+        .chat-header-actions {
+            display: flex;
+            align-items: center;
+        }
 
-.chat-header {
-    background: #1a73e8;
-    color: white;
-    padding: 15px 20px; /* More padding */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #1765cc; /* Subtle border */
-    /* Sticky positioning */
-    position: sticky;
-    top: 0;
-    z-index: 100; /* Ensure it's above messages */
-    width: 100%; /* Ensure it spans full width */
-    flex-shrink: 0; /* Prevent header from shrinking */
-}
+        .icon-button { /* Common style for icon buttons */
+            background: transparent;
+            border: none;
+            color: #555; /* Icon color */
+            font-size: 1.4em; /* Icon size */
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .icon-button:hover {
+            background-color: #f0f0f0; /* Subtle hover background */
+            color: #333;
+        }
+        .end-chat-btn-icon {
+             color: #fc5c7d; /* Match gradient for end chat */
+        }
+        .end-chat-btn-icon:hover {
+             background-color: #fce8ec;
+             color: #d94462;
+        }
 
-.room-info h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-}
 
-.online-count {
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    opacity: 0.9;
-}
+        .messages {
+            flex-grow: 1; 
+            padding: 15px; 
+            overflow-y: auto;
+            background: #f4f7f6; /* Light neutral background */
+        }
 
-.online-dot {
-    width: 8px;
-    height: 8px;
-    background: #34a853; /* Green dot */
-    border-radius: 50%;
-}
+        .message {
+            margin-bottom: 15px; 
+            animation: slideIn 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); /* Smoother animation */
+        }
 
-.chat-actions {
-    display: flex;
-    gap: 10px;
-}
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px); 
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-.action-btn {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: rgba(255,255,255,0.15); /* More subtle */
-    color: white;
-    border-radius: 8px; /* More rounded */
-    cursor: pointer;
-    font-size: 1.1rem; /* Larger icons */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease-in-out;
-}
+        .message.sent {
+            display: flex; /* Use flex for alignment */
+            flex-direction: column;
+            align-items: flex-end;
+        }
 
-.action-btn:hover {
-    background: rgba(255,255,255,0.25);
-}
+        .message.received { 
+            display: flex; /* Use flex for alignment */
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .message-sender-name {
+            font-size: 0.75em; 
+            color: #555;   
+            margin-bottom: 4px;
+            padding: 0 2px; 
+        }
 
-.messages-container {
-        flex: 1 1 auto;
-    overflow-y: auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* More space between messages */
-    background-color: #f8f9fa; /* Light background for messages area */
-    -webkit-overflow-scrolling: touch; /* For momentum scrolling on touch devices */
-}
+        .message-bubble {
+            display: inline-block;
+            max-width: 78%; 
+            padding: 10px 14px; 
+            border-radius: 18px; 
+            word-wrap: break-word;
+            text-align: left; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle shadow on bubbles */
+        }
 
-.message {
-    display: flex;
-    flex-direction: column;
-    max-width: 85%; /* Slightly wider messages */
-}
+        .message.sent .message-bubble {
+            background: linear-gradient(135deg, #6a82fb 0%, #7d8ef9 100%); /* Adjusted sent bubble gradient */
+            color: white;
+            border-bottom-right-radius: 6px; /* "Tail" effect */
+        }
 
-.message.own {
-    align-self: flex-end;
-}
+        .message.received .message-bubble {
+            background: #e9ecef; 
+            color: #212529; 
+            border-bottom-left-radius: 6px; /* "Tail" effect */
+        }
 
-.message.other {
-    align-self: flex-start;
-}
+        .message-media {
+            max-width: 100%;
+            border-radius: 12px; 
+            margin-top: 8px;
+            display: block; 
+        }
 
-.message-bubble {
-    padding: 10px 15px; /* More padding */
-    border-radius: 18px; /* Bubble shape */
-    font-size: 0.95rem;
-    line-height: 1.5;
-    word-wrap: break-word; /* Ensure long words wrap */
-}
+        .message-media img,
+        .message-media video {
+            max-width: 280px; 
+            max-height: 280px; 
+            border-radius: 10px;
+            display: block; 
+        }
 
-.message.own .message-bubble {
-    background: #1a73e8;
-    color: white;
-    border-bottom-right-radius: 4px; /* Tail effect */
-}
+        .input-area {
+            padding: 12px 15px; 
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0; 
+        }
 
-.message.other .message-bubble {
-    background: #e9ebee; /* Lighter grey for other messages */
-    color: #202124; /* Darker text for readability */
-    border-bottom-left-radius: 4px; /* Tail effect */
-}
+        .input-container {
+            display: flex;
+            gap: 10px; 
+            align-items: flex-end; 
+        }
 
-.message-info {
-    font-size: 0.75rem; /* Smaller info text */
-    color: #5f6368;
-    margin-bottom: 4px; /* Space between info and bubble */
-    padding: 0 5px;
-}
+        .message-input {
+            flex: 1;
+            border: 1px solid #ccc; /* Simpler border */
+            border-radius: 22px; 
+            padding: 12px 18px;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 1em; /* Base font size */
+            min-height: 44px; 
+            max-height: 120px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            line-height: 1.5;
+        }
 
-.message.own .message-info {
-    text-align: right;
-}
+        .message-input:focus {
+            border-color: #6a82fb;
+            box-shadow: 0 0 0 3px rgba(106, 130, 251, 0.1);
+        }
+        
+        /* Send and File buttons inherit .icon-button and add specific gradient */
+        .send-btn, .file-btn {
+            background: linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%);
+            color: white;
+            font-size: 1.2em; /* Icon size inside button */
+            width: 44px;  
+            height: 44px; 
+            padding: 0; /* Reset padding as size is fixed */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%; /* Circular */
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .send-btn:hover, .file-btn:hover {
+            background: linear-gradient(135deg, #5c75e6 0%, #e74f6f 100%); /* Darker on hover */
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            color: white; /* Ensure icon color remains white */
+        }
+        .file-btn { font-size: 1.1em; } 
 
-.message.other .message-info {
-    text-align: left;
-}
+        .file-input {
+            display: none;
+        }
 
-.message-input-container {
-    padding: 15px;
-    display: flex;
-    gap: 10px;
-    border-top: 1px solid #dadce0; /* Clearer separator */
-    background-color: #fff;
-    /* Sticky positioning */
-    position: sticky;
-    bottom: 0;
-    z-index: 100; /* Ensure it's above messages */
-    width: 100%; /* Ensure it spans full width */
-    flex-shrink: 0; /* Prevent input area from shrinking */
-}
-
-.message-input {
-    flex: 1;
-    padding: 12px 15px;
-    border: 1px solid #dadce0;
-    border-radius: 20px; /* Pill shape */
-    font-size: 0.95rem;
-}
-
-.message-input:focus {
-    outline: none;
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
-}
-
-.send-btn {
-    width: 44px; /* Larger send button */
-    height: 44px;
-    border: none;
-    background: #1a73e8;
-    color: white;
-    border-radius: 50%; /* Circular button */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem; /* Larger send icon */
-    transition: background-color 0.2s ease-in-out;
-}
-
-.send-btn:hover {
-    background: #1765cc;
-}
-
-.send-btn:disabled {
-    background-color: #e0e0e0;
-    cursor: not-allowed;
-}
-
-.system-message {
-    text-align: center;
-    color: #5f6368;
-    font-size: 0.85rem;
-    padding: 8px 0;
-    font-style: italic;
-}
-
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    height: 20px; /* Ensure it has height for alignment */
-}
-
-.loading-dot {
-    width: 8px;
-    height: 8px;
-    background: white; /* Dots are white on blue button */
-    border-radius: 50%;
-    animation: loadingPulse 1.4s infinite ease-in-out;
-}
-
-.loading-dot:nth-child(1) { animation-delay: -0.32s; }
-.loading-dot:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes loadingPulse {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1.0); }
-}
-
-/* Modal Styles */
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    display: none; /* Hidden by default */
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Ensure modal is on top of everything */
-}
-
-.modal-content {
-    background-color: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    width: 90%;
-    max-width: 350px;
-    text-align: center;
-}
-
-.modal-message {
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.modal-button {
-    padding: 10px 20px;
-    border-radius: 6px;
-    border: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.modal-button.confirm {
-    background-color: #1a73e8;
-    color: white;
-}
-
-.modal-button.confirm:hover {
-    background-color: #1765cc;
-}
-
-.modal-button.cancel {
-    background-color: #e0e0e0;
-    color: #333;
-}
-
-.modal-button.cancel:hover {
-    background-color: #d5d5d5;
-}
-
-/* Media Queries */
-@media (max-width: 480px) {
-    .container {
-        margin: 0;
-        border-radius: 0;
-        height: 100%; /* Use 100% to fill the viewport height on small screens */
-        max-height: 100vh; /* Ensure it respects viewport height */
-        box-shadow: none;
-    }
-
-    .chat-container {
-        height: 100%; /* Full height on mobile */
-        border-radius: 0;
-    }
-
-    .messages-container {
-        padding: 10px; /* Slightly less padding on mobile */
-    }
-
-    .message-input-container {
-        padding: 10px; /* Slightly less padding on mobile */
-    }
-}
-@media (max-width: 600px) {
-    .chat-container {
-        height: 100dvh;
-        max-height: 100dvh;
-    }
-}
+        .connection-info {
+            text-align: center;
+            padding: 15px;
+            color: #555;
+            font-size: 0.9em;
+            font-style: italic;
+            background-color: #f8f9fa; 
+            border-radius: 10px;
+            margin: 10px 15px; /* Margin for better spacing in messages area */
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="welcome-card" id="welcomeScreen">
-            <h1 class="welcome-title">Shh Chat 🤫</h1>
-            <p class="welcome-subtitle">Join or create a temporary chat room</p>
-            <form id="joinForm">
-                <div class="form-group">
-                    <label class="form-label" for="displayName">Your Name</label>
-                    <input type="text" class="form-input" id="displayName" placeholder="Enter your name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="roomCode">Room Code (optional)</label>
-                    <input type="text" class="form-input" id="roomCode" placeholder="Enter code or leave blank to create">
-                </div>
-                <button type="submit" class="join-btn" id="joinBtn">
-                    Join Chat
-                </button>
-            </form>
-        </div>
 
-        <div class="chat-container" id="chatContainer">
+    <div class="login-screen" id="loginScreen">
+        <h1><span class="emoji">👋</span>Welcome</h1>
+        <p class="instructions">Enter your name and a chat code to join, or leave blank to create a new one.</p>
+        <input type="text" id="userNameInput" class="login-input" placeholder="Your Name">
+        <input type="text" id="chatCodeInput" class="login-input" placeholder="Chat Code (optional)">
+        <button id="startJoinButton" class="login-button">➔ Start / Join</button>
+        <div id="generatedCodeDisplay"></div>
+    </div>
+
+    <div class="chat-screen" id="chatScreen">
+        <div class="chat-container">
             <div class="chat-header">
-                <div class="room-info">
-                    <h3 id="roomTitle">Room</h3>
-                    <div class="online-count">
-                        <div class="online-dot"></div>
-                        <span id="onlineCount">0 online</span>
+                <div class="chat-header-info">
+                    <div class="chat-header-title">💬 <span id="chatTitleText">Chat Active</span></div>
+                    <div class="chat-details">
+                        <div id="participantDisplay" class="chat-participants-list">
+                            <span class="participant-icon">👥</span> With: <span id="participantList"></span>
+                        </div>
+                        <div>Code: <strong id="displayChatCode"></strong></div>
+                        <div class="status-indicator-container">
+                            <span class="status-indicator"></span>
+                            <span id="statusText">Online</span> </div>
                     </div>
                 </div>
-                <div class="chat-actions">
-                    <button class="action-btn" id="shareRoomBtn" title="Share Room">↗</button>
-                    <button class="action-btn" id="leaveRoomBtn" title="Leave Room">×</button>
+                <div class="chat-header-actions">
+                    <button id="endChatButton" class="icon-button end-chat-btn-icon" title="End Chat">✕</button>
                 </div>
             </div>
-            <div class="messages-container" id="messagesContainer">
-                </div>
-            <div class="message-input-container">
-                <input type="text" class="message-input" id="messageInput" placeholder="Type a message..." maxlength="500">
-                <button class="send-btn" id="sendBtn" title="Send Message">→</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-backdrop" id="customModal">
-        <div class="modal-content">
-            <p class="modal-message" id="modalMessageText"></p>
-            <div class="modal-buttons">
-                <button class="modal-button confirm" id="modalConfirmBtn">OK</button>
-                <button class="modal-button cancel" id="modalCancelBtn">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-        import { 
-            getDatabase, 
-            ref, 
-            set, 
-            push, 
-            get, 
-            onChildAdded,
-            onChildRemoved, // Added for message deletion
-            onValue,
-            remove,
-            update, // Added for multi-path deletes
-            serverTimestamp,
-            query // Added for potential future ordering, though not strictly needed with push keys
-        } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
-
-        // --- DOM Element Declarations ---
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const chatContainer = document.getElementById('chatContainer');
-        const joinForm = document.getElementById('joinForm');
-        const displayNameInput = document.getElementById('displayName');
-        const roomCodeInput = document.getElementById('roomCode');
-        const roomTitle = document.getElementById('roomTitle');
-        const onlineCountEl = document.getElementById('onlineCount');
-        const messagesContainer = document.getElementById('messagesContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const shareRoomBtn = document.getElementById('shareRoomBtn');
-        const leaveRoomBtn = document.getElementById('leaveRoomBtn');
-        const joinBtn = document.getElementById('joinBtn');
-
-        const customModal = document.getElementById('customModal');
-        const modalMessageText = document.getElementById('modalMessageText');
-        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
-        const modalCancelBtn = document.getElementById('modalCancelBtn');
-        let modalConfirmCallback = null;
-
-        function showCustomAlert(message) {
-            if (modalMessageText && customModal && modalConfirmBtn && modalCancelBtn) {
-                modalMessageText.textContent = message;
-                modalConfirmBtn.style.display = 'inline-block';
-                modalCancelBtn.style.display = 'none';
-                customModal.style.display = 'flex';
-                return new Promise((resolve) => {
-                    modalConfirmCallback = () => {
-                        customModal.style.display = 'none';
-                        resolve(true);
-                    };
-                });
-            } else {
-                console.error("Modal elements not ready for alert:", message);
-                alert(message); 
-                return Promise.resolve(true);
-            }
-        }
-
-        function showCustomConfirm(message) {
-            if (modalMessageText && customModal && modalConfirmBtn && modalCancelBtn) {
-                modalMessageText.textContent = message;
-                modalConfirmBtn.style.display = 'inline-block';
-                modalCancelBtn.style.display = 'inline-block';
-                customModal.style.display = 'flex';
-                return new Promise((resolve) => {
-                    modalConfirmCallback = (confirmed) => {
-                        customModal.style.display = 'none';
-                        resolve(confirmed);
-                    };
-                });
-            } else {
-                console.error("Modal elements not ready for confirm:", message);
-                return Promise.resolve(window.confirm(message));
-            }
-        }
-        
-        if (modalConfirmBtn) {
-            modalConfirmBtn.addEventListener('click', () => {
-                if (modalConfirmCallback) modalConfirmCallback(true);
-            });
-        }
-        if (modalCancelBtn) {
-            modalCancelBtn.addEventListener('click', () => {
-                if (modalConfirmCallback) modalConfirmCallback(false);
-            });
-        }
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200", // Replace with your actual config
-            authDomain: "shh-chat-db9d0.firebaseapp.com",
-            databaseURL: "https://shh-chat-db9d0-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "shh-chat-db9d0",
-            storageBucket: "shh-chat-db9d0.appspot.com", // Corrected common typo: firebasestorage.app -> appspot.com for storageBucket
-            messagingSenderId: "20040883450",
-            appId: "1:20040883450:web:833660405c634b2aaffd43"
-        };
-        
-        let app;
-        let database;
-
-        try {
-            app = initializeApp(firebaseConfig);
-            database = getDatabase(app);
-            console.log("Firebase initialized successfully.");
-        } catch (error) {
-            console.error("Firebase initialization error:", error);
-            showCustomAlert(`Firebase initialization error. Please check your configuration and the console. Error: ${error.message}`);
-            if (joinBtn) { 
-                joinBtn.disabled = true;
-                joinBtn.textContent = 'Firebase Error';
-            }
-        }
-
-        const chatData = {
-            currentUser: null,
-            currentRoom: null,
-            messageListeners: [] 
-        };
-
-        function generateRoomCode() {
-            return Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
-
-        function generateUserId() {
-            return self.crypto?.randomUUID ? self.crypto.randomUUID() : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2,15) ;
-        }
-
-        function formatTime(timestamp) {
-            if (!timestamp) return '';
-            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        async function createOrJoinRoom(roomCode, userName) {
-            if (!database) {
-                 showCustomAlert("Database not initialized. Cannot join room.");
-                 return null;
-            }
-            const userId = generateUserId();
-            const user = {
-                id: userId,
-                name: userName,
-                joinedAt: serverTimestamp(),
-                lastSeen: serverTimestamp()
-            };
-
-            chatData.currentUser = user;
-
-            const effectiveRoomCode = roomCode || generateRoomCode();
-            const roomRefPath = 'rooms/' + effectiveRoomCode;
-            const roomRef = ref(database, roomRefPath);
             
-            try {
-                const snapshot = await get(roomRef);
-                if (!snapshot.exists()) {
-                    await set(roomRef, {
-                        code: effectiveRoomCode,
-                        createdAt: serverTimestamp(),
-                        users: { [userId]: {name: userName, joinedAt: serverTimestamp()} } 
-                    });
+            <div class="messages" id="messagesContainer"> </div>
+            
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea 
+                        id="messageInput" 
+                        class="message-input" 
+                        placeholder="Type a message..."
+                        rows="1"
+                    ></textarea>
+                    
+                    <button class="file-btn icon-button" onclick="document.getElementById('fileInput').click()" title="Attach File">
+                        📎
+                    </button>
+                    
+                    <button class="send-btn icon-button" onclick="sendMessage()" title="Send Message">
+                        ➤
+                    </button>
+                    
+                    <input 
+                        type="file" 
+                        id="fileInput" 
+                        class="file-input" 
+                        accept="image/*,video/*"
+                        onchange="handleFileSelect(event)"
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SimpleChatApp {
+            constructor() {
+                this.myNickname = null;
+                this.chatCode = null;
+                this.messagesStore = [];
+                this.participants = [];
+                this.isHost = false;
+                this.socket = null;
+
+                this.loginScreenEl = document.getElementById('loginScreen');
+                this.chatScreenEl = document.getElementById('chatScreen');
+                this.userNameInputEl = document.getElementById('userNameInput');
+                this.chatCodeInputEl = document.getElementById('chatCodeInput');
+                this.startJoinButtonEl = document.getElementById('startJoinButton');
+                this.generatedCodeDisplayEl = document.getElementById('generatedCodeDisplay');
+
+                this.chatTitleTextEl = document.getElementById('chatTitleText');
+                this.participantListEl = document.getElementById('participantList');
+                this.displayChatCodeEl = document.getElementById('displayChatCode');
+                this.messagesContainerEl = document.getElementById('messagesContainer');
+                this.messageInputEl = document.getElementById('messageInput');
+                this.endChatButtonEl = document.getElementById('endChatButton');
+                this.statusTextEl = document.getElementById('statusText'); // For "Online" text
+
+                this.showLoginScreen();
+                this.setupGlobalEventListeners();
+            }
+
+            generateUniqueCode() {
+                return Math.random().toString(36).substring(2, 8).toUpperCase();
+            }
+
+            setupGlobalEventListeners() {
+                this.startJoinButtonEl.addEventListener('click', () => this.handleStartJoin());
+            }
+            
+            setupChatScreenEventListeners() {
+                this.messageInputEl.addEventListener('keypress', this.handleMessageInputKeypress.bind(this));
+                this.messageInputEl.addEventListener('input', () => this.autoResizeTextarea(this.messageInputEl));
+                this.endChatButtonEl.onclick = () => this.handleEndChat();
+            }
+
+            autoResizeTextarea(textareaElement) {
+                textareaElement.style.height = 'auto'; 
+                let newHeight = Math.max(textareaElement.scrollHeight, parseFloat(getComputedStyle(textareaElement).minHeight));
+                textareaElement.style.height = Math.min(newHeight, 120) + 'px'; 
+            }
+
+            updateParticipantDisplay() {
+                if (this.participants.length > 0) {
+                    this.participantListEl.textContent = this.participants.join(', ');
+                    if (this.participants.length === 1 && this.isHost) {
+                        // If only host is present, could show something like "Waiting for others..."
+                        // For now, just show the host's name.
+                    }
                 } else {
-                    await set(ref(database, `${roomRefPath}/users/${userId}`), {name: userName, joinedAt: serverTimestamp()});
+                    this.participantListEl.textContent = 'No one yet';
                 }
-                chatData.currentRoom = effectiveRoomCode;
-                addSystemMessage(`${userName} joined the chat.`); // System message sent before other messages load
-                return { roomCode: effectiveRoomCode, userId };
-
-            } catch (error) {
-                console.error("Error creating/joining room:", error);
-                showCustomAlert(`Error joining room: ${error.message}`);
-                return null;
+                this.chatTitleTextEl.textContent = `Chat (${this.participants.length})`;
             }
-        }
-        
-        async function addSystemMessage(text) {
-            if (!chatData.currentRoom || !database) return;
-            const message = {
-                id: generateUserId(), // Though Firebase will assign its own key
-                type: 'system',
-                text: text,
-                timestamp: serverTimestamp()
-            };
-            const messagesRef = ref(database, `rooms/${chatData.currentRoom}/messages`);
-            try {
-                await push(messagesRef, message);
-            } catch (error) {
-                console.error("Error sending system message:", error);
-            }
-        }
 
-        async function sendMessage() {
-            if (!database) return;
-            const text = messageInput.value.trim();
-            if (!text || !chatData.currentUser || !chatData.currentRoom) return;
 
-            const message = {
-                id: generateUserId(), // Client-side ID, primarily for local use if needed before Firebase key
-                type: 'user',
-                text: text,
-                userId: chatData.currentUser.id,
-                userName: chatData.currentUser.name,
-                timestamp: serverTimestamp()
-            };
-
-            const messagesRef = ref(database, `rooms/${chatData.currentRoom}/messages`);
-            try {
-                await push(messagesRef, message);
-                messageInput.value = ''; 
-            } catch (error) {
-                console.error("Error sending message:", error);
-                showCustomAlert(`Error sending message: ${error.message}`);
-            }
-        }
-
-        function addMessageToDOM(message, messageId) { // messageId is the Firebase key
-            if (!messagesContainer || !chatData.currentUser && message.type !== 'system') return;
-
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.setAttribute('data-message-id', messageId); // For easy removal
-
-            if (message.type === 'system') {
-                messageDiv.className = 'system-message'; // Overrides .message, ensure this is intended or combine
-                messageDiv.classList.add('message'); // Add back .message if common styling is needed
-                messageDiv.setAttribute('data-message-id', messageId); 
-                messageDiv.textContent = escapeHtml(message.text);
-            } else {
-                const isOwn = message.userId === chatData.currentUser.id;
-                messageDiv.classList.add(isOwn ? 'own' : 'other');
+            showLoginScreen() {
+                document.body.style.alignItems = 'center';
+                this.loginScreenEl.style.display = 'flex'; 
+                this.chatScreenEl.style.display = 'none';
                 
-                const safeUserName = escapeHtml(message.userName || 'User');
-                const safeMessageText = escapeHtml(message.text);
-                const time = formatTime(message.timestamp);
+                this.userNameInputEl.value = '';
+                this.chatCodeInputEl.value = '';
+                this.generatedCodeDisplayEl.textContent = '';
+                this.messagesStore = [];
+                this.participants = [];
+                if (this.messagesContainerEl) this.messagesContainerEl.innerHTML = '';
+                this.myNickname = null;
+                this.chatCode = null;
+                this.isHost = false;
 
-                messageDiv.innerHTML = `
-                    <div class="message-info">${safeUserName} • ${time}</div>
-                    <div class="message-bubble">${safeMessageText}</div>
-                `;
+                if (this.socket) {
+                    this.socket.close();
+                    this.socket = null;
+                }
             }
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight; 
-        }
 
-        function listenForMessages() {
-            if (!chatData.currentRoom || !database) return;
-            
-            // Unsubscribe from previous listeners
-            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-            chatData.messageListeners = [];
+            showChatScreen() {
+                this.loginScreenEl.style.display = 'none';
+                this.chatScreenEl.style.display = 'block'; 
 
-            // Clear messages currently in DOM for this new room session (the initial system message from join will be re-added if it's part of the DB or handled separately)
-            // messagesContainer.innerHTML = ''; // Keep this if you want a clean slate before loading.
-                                          // The current join process adds a welcome message locally, then listenForMessages.
-                                          // If the welcome message is not in DB, it'll be overwritten if we clear here without re-adding.
-                                          // Given current flow, it's okay to not clear here, as `onChildAdded` will append.
+                this.displayChatCodeEl.textContent = this.chatCode;
+                this.statusTextEl.textContent = 'Online'; // Assuming online when chat screen is shown
 
-            const messagesQueryRef = query(ref(database, `rooms/${chatData.currentRoom}/messages`)); // No specific ordering needed as push keys are chronological
+                this.updateParticipantDisplay();
 
-            const onChildAddedUnsubscribe = onChildAdded(messagesQueryRef, (snapshot) => {
-                const message = snapshot.val();
-                const messageId = snapshot.key;
-                if (message) { 
-                    // Avoid re-adding if element already exists (can happen with some listener setups, less likely here)
-                    if (!document.querySelector(`.message[data-message-id="${messageId}"]`)) {
-                        addMessageToDOM(message, messageId);
-                    }
-                }
-            }, (error) => {
-                console.error("Error listening for added messages:", error);
-                showCustomAlert("Error fetching new messages.");
-            });
-            chatData.messageListeners.push(onChildAddedUnsubscribe);
 
-            const onChildRemovedUnsubscribe = onChildRemoved(messagesQueryRef, (snapshot) => {
-                const messageId = snapshot.key;
-                const messageElement = document.querySelector(`.message[data-message-id="${messageId}"]`);
-                if (messageElement) {
-                    messageElement.remove();
-                }
-            }, (error) => {
-                console.error("Error listening for removed messages:", error);
-            });
-            chatData.messageListeners.push(onChildRemovedUnsubscribe);
-        }
+                this.messagesContainerEl.innerHTML = ''; 
 
-        function updateOnlineCount() {
-            if (!chatData.currentRoom || !database) return;
-            const usersRef = ref(database, `rooms/${chatData.currentRoom}/users`);
-            
-            const unsubscribe = onValue(usersRef, (snapshot) => {
-                const users = snapshot.val();
-                const count = users ? Object.keys(users).length : 0;
-                onlineCountEl.textContent = `${count} online`;
-            }, (error) => {
-                console.error("Error updating online count:", error);
-            });
-            chatData.messageListeners.push(unsubscribe); // Add to listeners to be cleaned up on leave
-        }
-
-        async function leaveRoom() {
-            if (!chatData.currentRoom || !chatData.currentUser || !database) return;
-            
-            const confirmed = await showCustomConfirm('Leave room? Your messages will be removed if others remain. The room is deleted if you are the last one.');
-            if (!confirmed) return;
-
-            const leavingUserId = chatData.currentUser.id;
-            const leavingUserName = chatData.currentUser.name;
-            const currentRoomCode = chatData.currentRoom;
-
-            // Send "left chat" message before removing user or messages
-            // This message will persist even if other messages by the user are removed.
-            await addSystemMessage(`${leavingUserName} left the chat.`); 
-
-            const roomUsersRef = ref(database, `rooms/${currentRoomCode}/users`);
-            const currentUserInRoomRef = ref(database, `rooms/${currentRoomCode}/users/${leavingUserId}`);
-            
-            try {
-                // Remove user from the list of users in the room
-                await remove(currentUserInRoomRef);
-
-                const usersSnapshot = await get(roomUsersRef);
-                const remainingUsers = usersSnapshot.val();
-                const isRoomEmpty = !usersSnapshot.exists() || Object.keys(remainingUsers || {}).length === 0;
-
-                if (isRoomEmpty) {
-                    // If room is empty, remove the entire room
-                    await remove(ref(database, `rooms/${currentRoomCode}`));
-                    console.log(`Room ${currentRoomCode} deleted as it was empty.`);
+                const initialMessageDiv = document.createElement('div');
+                initialMessageDiv.className = 'connection-info';
+                if (this.isHost) {
+                    initialMessageDiv.innerHTML = `<p>✨ You've created chat <strong>${this.chatCode}</strong>! Share the code to invite others.</p>`;
                 } else {
-                    // If other users remain, remove messages from the leaving user
-                    const messagesRef = ref(database, `rooms/${currentRoomCode}/messages`);
-                    const messagesSnapshot = await get(messagesRef);
-                    if (messagesSnapshot.exists()) {
-                        const allMessages = messagesSnapshot.val();
-                        const updates = {};
-                        let messagesDeleted = false;
-                        for (const messageId in allMessages) {
-                            // Only delete 'user' type messages from the leaving user
-                            if (allMessages[messageId].userId === leavingUserId && allMessages[messageId].type === 'user') {
-                                updates[`rooms/${currentRoomCode}/messages/${messageId}`] = null; // Mark for deletion
-                                messagesDeleted = true;
-                            }
-                        }
-                        if (messagesDeleted) {
-                            await update(ref(database), updates); // Perform multi-path update to delete messages
-                            console.log(`Removed messages from user ${leavingUserId} in room ${currentRoomCode}`);
-                        }
+                    initialMessageDiv.innerHTML = `<p>🎉 Joined chat <strong>${this.chatCode}</strong>. Say hello!</p>`;
+                }
+                this.messagesContainerEl.appendChild(initialMessageDiv);
+                
+                this.messageInputEl.value = '';
+                this.autoResizeTextarea(this.messageInputEl);
+
+                this.setupChatScreenEventListeners();
+                this.messageInputEl.focus(); 
+            }
+
+            handleMessageInputKeypress(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.sendMessageInternal();
+                }
+            }
+
+            handleStartJoin() {
+                const nickname = this.userNameInputEl.value.trim();
+                const codeToJoin = this.chatCodeInputEl.value.trim().toUpperCase();
+
+                if (!nickname) {
+                    alert('Please enter your Name.');
+                    return;
+                }
+                this.myNickname = nickname;
+                this.participants = [this.myNickname]; // Add self to participants
+
+                if (!codeToJoin) { 
+                    this.isHost = true;
+                    this.chatCode = this.generateUniqueCode();
+                    this.generatedCodeDisplayEl.textContent = `Your New Chat Code: ${this.chatCode}`; 
+                    this.participants.push("Waiting for friend..."); // Simulated second participant for host
+                } else { 
+                    this.isHost = false;
+                    this.chatCode = codeToJoin;
+                    this.generatedCodeDisplayEl.textContent = ''; 
+                    this.participants.push("Chat Host"); // Simulate the host as another participant
+                }
+                // Ensure own name isn't duplicated if "Chat Host" is the same as myNickname (not an issue with this logic)
+                // For better simulation, if joining, the "Chat Host" would be a different name.
+                // Let's refine the participant simulation slightly
+                if (this.isHost) {
+                    // this.participants = [this.myNickname, "(Waiting...)"]; // Placeholder
+                } else {
+                    // When joining, it's you and the host (simulated)
+                    // this.participants = [this.myNickname, "Friend (Host)"]; // More explicit simulation
+                }
+
+
+                this.showChatScreen();
+            }
+
+            sendMessageInternal() { 
+                if (this.chatScreenEl.style.display === 'none') return;
+                const text = this.messageInputEl.value.trim();
+                if (!text) return;
+
+                this.addMessageToChat(text, 'text', true, this.myNickname);
+
+                this.messageInputEl.value = '';
+                this.autoResizeTextarea(this.messageInputEl);
+            }
+
+            handleFileSelectInternal(event) { 
+                if (this.chatScreenEl.style.display === 'none') return;
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const fileType = file.type.startsWith('image/') ? 'image' : (file.type.startsWith('video/') ? 'video' : 'other');
+                    
+                    if (fileType === 'other') {
+                        this.addMessageToChat(`Shared file: ${file.name} (type: ${file.type})`, 'text', true, this.myNickname);
+                    } else {
+                         this.addMessageToChat(e.target.result, fileType, true, this.myNickname);
                     }
+                };
+                reader.readAsDataURL(file); 
+                event.target.value = '';
+            }
+            
+            addMessageToChat(content, type, isSent, senderName) { 
+                const firstMessage = this.messagesStore.length === 0 && this.messagesContainerEl.querySelector('.connection-info');
+                if (firstMessage) {
+                    this.messagesContainerEl.innerHTML = '';
                 }
-            } catch (error) {
-                console.error("Error leaving room:", error);
-                showCustomAlert(`Error leaving room: ${error.message}`);
-            } finally {
-                chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-                chatData.messageListeners = [];
-                chatData.currentUser = null;
-                chatData.currentRoom = null;
 
-                chatContainer.style.display = 'none';
-                welcomeScreen.style.display = 'flex'; 
-                displayNameInput.value = '';
-                roomCodeInput.value = '';
-                // Clear messages on client side, as new room/welcome screen is shown
-                messagesContainer.innerHTML = '<div class="system-message">Messages disappear when everyone leaves.</div>'; 
-                displayNameInput.focus();
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+
+                if (senderName) { 
+                    const senderNameDiv = document.createElement('div');
+                    senderNameDiv.className = 'message-sender-name';
+                    senderNameDiv.textContent = senderName;
+                    messageDiv.appendChild(senderNameDiv); 
+                }
+
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = 'message-bubble';
+
+                if (type === 'text') {
+                    bubbleDiv.textContent = content;
+                } else if (type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = content;
+                    img.alt = "Sent image";
+                    img.className = 'message-media';
+                    bubbleDiv.appendChild(img);
+                } else if (type === 'video') {
+                    const video = document.createElement('video');
+                    video.src = content;
+                    video.controls = true;
+                    video.className = 'message-media';
+                    bubbleDiv.appendChild(video);
+                }
+                
+                messageDiv.appendChild(bubbleDiv);
+                this.messagesContainerEl.appendChild(messageDiv);
+                requestAnimationFrame(() => {
+                    this.messagesContainerEl.scrollTop = this.messagesContainerEl.scrollHeight;
+                });
+
+                this.messagesStore.push({
+                    content,
+                    type,
+                    isSent,
+                    sender: senderName || (isSent ? this.myNickname : 'System'), 
+                    timestamp: Date.now()
+                });
+            }
+
+            handleEndChat() {
+                this.showLoginScreen();
             }
         }
 
-        async function shareRoom() {
-            if (!chatData.currentRoom) return;
-            const roomLink = `${window.location.origin}${window.location.pathname}?room=${chatData.currentRoom}`;
-            const shareText = `Join my Shh Chat room!\nCode: ${chatData.currentRoom}\nLink: ${roomLink}`;
-            try {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(shareText);
-                    showCustomAlert('Room code and link copied to clipboard!');
-                } else if (navigator.share) {
-                    await navigator.share({
-                        title: 'Shh Chat Room',
-                        text: `Join my Shh Chat room! Code: ${chatData.currentRoom}`,
-                        url: roomLink,
-                    });
-                }
-                else {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = shareText;
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        showCustomAlert('Room code and link copied to clipboard (fallback)!');
-                    } catch (err) {
-                        showCustomAlert('Failed to copy. Please copy manually:\n' + shareText);
-                    }
-                    document.body.removeChild(textArea);
-                }
-            } catch (err) {
-                console.error('Could not copy/share text: ', err);
-                if (err.name !== 'AbortError') { // AbortError happens if user cancels share dialog
-                   showCustomAlert('Failed to copy/share room details. Please try again or copy manually.');
-                }
-            }
+        let chatApp;
+        document.addEventListener('DOMContentLoaded', () => {
+            chatApp = new SimpleChatApp();
+        });
+
+        function sendMessage() {
+            if (chatApp) chatApp.sendMessageInternal();
         }
 
-        // --- Event Listeners ---
-        joinForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!database) { 
-                showCustomAlert("Cannot join: Firebase is not connected.");
-                return;
-            }
-            const displayName = displayNameInput.value.trim();
-            let roomCode = roomCodeInput.value.trim().toUpperCase();
-
-            if (!displayName) {
-                showCustomAlert('Please enter your name.');
-                return;
-            }
-            if (displayName.length > 25) { 
-                showCustomAlert('Name must be 25 characters or less.');
-                return;
-            }
-            if (roomCode && (roomCode.length < 4 || roomCode.length > 10)) { 
-                 showCustomAlert('Room code must be between 4 and 10 characters if provided.');
-                 return;
-            }
-
-            // Check for room code in URL query params (for joining via link)
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomFromUrl = urlParams.get('room');
-            if (roomFromUrl && !roomCode) {
-                roomCode = roomFromUrl.toUpperCase();
-                roomCodeInput.value = roomCode; // Optionally populate the input
-            }
-
-
-            const originalBtnText = joinBtn.innerHTML;
-            joinBtn.innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
-            joinBtn.disabled = true;
-
-            try {
-                const result = await createOrJoinRoom(roomCode, displayName);
-                if (result && result.roomCode) {
-                    welcomeScreen.style.display = 'none';
-                    chatContainer.style.display = 'flex';
-                    roomTitle.textContent = `Room: ${result.roomCode}`;
-                    
-                    // Update URL without reloading page, to reflect current room
-                    // and allow easy sharing/bookmarking of the current room.
-                    const newUrl = `${window.location.pathname}?room=${result.roomCode}`;
-                    history.pushState({room: result.roomCode}, '', newUrl);
-
-                    messagesContainer.innerHTML = '<div class="system-message">Welcome! Messages are temporary.</div>'; 
-                    
-                    listenForMessages();
-                    updateOnlineCount();
-                    
-                    messageInput.focus();
-                }
-            } catch (error) {
-                console.error("Join form submission error:", error);
-                showCustomAlert("An unexpected error occurred while joining the room.");
-            } finally {
-                joinBtn.innerHTML = originalBtnText;
-                joinBtn.disabled = false;
-            }
-        });
-
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); 
-                sendMessage();
-            }
-        });
-
-        shareRoomBtn.addEventListener('click', shareRoom);
-        leaveRoomBtn.addEventListener('click', leaveRoom);
-
-        // Initial UI setup
-        displayNameInput.focus();
-        // If room code in URL on page load, prefill it
-        const initialUrlParams = new URLSearchParams(window.location.search);
-        const initialRoomFromUrl = initialUrlParams.get('room');
-        if (initialRoomFromUrl) {
-            roomCodeInput.value = initialRoomFromUrl.toUpperCase();
+        function handleFileSelect(event) {
+            if (chatApp) chatApp.handleFileSelectInternal(event);
         }
-        messagesContainer.innerHTML = '<div class="system-message">Messages disappear when everyone leaves.</div>';
-
-
-        window.addEventListener('beforeunload', async (event) => {
-            // This is tricky. Most modern browsers heavily restrict `beforeunload` actions.
-            // Trying to do async operations like `leaveRoom` here is unreliable and often blocked.
-            // The best practice is to rely on Firebase's presence system if you need robust "user disconnected" logic.
-            // For now, this simple confirmation might work on some browsers for explicit navigation.
-            if (chatData.currentRoom && chatData.currentUser) {
-                // The message in `returnValue` is often ignored by modern browsers.
-                // `event.preventDefault()` is the key to trigger a generic browser confirm dialog.
-                event.preventDefault(); 
-                event.returnValue = 'Are you sure you want to leave? Your session will end.'; 
-                // Note: You cannot reliably call `leaveRoom()` here and guarantee its completion.
-            }
-        });
-
-        // Handle back/forward navigation to potentially rejoin or leave room context
-        window.addEventListener('popstate', (event) => {
-            const state = event.state;
-            if (chatData.currentRoom) { // If user was in a room
-                const urlParams = new URLSearchParams(window.location.search);
-                const roomFromUrl = urlParams.get('room');
-                if (!roomFromUrl || roomFromUrl !== chatData.currentRoom) {
-                    // User navigated away from the room URL (e.g., back to no query params)
-                    // or to a different room URL. Treat as leaving the current room.
-                    // No confirmation here, as it's a browser navigation action.
-                    // Call a "silent" leave or reset.
-                    
-                    chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-                    chatData.messageListeners = [];
-                    // Don't remove user from Firebase here as it might be unintentional nav
-                    // Better to rely on timeout / Firebase presence for actual disconnects if not explicit leave.
-                    // For now, just reset UI:
-                    chatContainer.style.display = 'none';
-                    welcomeScreen.style.display = 'flex';
-                    roomCodeInput.value = roomFromUrl ? roomFromUrl.toUpperCase() : '';
-                    displayNameInput.value = chatData.currentUser ? chatData.currentUser.name : ''; // Keep display name
-                    messagesContainer.innerHTML = '<div class="system-message">Navigated away. Rejoin or create a new room.</div>';
-                    // Reset part of chatData, but keep currentUser name perhaps
-                    // chatData.currentRoom = null; // This should be reset if we are truly leaving room context
-                    console.log("Navigated away from room context.");
-                }
-            } else {
-                 // If user was not in a room, but URL now has a room, prefill it.
-                const urlParams = new URLSearchParams(window.location.search);
-                const roomFromUrl = urlParams.get('room');
-                 if (roomFromUrl) {
-                    roomCodeInput.value = roomFromUrl.toUpperCase();
-                }
-            }
-        });
-
-
     </script>
 </body>
 </html>
