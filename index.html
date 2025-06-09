@@ -3,8 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Chat App - Modern</title>
+    <title>shhh chat 🤫</title>
     <style>
+        :root {
+            /* Light Mode Palette (Default) */
+            --bg-page: #f0f2f5;
+            --bg-container: #ffffff;
+            --bg-header: #ffffff;
+            --bg-messages: #f0f2f5;
+            --bg-input-area: #ffffff;
+            --bg-bubble-sent: linear-gradient(135deg, #0088cc, #006699);
+            --bg-bubble-received: #e9ebee;
+            --bg-button-hover: #f0f0f0;
+
+            --text-primary: #050505;
+            --text-secondary: #65676b;
+            --text-tertiary: #8a8d91;
+            --text-on-accent: #ffffff;
+
+            --border-primary: #ced0d4;
+            --border-secondary: #e0e0e0;
+            --shadow-primary: rgba(0, 0, 0, 0.1);
+            
+            --accent-primary: #007bff;
+        }
+
+        .dark-mode {
+            /* Dark Mode Palette */
+            --bg-page: #18191a;
+            --bg-container: #242526;
+            --bg-header: #242526;
+            --bg-messages: #18191a;
+            --bg-input-area: #242526;
+            --bg-bubble-sent: linear-gradient(135deg, #4b88da, #3a6ab2);
+            --bg-bubble-received: #3a3b3c;
+            --bg-button-hover: #4a4a4c;
+
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --text-tertiary: #8a8d91;
+            --text-on-accent: #ffffff;
+            
+            --border-primary: #3a3b3c;
+            --border-secondary: #303132;
+            --shadow-primary: rgba(0, 0, 0, 0.4);
+            
+            --accent-primary: #4b88da;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,43 +58,41 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
-            background: linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%); /* New Gradient */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-page);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #333;
+            color: var(--text-primary);
             overflow: hidden; 
+            transition: background-color 0.3s ease;
         }
 
         /* Login Screen Styles */
         .login-screen {
-            background: white;
-            padding: 35px 40px; /* Increased padding */
-            border-radius: 24px; /* More pronounced rounding */
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            background: var(--bg-container);
+            padding: 35px 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px var(--shadow-primary);
             text-align: center;
             width: 90%;
-            max-width: 400px; /* Slightly wider */
+            max-width: 400px;
             display: flex; 
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.3s ease;
         }
 
         .login-screen h1 {
-            font-size: 2em;
+            font-size: 2.2em;
             margin-bottom: 15px;
-            color: #333; /* Darker for modern feel */
             font-weight: 600;
-        }
-        .login-screen h1 .emoji { /* Style for emoji if needed */
-             margin-right: 8px;
         }
 
         .login-screen p.instructions {
-            margin-bottom: 30px; /* More space */
-            color: #555;
+            margin-bottom: 30px;
+            color: var(--text-secondary);
             font-size: 0.95em;
             line-height: 1.6;
         }
@@ -57,59 +101,43 @@
             width: 100%;
             padding: 15px 20px;
             margin-bottom: 20px;
-            border: 1px solid #ddd; /* Softer border */
+            border: 1px solid var(--border-primary);
+            background-color: var(--bg-page);
+            color: var(--text-primary);
             border-radius: 12px;
             font-size: 15px;
             outline: none;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
         .login-input:focus {
-            border-color: #6a82fb; /* Match new gradient */
-            box-shadow: 0 0 0 4px rgba(106, 130, 251, 0.15);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-primary) 15%, transparent);
         }
 
         .login-button {
-            background: linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%);
-            color: white;
+            background: var(--accent-primary);
+            color: var(--text-on-accent);
             border: none;
             padding: 15px 20px;
             border-radius: 12px;
-            font-size: 1em; /* Relative font size */
+            font-size: 1em;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.2s ease;
             width: 100%;
             margin-top: 10px;
             box-sizing: border-box;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-primary) 20%, transparent);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px; /* Space between icon and text */
+            gap: 8px;
         }
 
         .login-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(106, 130, 251, 0.3);
-        }
-
-        #generatedCodeDisplay {
-            margin-top: 25px;
-            font-size: 1em;
-            color: #28a745; /* Bootstrap success green */
-            font-weight: 500;
-            padding: 12px;
-            background-color: #e9f7ef; /* Lighter green */
-            border-radius: 10px;
-            border: 1px solid #c3e6cb; /* Softer green border */
-            line-height: 1.4;
-            width: 100%; 
-            word-wrap: break-word; 
-        }
-        #generatedCodeDisplay:empty {
-            display: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px color-mix(in srgb, var(--accent-primary) 30%, transparent);
         }
 
         /* Chat Screen Styles */
@@ -120,190 +148,132 @@
             position: fixed; 
             top: 0;
             left: 0;
-            background: #f4f7f6; /* Light neutral background for chat area */
+            background: var(--bg-page);
         }
 
         .chat-container {
             width: 100%;    
             height: 100%;   
-            border-radius: 0; 
-            box-shadow: none;   
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background: #fff; /* Main chat container background */
+            background: var(--bg-container);
+            position: relative; /* For scroll-to-bottom button */
         }
 
         .chat-header {
-            background: #fff; /* Cleaner white header */
-            color: #333; /* Dark text on white */
+            background: var(--bg-header);
+            color: var(--text-primary);
             padding: 15px 20px;
-            text-align: left; /* Align header content left */
-            position: relative; 
+            text-align: left;
             flex-shrink: 0; 
-            border-bottom: 1px solid #eee; /* Subtle separator */
+            border-bottom: 1px solid var(--border-secondary);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         
-        .chat-header-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px; /* Small gap between info lines */
-        }
-
-        .chat-header-title {
-            font-size: 1.1em; 
+        .chat-header-info h2 {
+            font-size: 1.2em; 
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px; /* Space between icon and title */
         }
         
         .chat-details {
             font-size: 0.75em; 
-            color: #777;
-            display: flex;
-            flex-direction: column; /* Stack details vertically */
-            gap: 1px;
-        }
-        .chat-participants-list {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .chat-participants-list .participant-icon {
-            font-size: 0.9em;
-        }
-
-
-        .status-indicator-container {
-            display: flex;
-            align-items: center;
-            font-size: 0.75em;
-            color: #555;
-        }
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #4ade80; /* Green for online */
-            margin-right: 6px;
+            color: var(--text-secondary);
+            margin-top: 4px;
         }
         
         .chat-header-actions {
             display: flex;
             align-items: center;
+            gap: 8px; /* Gap between action buttons */
         }
 
-        .icon-button { /* Common style for icon buttons */
+        .icon-button {
             background: transparent;
             border: none;
-            color: #555; /* Icon color */
-            font-size: 1.4em; /* Icon size */
+            color: var(--text-secondary);
+            font-size: 1.4em;
             cursor: pointer;
             padding: 8px;
             border-radius: 50%;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
         }
         .icon-button:hover {
-            background-color: #f0f0f0; /* Subtle hover background */
-            color: #333;
+            background-color: var(--bg-button-hover);
         }
-        .end-chat-btn-icon {
-             color: #fc5c7d; /* Match gradient for end chat */
-        }
-        .end-chat-btn-icon:hover {
-             background-color: #fce8ec;
-             color: #d94462;
-        }
-
-
+        
         .messages {
             flex-grow: 1; 
             padding: 15px; 
             overflow-y: auto;
-            background: #f4f7f6; /* Light neutral background */
+            background: var(--bg-messages);
+            transition: background-color 0.3s ease;
         }
 
         .message {
-            margin-bottom: 15px; 
-            animation: slideIn 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); /* Smoother animation */
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px); 
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.sent {
-            display: flex; /* Use flex for alignment */
+            display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            margin-bottom: 2px; /* Reduced margin */
         }
 
-        .message.received { 
-            display: flex; /* Use flex for alignment */
-            flex-direction: column;
-            align-items: flex-start;
+        .message-group-end {
+            margin-bottom: 15px; /* Add margin to the last message of a group */
         }
+
+        .message.sent { align-items: flex-end; }
+        .message.received { align-items: flex-start; }
         
-        .message-sender-name {
-            font-size: 0.75em; 
-            color: #555;   
-            margin-bottom: 4px;
-            padding: 0 2px; 
+        .message-content-wrapper {
+             display: flex;
+             align-items: flex-end;
+             gap: 8px;
+             max-width: 80%;
         }
+        .message.sent .message-content-wrapper { flex-direction: row-reverse; }
 
         .message-bubble {
-            display: inline-block;
-            max-width: 78%; 
             padding: 10px 14px; 
             border-radius: 18px; 
             word-wrap: break-word;
             text-align: left; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle shadow on bubbles */
+            box-shadow: 0 1px 2px var(--shadow-primary);
+            color: var(--text-on-accent);
         }
 
         .message.sent .message-bubble {
-            background: linear-gradient(135deg, #6a82fb 0%, #7d8ef9 100%); /* Adjusted sent bubble gradient */
-            color: white;
-            border-bottom-right-radius: 6px; /* "Tail" effect */
+            background: var(--bg-bubble-sent);
+            border-bottom-right-radius: 6px;
         }
 
         .message.received .message-bubble {
-            background: #e9ecef; 
-            color: #212529; 
-            border-bottom-left-radius: 6px; /* "Tail" effect */
+            background: var(--bg-bubble-received);
+            color: var(--text-primary);
+            border-bottom-left-radius: 6px;
         }
-
-        .message-media {
-            max-width: 100%;
-            border-radius: 12px; 
-            margin-top: 8px;
-            display: block; 
+        
+        .message-timestamp {
+            font-size: 0.7em;
+            color: var(--text-tertiary);
+            margin: 0 4px 2px 4px; /* Bottom margin to align with bubble base */
+            white-space: nowrap;
+            display: none; /* Initially hidden */
         }
-
-        .message-media img,
-        .message-media video {
-            max-width: 280px; 
-            max-height: 280px; 
-            border-radius: 10px;
-            display: block; 
+        .message:hover .message-timestamp {
+            display: block; /* Show on hover */
         }
-
+        
         .input-area {
             padding: 12px 15px; 
-            background: white;
-            border-top: 1px solid #e0e0e0;
+            background: var(--bg-input-area);
+            border-top: 1px solid var(--border-secondary);
             flex-shrink: 0; 
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .input-container {
@@ -314,95 +284,103 @@
 
         .message-input {
             flex: 1;
-            border: 1px solid #ccc; /* Simpler border */
+            border: 1px solid var(--border-primary); 
+            background: var(--bg-messages);
+            color: var(--text-primary);
             border-radius: 22px; 
             padding: 12px 18px;
             resize: none;
             outline: none;
             font-family: inherit;
-            font-size: 1em; /* Base font size */
-            min-height: 44px; 
+            font-size: 1em; 
+            min-height: 46px; 
             max-height: 120px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.2s ease;
             line-height: 1.5;
         }
 
         .message-input:focus {
-            border-color: #6a82fb;
-            box-shadow: 0 0 0 3px rgba(106, 130, 251, 0.1);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 15%, transparent);
         }
         
-        /* Send and File buttons inherit .icon-button and add specific gradient */
-        .send-btn, .file-btn {
-            background: linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%);
-            color: white;
-            font-size: 1.2em; /* Icon size inside button */
-            width: 44px;  
-            height: 44px; 
-            padding: 0; /* Reset padding as size is fixed */
+        .send-btn {
+            background: var(--accent-primary);
+            color: var(--text-on-accent);
+            font-size: 1.2em; 
+            width: 46px;  
+            height: 46px; 
+            padding: 0; 
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%; /* Circular */
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-radius: 50%; 
+            box-shadow: 0 3px 10px var(--shadow-primary);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-        .send-btn:hover, .file-btn:hover {
-            background: linear-gradient(135deg, #5c75e6 0%, #e74f6f 100%); /* Darker on hover */
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-            color: white; /* Ensure icon color remains white */
-        }
-        .file-btn { font-size: 1.1em; } 
-
-        .file-input {
-            display: none;
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-primary) 25%, transparent);
         }
 
-        .connection-info {
-            text-align: center;
-            padding: 15px;
-            color: #555;
-            font-size: 0.9em;
-            font-style: italic;
-            background-color: #f8f9fa; 
-            border-radius: 10px;
-            margin: 10px 15px; /* Margin for better spacing in messages area */
+        .scroll-to-bottom-btn {
+            position: absolute;
+            bottom: 80px; /* Position above input area */
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-container);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 4px 10px var(--shadow-primary);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            visibility: hidden;
+        }
+        .scroll-to-bottom-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
         }
     </style>
 </head>
 <body>
 
     <div class="login-screen" id="loginScreen">
-        <h1><span class="emoji">👋</span>Welcome</h1>
-        <p class="instructions">Enter your name and a chat code to join, or leave blank to create a new one.</p>
+        <h1>🤫 shhh chat</h1>
+        <p class="instructions">Your private space to talk. Enter your name and a code to begin.</p>
         <input type="text" id="userNameInput" class="login-input" placeholder="Your Name">
-        <input type="text" id="chatCodeInput" class="login-input" placeholder="Chat Code (optional)">
-        <button id="startJoinButton" class="login-button">➔ Start / Join</button>
-        <div id="generatedCodeDisplay"></div>
+        <input type="text" id="chatCodeInput" class="login-input" placeholder="Chat Code (or leave blank)">
+        <button id="startJoinButton" class="login-button">➔ Enter</button>
     </div>
 
     <div class="chat-screen" id="chatScreen">
         <div class="chat-container">
             <div class="chat-header">
                 <div class="chat-header-info">
-                    <div class="chat-header-title">💬 <span id="chatTitleText">Chat Active</span></div>
-                    <div class="chat-details">
-                        <div id="participantDisplay" class="chat-participants-list">
-                            <span class="participant-icon">👥</span> With: <span id="participantList"></span>
-                        </div>
-                        <div>Code: <strong id="displayChatCode"></strong></div>
-                        <div class="status-indicator-container">
-                            <span class="status-indicator"></span>
-                            <span id="statusText">Online</span> </div>
-                    </div>
+                    <h2 id="chatHeaderTitle">Your Chat</h2>
+                    <div id="chatDetails" class="chat-details">with <strong id="participantName"></strong></div>
                 </div>
                 <div class="chat-header-actions">
-                    <button id="endChatButton" class="icon-button end-chat-btn-icon" title="End Chat">✕</button>
+                    <button id="themeToggle" class="icon-button" aria-label="Toggle Theme" title="Toggle Theme">🌙</button>
+                    <button id="endChatButton" class="icon-button" aria-label="End Chat" title="End Chat">✕</button>
                 </div>
             </div>
             
-            <div class="messages" id="messagesContainer"> </div>
+            <div class="messages" id="messagesContainer">
+                </div>
             
+            <button id="scrollToBottomBtn" class="scroll-to-bottom-btn" aria-label="Scroll to Bottom" title="Scroll to Bottom">↓</button>
+
             <div class="input-area">
                 <div class="input-container">
                     <textarea 
@@ -411,144 +389,112 @@
                         placeholder="Type a message..."
                         rows="1"
                     ></textarea>
-                    
-                    <button class="file-btn icon-button" onclick="document.getElementById('fileInput').click()" title="Attach File">
-                        📎
-                    </button>
-                    
-                    <button class="send-btn icon-button" onclick="sendMessage()" title="Send Message">
+                    <button class="send-btn" onclick="sendMessage()" aria-label="Send Message" title="Send Message">
                         ➤
                     </button>
-                    
-                    <input 
-                        type="file" 
-                        id="fileInput" 
-                        class="file-input" 
-                        accept="image/*,video/*"
-                        onchange="handleFileSelect(event)"
-                    >
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        class SimpleChatApp {
+        class ShhhChatApp {
             constructor() {
                 this.myNickname = null;
                 this.chatCode = null;
                 this.messagesStore = [];
                 this.participants = [];
-                this.isHost = false;
-                this.socket = null;
+                
+                // Sound for sent messages
+                this.sentMessageSound = new Audio("data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSUNSAAAACgAAADU4MjY1ODEwTEFYAAABXgL/GgSubscriptionPricesLastSuccessMainstreamServicePremiumEnabledLastKnownPremiumEnabledDateLastKnownSubscriptionPricesLastSuccessMainstreamServicePremiumEnabledLastKnownPremiumEnabledDate");
 
+                // DOM Caching
                 this.loginScreenEl = document.getElementById('loginScreen');
                 this.chatScreenEl = document.getElementById('chatScreen');
                 this.userNameInputEl = document.getElementById('userNameInput');
                 this.chatCodeInputEl = document.getElementById('chatCodeInput');
                 this.startJoinButtonEl = document.getElementById('startJoinButton');
-                this.generatedCodeDisplayEl = document.getElementById('generatedCodeDisplay');
-
-                this.chatTitleTextEl = document.getElementById('chatTitleText');
-                this.participantListEl = document.getElementById('participantList');
-                this.displayChatCodeEl = document.getElementById('displayChatCode');
+                
+                this.chatHeaderTitleEl = document.getElementById('chatHeaderTitle');
+                this.participantNameEl = document.getElementById('participantName');
                 this.messagesContainerEl = document.getElementById('messagesContainer');
                 this.messageInputEl = document.getElementById('messageInput');
                 this.endChatButtonEl = document.getElementById('endChatButton');
-                this.statusTextEl = document.getElementById('statusText'); // For "Online" text
+                this.themeToggleEl = document.getElementById('themeToggle');
+                this.scrollToBottomBtnEl = document.getElementById('scrollToBottomBtn');
 
+                this.initTheme();
                 this.showLoginScreen();
                 this.setupGlobalEventListeners();
             }
-
-            generateUniqueCode() {
-                return Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            initTheme() {
+                const savedTheme = localStorage.getItem('shhhChatTheme');
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    this.themeToggleEl.textContent = '☀️';
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    this.themeToggleEl.textContent = '🌙';
+                }
             }
 
-            setupGlobalEventListeners() {
-                this.startJoinButtonEl.addEventListener('click', () => this.handleStartJoin());
+            toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('shhhChatTheme', 'dark');
+                    this.themeToggleEl.textContent = '☀️';
+                } else {
+                    localStorage.setItem('shhhChatTheme', 'light');
+                    this.themeToggleEl.textContent = '🌙';
+                }
             }
             
-            setupChatScreenEventListeners() {
-                this.messageInputEl.addEventListener('keypress', this.handleMessageInputKeypress.bind(this));
-                this.messageInputEl.addEventListener('input', () => this.autoResizeTextarea(this.messageInputEl));
-                this.endChatButtonEl.onclick = () => this.handleEndChat();
-            }
-
-            autoResizeTextarea(textareaElement) {
-                textareaElement.style.height = 'auto'; 
-                let newHeight = Math.max(textareaElement.scrollHeight, parseFloat(getComputedStyle(textareaElement).minHeight));
-                textareaElement.style.height = Math.min(newHeight, 120) + 'px'; 
-            }
-
-            updateParticipantDisplay() {
-                if (this.participants.length > 0) {
-                    this.participantListEl.textContent = this.participants.join(', ');
-                    if (this.participants.length === 1 && this.isHost) {
-                        // If only host is present, could show something like "Waiting for others..."
-                        // For now, just show the host's name.
+            setupGlobalEventListeners() {
+                this.startJoinButtonEl.addEventListener('click', () => this.handleStartJoin());
+                this.themeToggleEl.addEventListener('click', () => this.toggleTheme());
+                
+                this.messagesContainerEl.addEventListener('scroll', () => {
+                    const threshold = 100; // Pixels from the bottom
+                    const isScrolledToBottom = this.messagesContainerEl.scrollHeight - this.messagesContainerEl.scrollTop - this.messagesContainerEl.clientHeight < threshold;
+                    if (isScrolledToBottom) {
+                        this.scrollToBottomBtnEl.classList.remove('visible');
+                    } else {
+                        this.scrollToBottomBtnEl.classList.add('visible');
                     }
-                } else {
-                    this.participantListEl.textContent = 'No one yet';
-                }
-                this.chatTitleTextEl.textContent = `Chat (${this.participants.length})`;
+                });
+                
+                this.scrollToBottomBtnEl.addEventListener('click', () => {
+                    this.messagesContainerEl.scrollTo({ top: this.messagesContainerEl.scrollHeight, behavior: 'smooth' });
+                });
             }
-
-
+            
             showLoginScreen() {
-                document.body.style.alignItems = 'center';
                 this.loginScreenEl.style.display = 'flex'; 
                 this.chatScreenEl.style.display = 'none';
                 
                 this.userNameInputEl.value = '';
                 this.chatCodeInputEl.value = '';
-                this.generatedCodeDisplayEl.textContent = '';
                 this.messagesStore = [];
-                this.participants = [];
-                if (this.messagesContainerEl) this.messagesContainerEl.innerHTML = '';
                 this.myNickname = null;
-                this.chatCode = null;
-                this.isHost = false;
-
-                if (this.socket) {
-                    this.socket.close();
-                    this.socket = null;
-                }
             }
 
             showChatScreen() {
                 this.loginScreenEl.style.display = 'none';
                 this.chatScreenEl.style.display = 'block'; 
 
-                this.displayChatCodeEl.textContent = this.chatCode;
-                this.statusTextEl.textContent = 'Online'; // Assuming online when chat screen is shown
-
-                this.updateParticipantDisplay();
-
+                // Simulate participants for UI
+                const otherParticipant = this.isHost ? "Your Friend" : "Chat Host";
+                this.chatHeaderTitleEl.textContent = `Chat with ${otherParticipant}`;
+                this.participantNameEl.textContent = this.myNickname;
 
                 this.messagesContainerEl.innerHTML = ''; 
-
                 const initialMessageDiv = document.createElement('div');
                 initialMessageDiv.className = 'connection-info';
-                if (this.isHost) {
-                    initialMessageDiv.innerHTML = `<p>✨ You've created chat <strong>${this.chatCode}</strong>! Share the code to invite others.</p>`;
-                } else {
-                    initialMessageDiv.innerHTML = `<p>🎉 Joined chat <strong>${this.chatCode}</strong>. Say hello!</p>`;
-                }
+                initialMessageDiv.innerHTML = `<p>✨ This is the beginning of your private chat. Messages are only stored for this session.</p>`;
                 this.messagesContainerEl.appendChild(initialMessageDiv);
                 
-                this.messageInputEl.value = '';
-                this.autoResizeTextarea(this.messageInputEl);
-
-                this.setupChatScreenEventListeners();
                 this.messageInputEl.focus(); 
-            }
-
-            handleMessageInputKeypress(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    this.sendMessageInternal();
-                }
             }
 
             handleStartJoin() {
@@ -560,111 +506,72 @@
                     return;
                 }
                 this.myNickname = nickname;
-                this.participants = [this.myNickname]; // Add self to participants
-
-                if (!codeToJoin) { 
-                    this.isHost = true;
-                    this.chatCode = this.generateUniqueCode();
-                    this.generatedCodeDisplayEl.textContent = `Your New Chat Code: ${this.chatCode}`; 
-                    this.participants.push("Waiting for friend..."); // Simulated second participant for host
-                } else { 
-                    this.isHost = false;
-                    this.chatCode = codeToJoin;
-                    this.generatedCodeDisplayEl.textContent = ''; 
-                    this.participants.push("Chat Host"); // Simulate the host as another participant
-                }
-                // Ensure own name isn't duplicated if "Chat Host" is the same as myNickname (not an issue with this logic)
-                // For better simulation, if joining, the "Chat Host" would be a different name.
-                // Let's refine the participant simulation slightly
-                if (this.isHost) {
-                    // this.participants = [this.myNickname, "(Waiting...)"]; // Placeholder
-                } else {
-                    // When joining, it's you and the host (simulated)
-                    // this.participants = [this.myNickname, "Friend (Host)"]; // More explicit simulation
-                }
-
-
+                this.isHost = !codeToJoin;
+                this.chatCode = codeToJoin || Math.random().toString(36).substring(2, 8).toUpperCase();
+                
                 this.showChatScreen();
             }
 
             sendMessageInternal() { 
-                if (this.chatScreenEl.style.display === 'none') return;
                 const text = this.messageInputEl.value.trim();
                 if (!text) return;
 
-                this.addMessageToChat(text, 'text', true, this.myNickname);
+                this.addMessageToChat({
+                    content: text,
+                    type: 'text',
+                    isSent: true,
+                    sender: this.myNickname,
+                    timestamp: new Date()
+                });
 
                 this.messageInputEl.value = '';
-                this.autoResizeTextarea(this.messageInputEl);
+                this.messageInputEl.style.height = 'auto';
             }
 
-            handleFileSelectInternal(event) { 
-                if (this.chatScreenEl.style.display === 'none') return;
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const fileType = file.type.startsWith('image/') ? 'image' : (file.type.startsWith('video/') ? 'video' : 'other');
-                    
-                    if (fileType === 'other') {
-                        this.addMessageToChat(`Shared file: ${file.name} (type: ${file.type})`, 'text', true, this.myNickname);
-                    } else {
-                         this.addMessageToChat(e.target.result, fileType, true, this.myNickname);
-                    }
-                };
-                reader.readAsDataURL(file); 
-                event.target.value = '';
-            }
-            
-            addMessageToChat(content, type, isSent, senderName) { 
-                const firstMessage = this.messagesStore.length === 0 && this.messagesContainerEl.querySelector('.connection-info');
-                if (firstMessage) {
+            addMessageToChat(message) {
+                // Clear initial info message on first real message
+                if (this.messagesStore.length === 0) {
                     this.messagesContainerEl.innerHTML = '';
                 }
 
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+                const lastMessage = this.messagesStore[this.messagesStore.length - 1];
+                const isGrouped = lastMessage && lastMessage.sender === message.sender;
 
-                if (senderName) { 
-                    const senderNameDiv = document.createElement('div');
-                    senderNameDiv.className = 'message-sender-name';
-                    senderNameDiv.textContent = senderName;
-                    messageDiv.appendChild(senderNameDiv); 
+                // Remove grouping class from previous message if it exists
+                const lastMessageEl = this.messagesContainerEl.lastElementChild;
+                if (lastMessageEl) {
+                    lastMessageEl.classList.remove('message-group-end');
                 }
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${message.isSent ? 'sent' : 'received'} message-group-end`;
+                if (isGrouped) {
+                    messageDiv.style.marginTop = '4px';
+                }
+
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'message-content-wrapper';
 
                 const bubbleDiv = document.createElement('div');
                 bubbleDiv.className = 'message-bubble';
-
-                if (type === 'text') {
-                    bubbleDiv.textContent = content;
-                } else if (type === 'image') {
-                    const img = document.createElement('img');
-                    img.src = content;
-                    img.alt = "Sent image";
-                    img.className = 'message-media';
-                    bubbleDiv.appendChild(img);
-                } else if (type === 'video') {
-                    const video = document.createElement('video');
-                    video.src = content;
-                    video.controls = true;
-                    video.className = 'message-media';
-                    bubbleDiv.appendChild(video);
-                }
+                bubbleDiv.textContent = message.content;
                 
-                messageDiv.appendChild(bubbleDiv);
-                this.messagesContainerEl.appendChild(messageDiv);
-                requestAnimationFrame(() => {
-                    this.messagesContainerEl.scrollTop = this.messagesContainerEl.scrollHeight;
-                });
+                const timestampSpan = document.createElement('span');
+                timestampSpan.className = 'message-timestamp';
+                timestampSpan.textContent = message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                this.messagesStore.push({
-                    content,
-                    type,
-                    isSent,
-                    sender: senderName || (isSent ? this.myNickname : 'System'), 
-                    timestamp: Date.now()
-                });
+                contentWrapper.appendChild(bubbleDiv);
+                contentWrapper.appendChild(timestampSpan);
+                messageDiv.appendChild(contentWrapper);
+                this.messagesContainerEl.appendChild(messageDiv);
+                
+                this.messagesContainerEl.scrollTo({ top: this.messagesContainerEl.scrollHeight, behavior: 'smooth' });
+                
+                if (message.isSent) {
+                    this.sentMessageSound.play().catch(e => console.error("Sound play failed:", e));
+                }
+
+                this.messagesStore.push(message);
             }
 
             handleEndChat() {
@@ -674,15 +581,15 @@
 
         let chatApp;
         document.addEventListener('DOMContentLoaded', () => {
-            chatApp = new SimpleChatApp();
+            // Unbind listeners from constructor to avoid calling before DOM ready
+            chatApp = new ShhhChatApp();
+            chatApp.endChatButtonEl.onclick = () => chatApp.handleEndChat();
+            // other event listeners that rely on chatApp instance
         });
 
+        // Global function for onclick attribute
         function sendMessage() {
             if (chatApp) chatApp.sendMessageInternal();
-        }
-
-        function handleFileSelect(event) {
-            if (chatApp) chatApp.handleFileSelectInternal(event);
         }
     </script>
 </body>
