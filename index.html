@@ -26,6 +26,7 @@
             --shadow-primary: rgba(0, 0, 0, 0.1);
             
             --accent-primary: #007bff;
+            --online-indicator: #31a24c;
         }
 
         .dark-mode {
@@ -49,308 +50,52 @@
             --shadow-primary: rgba(0, 0, 0, 0.4);
             
             --accent-primary: #4b88da;
+            --online-indicator: #24a141;
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* ... (rest of the styles are largely the same as the previous full code block) ... */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-page); height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text-primary); overflow: hidden; transition: background-color 0.3s ease; }
+        .login-screen { background: var(--bg-container); padding: 35px 40px; border-radius: 24px; box-shadow: 0 20px 50px var(--shadow-primary); text-align: center; width: 90%; max-width: 400px; display: flex; flex-direction: column; align-items: center; transition: background-color 0.3s ease; }
+        .login-screen h1 { font-size: 2.2em; margin-bottom: 15px; font-weight: 600; }
+        .login-screen p.instructions { margin-bottom: 30px; color: var(--text-secondary); font-size: 0.95em; line-height: 1.6; }
+        .login-input { width: 100%; padding: 15px 20px; margin-bottom: 20px; border: 1px solid var(--border-primary); background-color: var(--bg-page); color: var(--text-primary); border-radius: 12px; font-size: 15px; outline: none; transition: all 0.3s ease; }
+        .login-input:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-primary) 15%, transparent); }
+        .login-button { background: var(--accent-primary); color: var(--text-on-accent); border: none; padding: 15px 20px; border-radius: 12px; font-size: 1em; font-weight: 600; cursor: pointer; transition: all 0.2s ease; width: 100%; margin-top: 10px; box-sizing: border-box; box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-primary) 20%, transparent); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .login-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px color-mix(in srgb, var(--accent-primary) 30%, transparent); }
+        .chat-screen { display: none; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; background: var(--bg-page); }
+        .chat-container { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-container); position: relative; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg-page);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-primary);
-            overflow: hidden; 
-            transition: background-color 0.3s ease;
-        }
+        .chat-header { background: var(--bg-header); color: var(--text-primary); padding: 12px 20px; text-align: left; flex-shrink: 0; border-bottom: 1px solid var(--border-secondary); display: flex; justify-content: space-between; align-items: center; transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .chat-header-info h2 { font-size: 1.1em; font-weight: 600; margin-bottom: 5px;}
+        .chat-details { display: flex; align-items: center; gap: 15px; font-size: 0.8em; color: var(--text-secondary); }
+        .chat-code-display { background-color: var(--bg-page); padding: 2px 8px; border-radius: 6px; font-family: monospace; }
+        .online-status-display { display: flex; align-items: center; gap: 6px; }
+        .status-indicator { width: 8px; height: 8px; border-radius: 50%; background-color: var(--online-indicator); }
+        .chat-header-actions { display: flex; align-items: center; gap: 8px; }
+        .icon-button { background: transparent; border: none; color: var(--text-secondary); font-size: 1.4em; cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease; }
+        .icon-button:hover { background-color: var(--bg-button-hover); }
 
-        /* Login Screen Styles */
-        .login-screen {
-            background: var(--bg-container);
-            padding: 35px 40px;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px var(--shadow-primary);
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-            display: flex; 
-            flex-direction: column;
-            align-items: center;
-            transition: background-color 0.3s ease;
-        }
-
-        .login-screen h1 {
-            font-size: 2.2em;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .login-screen p.instructions {
-            margin-bottom: 30px;
-            color: var(--text-secondary);
-            font-size: 0.95em;
-            line-height: 1.6;
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-primary);
-            background-color: var(--bg-page);
-            color: var(--text-primary);
-            border-radius: 12px;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .login-input:focus {
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-primary) 15%, transparent);
-        }
-
-        .login-button {
-            background: var(--accent-primary);
-            color: var(--text-on-accent);
-            border: none;
-            padding: 15px 20px;
-            border-radius: 12px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-            margin-top: 10px;
-            box-sizing: border-box;
-            box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-primary) 20%, transparent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .login-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px color-mix(in srgb, var(--accent-primary) 30%, transparent);
-        }
-
-        /* Chat Screen Styles */
-        .chat-screen {
-            display: none; 
-            width: 100vw;   
-            height: 100vh;  
-            position: fixed; 
-            top: 0;
-            left: 0;
-            background: var(--bg-page);
-        }
-
-        .chat-container {
-            width: 100%;    
-            height: 100%;   
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: var(--bg-container);
-            position: relative; /* For scroll-to-bottom button */
-        }
-
-        .chat-header {
-            background: var(--bg-header);
-            color: var(--text-primary);
-            padding: 15px 20px;
-            text-align: left;
-            flex-shrink: 0; 
-            border-bottom: 1px solid var(--border-secondary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-        
-        .chat-header-info h2 {
-            font-size: 1.2em; 
-            font-weight: 600;
-        }
-        
-        .chat-details {
-            font-size: 0.75em; 
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-        
-        .chat-header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px; /* Gap between action buttons */
-        }
-
-        .icon-button {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.4em;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s ease;
-        }
-        .icon-button:hover {
-            background-color: var(--bg-button-hover);
-        }
-        
-        .messages {
-            flex-grow: 1; 
-            padding: 15px; 
-            overflow-y: auto;
-            background: var(--bg-messages);
-            transition: background-color 0.3s ease;
-        }
-
-        .message {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 2px; /* Reduced margin */
-        }
-
-        .message-group-end {
-            margin-bottom: 15px; /* Add margin to the last message of a group */
-        }
-
+        .messages { flex-grow: 1; padding: 15px; overflow-y: auto; background: var(--bg-messages); transition: background-color 0.3s ease; }
+        .message { display: flex; flex-direction: column; margin-bottom: 2px; }
+        .message-group-end { margin-bottom: 15px; }
         .message.sent { align-items: flex-end; }
         .message.received { align-items: flex-start; }
-        
-        .message-content-wrapper {
-             display: flex;
-             align-items: flex-end;
-             gap: 8px;
-             max-width: 80%;
-        }
+        .message-content-wrapper { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
         .message.sent .message-content-wrapper { flex-direction: row-reverse; }
-
-        .message-bubble {
-            padding: 10px 14px; 
-            border-radius: 18px; 
-            word-wrap: break-word;
-            text-align: left; 
-            box-shadow: 0 1px 2px var(--shadow-primary);
-            color: var(--text-on-accent);
-        }
-
-        .message.sent .message-bubble {
-            background: var(--bg-bubble-sent);
-            border-bottom-right-radius: 6px;
-        }
-
-        .message.received .message-bubble {
-            background: var(--bg-bubble-received);
-            color: var(--text-primary);
-            border-bottom-left-radius: 6px;
-        }
-        
-        .message-timestamp {
-            font-size: 0.7em;
-            color: var(--text-tertiary);
-            margin: 0 4px 2px 4px; /* Bottom margin to align with bubble base */
-            white-space: nowrap;
-            display: none; /* Initially hidden */
-        }
-        .message:hover .message-timestamp {
-            display: block; /* Show on hover */
-        }
-        
-        .input-area {
-            padding: 12px 15px; 
-            background: var(--bg-input-area);
-            border-top: 1px solid var(--border-secondary);
-            flex-shrink: 0; 
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-
-        .input-container {
-            display: flex;
-            gap: 10px; 
-            align-items: flex-end; 
-        }
-
-        .message-input {
-            flex: 1;
-            border: 1px solid var(--border-primary); 
-            background: var(--bg-messages);
-            color: var(--text-primary);
-            border-radius: 22px; 
-            padding: 12px 18px;
-            resize: none;
-            outline: none;
-            font-family: inherit;
-            font-size: 1em; 
-            min-height: 46px; 
-            max-height: 120px;
-            transition: all 0.2s ease;
-            line-height: 1.5;
-        }
-
-        .message-input:focus {
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 15%, transparent);
-        }
-        
-        .send-btn {
-            background: var(--accent-primary);
-            color: var(--text-on-accent);
-            font-size: 1.2em; 
-            width: 46px;  
-            height: 46px; 
-            padding: 0; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%; 
-            box-shadow: 0 3px 10px var(--shadow-primary);
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .send-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-primary) 25%, transparent);
-        }
-
-        .scroll-to-bottom-btn {
-            position: absolute;
-            bottom: 80px; /* Position above input area */
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background-color: var(--bg-container);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-secondary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            cursor: pointer;
-            box-shadow: 0 4px 10px var(--shadow-primary);
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            visibility: hidden;
-        }
-        .scroll-to-bottom-btn.visible {
-            opacity: 1;
-            transform: translateY(0);
-            visibility: visible;
-        }
+        .message-bubble { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; text-align: left; box-shadow: 0 1px 2px var(--shadow-primary); color: var(--text-on-accent); }
+        .message.sent .message-bubble { background: var(--bg-bubble-sent); border-bottom-right-radius: 6px; }
+        .message.received .message-bubble { background: var(--bg-bubble-received); color: var(--text-primary); border-bottom-left-radius: 6px; }
+        .message-timestamp { font-size: 0.7em; color: var(--text-tertiary); margin: 0 4px 2px 4px; white-space: nowrap; display: none; }
+        .message:hover .message-timestamp { display: block; }
+        .input-area { padding: 12px 15px; background: var(--bg-input-area); border-top: 1px solid var(--border-secondary); flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .input-container { display: flex; gap: 10px; align-items: flex-end; }
+        .message-input { flex: 1; border: 1px solid var(--border-primary); background: var(--bg-messages); color: var(--text-primary); border-radius: 22px; padding: 12px 18px; resize: none; outline: none; font-family: inherit; font-size: 1em; min-height: 46px; max-height: 120px; transition: all 0.2s ease; line-height: 1.5; }
+        .message-input:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 15%, transparent); }
+        .send-btn { background: var(--accent-primary); color: var(--text-on-accent); font-size: 1.2em; width: 46px; height: 46px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 3px 10px var(--shadow-primary); border: none; cursor: pointer; transition: all 0.2s ease; }
+        .send-btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-primary) 25%, transparent); }
+        .scroll-to-bottom-btn { position: absolute; bottom: 80px; right: 20px; width: 40px; height: 40px; background-color: var(--bg-container); color: var(--text-secondary); border: 1px solid var(--border-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 10px var(--shadow-primary); opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease; visibility: hidden; }
+        .scroll-to-bottom-btn.visible { opacity: 1; transform: translateY(0); visibility: visible; }
     </style>
 </head>
 <body>
@@ -367,8 +112,14 @@
         <div class="chat-container">
             <div class="chat-header">
                 <div class="chat-header-info">
-                    <h2 id="chatHeaderTitle">Your Chat</h2>
-                    <div id="chatDetails" class="chat-details">with <strong id="participantName"></strong></div>
+                    <h2 id="chatHeaderTitle">Chat with [Friend]</h2>
+                    <div class="chat-details">
+                        <span class="chat-code-display">Code: <strong id="displayChatCode"></strong></span>
+                        <span class="online-status-display">
+                            <span class="status-indicator"></span>
+                            <span id="onlineCount">1</span> Online
+                        </span>
+                    </div>
                 </div>
                 <div class="chat-header-actions">
                     <button id="themeToggle" class="icon-button" aria-label="Toggle Theme" title="Toggle Theme">🌙</button>
@@ -376,221 +127,61 @@
                 </div>
             </div>
             
-            <div class="messages" id="messagesContainer">
-                </div>
-            
+            <div class="messages" id="messagesContainer"></div>
             <button id="scrollToBottomBtn" class="scroll-to-bottom-btn" aria-label="Scroll to Bottom" title="Scroll to Bottom">↓</button>
-
             <div class="input-area">
                 <div class="input-container">
-                    <textarea 
-                        id="messageInput" 
-                        class="message-input" 
-                        placeholder="Type a message..."
-                        rows="1"
-                    ></textarea>
-                    <button class="send-btn" onclick="sendMessage()" aria-label="Send Message" title="Send Message">
-                        ➤
-                    </button>
+                    <textarea id="messageInput" class="message-input" placeholder="Type a message..." rows="1"></textarea>
+                    <button class="send-btn" onclick="sendMessage()" aria-label="Send Message" title="Send Message">➤</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // NOTE: The rest of the JavaScript is identical to the previous version.
+        // I will only show the changed parts for brevity. The full script from the
+        // last response should be used, with the following modifications in showChatScreen.
+        
         class ShhhChatApp {
             constructor() {
-                this.myNickname = null;
-                this.chatCode = null;
-                this.messagesStore = [];
-                this.participants = [];
-                
-                // Sound for sent messages
-                this.sentMessageSound = new Audio("data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSUNSAAAACgAAADU4MjY1ODEwTEFYAAABXgL/GgSubscriptionPricesLastSuccessMainstreamServicePremiumEnabledLastKnownPremiumEnabledDateLastKnownSubscriptionPricesLastSuccessMainstreamServicePremiumEnabledLastKnownPremiumEnabledDate");
-
-                // DOM Caching
-                this.loginScreenEl = document.getElementById('loginScreen');
-                this.chatScreenEl = document.getElementById('chatScreen');
-                this.userNameInputEl = document.getElementById('userNameInput');
-                this.chatCodeInputEl = document.getElementById('chatCodeInput');
-                this.startJoinButtonEl = document.getElementById('startJoinButton');
-                
-                this.chatHeaderTitleEl = document.getElementById('chatHeaderTitle');
-                this.participantNameEl = document.getElementById('participantName');
-                this.messagesContainerEl = document.getElementById('messagesContainer');
-                this.messageInputEl = document.getElementById('messageInput');
-                this.endChatButtonEl = document.getElementById('endChatButton');
-                this.themeToggleEl = document.getElementById('themeToggle');
-                this.scrollToBottomBtnEl = document.getElementById('scrollToBottomBtn');
-
-                this.initTheme();
-                this.showLoginScreen();
-                this.setupGlobalEventListeners();
-            }
-            
-            initTheme() {
-                const savedTheme = localStorage.getItem('shhhChatTheme');
-                if (savedTheme === 'dark') {
-                    document.body.classList.add('dark-mode');
-                    this.themeToggleEl.textContent = '☀️';
-                } else {
-                    document.body.classList.remove('dark-mode');
-                    this.themeToggleEl.textContent = '🌙';
-                }
+                // ... (Same constructor as before) ...
+                this.displayChatCodeEl = document.getElementById('displayChatCode');
+                this.onlineCountEl = document.getElementById('onlineCount');
             }
 
-            toggleTheme() {
-                document.body.classList.toggle('dark-mode');
-                if (document.body.classList.contains('dark-mode')) {
-                    localStorage.setItem('shhhChatTheme', 'dark');
-                    this.themeToggleEl.textContent = '☀️';
-                } else {
-                    localStorage.setItem('shhhChatTheme', 'light');
-                    this.themeToggleEl.textContent = '🌙';
-                }
-            }
-            
-            setupGlobalEventListeners() {
-                this.startJoinButtonEl.addEventListener('click', () => this.handleStartJoin());
-                this.themeToggleEl.addEventListener('click', () => this.toggleTheme());
-                
-                this.messagesContainerEl.addEventListener('scroll', () => {
-                    const threshold = 100; // Pixels from the bottom
-                    const isScrolledToBottom = this.messagesContainerEl.scrollHeight - this.messagesContainerEl.scrollTop - this.messagesContainerEl.clientHeight < threshold;
-                    if (isScrolledToBottom) {
-                        this.scrollToBottomBtnEl.classList.remove('visible');
-                    } else {
-                        this.scrollToBottomBtnEl.classList.add('visible');
-                    }
-                });
-                
-                this.scrollToBottomBtnEl.addEventListener('click', () => {
-                    this.messagesContainerEl.scrollTo({ top: this.messagesContainerEl.scrollHeight, behavior: 'smooth' });
-                });
-            }
-            
-            showLoginScreen() {
-                this.loginScreenEl.style.display = 'flex'; 
-                this.chatScreenEl.style.display = 'none';
-                
-                this.userNameInputEl.value = '';
-                this.chatCodeInputEl.value = '';
-                this.messagesStore = [];
-                this.myNickname = null;
-            }
+            // ... (All other methods are the same until showChatScreen) ...
 
             showChatScreen() {
                 this.loginScreenEl.style.display = 'none';
                 this.chatScreenEl.style.display = 'block'; 
 
-                // Simulate participants for UI
-                const otherParticipant = this.isHost ? "Your Friend" : "Chat Host";
-                this.chatHeaderTitleEl.textContent = `Chat with ${otherParticipant}`;
-                this.participantNameEl.textContent = this.myNickname;
+                // --- MODIFICATIONS START HERE ---
+                const otherParticipantName = this.isHost ? "Your Friend" : "Chat Host";
+                const onlineCount = this.isHost ? 1 : 2; // Simulate 2 people if joining
+
+                this.chatHeaderTitleEl.textContent = `Chat with ${otherParticipantName}`;
+                this.displayChatCodeEl.textContent = this.chatCode;
+                this.onlineCountEl.textContent = onlineCount;
+                // --- MODIFICATIONS END HERE ---
 
                 this.messagesContainerEl.innerHTML = ''; 
                 const initialMessageDiv = document.createElement('div');
-                initialMessageDiv.className = 'connection-info';
-                initialMessageDiv.innerHTML = `<p>✨ This is the beginning of your private chat. Messages are only stored for this session.</p>`;
+                initialMessageDiv.className = 'connection-info'; // You can keep or remove this class
+                initialMessageDiv.style.cssText = 'text-align:center; padding:15px; color:var(--text-secondary); font-size:0.9em;';
+                initialMessageDiv.innerHTML = `<p>🤫 This is the beginning of your private chat with code <strong>${this.chatCode}</strong>. Messages are not saved.</p>`;
                 this.messagesContainerEl.appendChild(initialMessageDiv);
                 
                 this.messageInputEl.focus(); 
             }
 
-            handleStartJoin() {
-                const nickname = this.userNameInputEl.value.trim();
-                const codeToJoin = this.chatCodeInputEl.value.trim().toUpperCase();
-
-                if (!nickname) {
-                    alert('Please enter your Name.');
-                    return;
-                }
-                this.myNickname = nickname;
-                this.isHost = !codeToJoin;
-                this.chatCode = codeToJoin || Math.random().toString(36).substring(2, 8).toUpperCase();
-                
-                this.showChatScreen();
-            }
-
-            sendMessageInternal() { 
-                const text = this.messageInputEl.value.trim();
-                if (!text) return;
-
-                this.addMessageToChat({
-                    content: text,
-                    type: 'text',
-                    isSent: true,
-                    sender: this.myNickname,
-                    timestamp: new Date()
-                });
-
-                this.messageInputEl.value = '';
-                this.messageInputEl.style.height = 'auto';
-            }
-
-            addMessageToChat(message) {
-                // Clear initial info message on first real message
-                if (this.messagesStore.length === 0) {
-                    this.messagesContainerEl.innerHTML = '';
-                }
-
-                const lastMessage = this.messagesStore[this.messagesStore.length - 1];
-                const isGrouped = lastMessage && lastMessage.sender === message.sender;
-
-                // Remove grouping class from previous message if it exists
-                const lastMessageEl = this.messagesContainerEl.lastElementChild;
-                if (lastMessageEl) {
-                    lastMessageEl.classList.remove('message-group-end');
-                }
-
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${message.isSent ? 'sent' : 'received'} message-group-end`;
-                if (isGrouped) {
-                    messageDiv.style.marginTop = '4px';
-                }
-
-                const contentWrapper = document.createElement('div');
-                contentWrapper.className = 'message-content-wrapper';
-
-                const bubbleDiv = document.createElement('div');
-                bubbleDiv.className = 'message-bubble';
-                bubbleDiv.textContent = message.content;
-                
-                const timestampSpan = document.createElement('span');
-                timestampSpan.className = 'message-timestamp';
-                timestampSpan.textContent = message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                contentWrapper.appendChild(bubbleDiv);
-                contentWrapper.appendChild(timestampSpan);
-                messageDiv.appendChild(contentWrapper);
-                this.messagesContainerEl.appendChild(messageDiv);
-                
-                this.messagesContainerEl.scrollTo({ top: this.messagesContainerEl.scrollHeight, behavior: 'smooth' });
-                
-                if (message.isSent) {
-                    this.sentMessageSound.play().catch(e => console.error("Sound play failed:", e));
-                }
-
-                this.messagesStore.push(message);
-            }
-
-            handleEndChat() {
-                this.showLoginScreen();
-            }
+            // ... (Rest of the script is the same) ...
         }
 
-        let chatApp;
-        document.addEventListener('DOMContentLoaded', () => {
-            // Unbind listeners from constructor to avoid calling before DOM ready
-            chatApp = new ShhhChatApp();
-            chatApp.endChatButtonEl.onclick = () => chatApp.handleEndChat();
-            // other event listeners that rely on chatApp instance
-        });
-
-        // Global function for onclick attribute
-        function sendMessage() {
-            if (chatApp) chatApp.sendMessageInternal();
-        }
+        // The full JavaScript from the previous response should be placed here.
+        // This is just a diff to show the changes. For a working copy,
+        // take the last full script and apply these changes to the `constructor`
+        // and `showChatScreen` methods.
     </script>
 </body>
 </html>
