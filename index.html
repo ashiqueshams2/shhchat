@@ -19,7 +19,6 @@
             --bg-bubble-received: #e9ebee;
             --bg-button-hover: #f0f0f0;
             --bg-reply-bar: #f7f7f7;
-            --bg-emoji-picker: #ffffff;
 
             --text-primary: #050505;
             --text-secondary: #65676b;
@@ -45,7 +44,6 @@
             --bg-bubble-received: #3a3b3c;
             --bg-button-hover: #4a4a4c;
             --bg-reply-bar: #2e2f30;
-            --bg-emoji-picker: #2d2d2d;
 
             --text-primary: #e4e6eb;
             --text-secondary: #b0b3b8;
@@ -86,11 +84,10 @@
         .icon-button { background: transparent; border: none; color: var(--text-secondary); font-size: 1.4em; cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease; }
         .icon-button:hover { background-color: var(--bg-button-hover); }
 
-        .messages { flex-grow: 1; padding: 15px; overflow-y: auto; background: var(--bg-messages); transition: background-color 0.3s ease; }
+        .messages { flex-grow: 1; padding: 15px; overflow-y: auto; background: var(--bg-messages); transition: background-color 0.3s ease; display: flex; flex-direction: column; }
         .message { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; }
         .message.sent { align-items: flex-end; }
         .message.received { align-items: flex-start; }
-        .message:hover .message-actions { opacity: 1; }
         
         .sender-name { font-size: 0.8em; font-weight: 500; color: var(--text-secondary); margin-left: 15px; margin-bottom: 4px; }
         .message-content-wrapper { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
@@ -107,10 +104,7 @@
         .message-timestamp { font-size: 0.7em; color: var(--text-tertiary); white-space: nowrap; }
         .read-receipt { font-size: 0.7em; color: var(--accent-primary); font-weight: 600; }
         
-        .message-actions { position: absolute; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s; }
-        .message.sent .message-actions { right: 100%; margin-right: 5px; }
-        .message.received .message-actions { left: 100%; margin-left: 5px; }
-        .message-actions .icon-button { font-size: 1.1em; padding: 5px; }
+        .message-actions { display: none; }
 
         .system-message { text-align: center; color: var(--text-secondary); font-size: 0.85em; padding: 12px 0; font-style: italic; }
 
@@ -128,15 +122,11 @@
         .message-input { flex: 1; border: 1px solid var(--border-primary); background: var(--bg-messages); color: var(--text-primary); border-radius: 22px; padding: 12px 18px; resize: none; outline: none; font-family: inherit; font-size: 1em; max-height: 120px; transition: all 0.2s ease; line-height: 1.5; }
         .message-input:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 15%, transparent); }
         
-        .input-buttons { display: flex; align-items: center; gap: 5px; position: relative; }
+        .input-buttons { display: flex; align-items: center; gap: 5px; }
         .send-btn { background: var(--accent-primary); color: var(--text-on-accent); font-size: 1.2em; width: 46px; height: 46px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 3px 10px var(--shadow-primary); border: none; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
         .send-btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-primary) 25%, transparent); }
         .send-btn:disabled { background: var(--text-tertiary); cursor: not-allowed; transform: none; box-shadow: none; }
         
-        .emoji-picker { display: none; position: absolute; bottom: 55px; right: 0; background: var(--bg-emoji-picker); border: 1px solid var(--border-secondary); border-radius: 12px; box-shadow: 0 5px 15px var(--shadow-primary); width: 280px; height: 200px; padding: 10px; overflow-y: auto; z-index: 10; }
-        .emoji-picker button { background: none; border: none; font-size: 1.5em; padding: 5px; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
-        .emoji-picker button:hover { background-color: var(--bg-button-hover); }
-
         .scroll-to-bottom-btn { position: absolute; bottom: 90px; right: 20px; width: 40px; height: 40px; background-color: var(--bg-container); color: var(--text-secondary); border: 1px solid var(--border-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 10px var(--shadow-primary); opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease; visibility: hidden; }
         .scroll-to-bottom-btn.visible { opacity: 1; transform: translateY(0); visibility: visible; }
         .scroll-to-bottom-btn:hover { background-color: var(--bg-button-hover); }
@@ -161,7 +151,7 @@
                         <span class="chat-code-display">Code: <strong id="displayChatCode"></strong></span>
                         <span class="online-status-display">
                             <span class="status-indicator"></span>
-                            <span id="onlineCount">0</span>&nbsp;Online
+                            <span id="onlineCount">0</span> Online
                         </span>
                     </div>
                 </div>
@@ -178,7 +168,7 @@
                 <div class="reply-bar" id="replyBar">
                     <div class="reply-bar-content">
                         <div class="reply-bar-text" id="replyBarText"></div>
-                        <button class="close-reply-btn" id="closeReplyBtn" aria-label="Cancel Reply">&times;</button>
+                        <button class="close-reply-btn" id="closeReplyBtn" aria-label="Cancel Reply">×</button>
                     </div>
                 </div>
 
@@ -187,8 +177,6 @@
                 <div class="input-container">
                     <textarea id="messageInput" class="message-input" placeholder="Type a message..." rows="1"></textarea>
                     <div class="input-buttons">
-                        <button class="icon-button" id="emojiBtn" aria-label="Open Emojis" title="Open Emojis">😀</button>
-                        <div class="emoji-picker" id="emojiPicker"></div>
                         <button class="send-btn" id="sendBtn" aria-label="Send Message" title="Send Message">➤</button>
                     </div>
                 </div>
@@ -201,19 +189,19 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { 
             getDatabase, ref, set, push, get, 
-            onChildAdded, onChildRemoved, onValue, onChildChanged, // FIX: Added onChildChanged for performance
-            remove, update, serverTimestamp, query, onDisconnect // FIX: Added onDisconnect for presence
+            onChildAdded, onChildRemoved, onValue, onChildChanged,
+            remove, update, serverTimestamp, query, onDisconnect
         } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-   // --- Firebase Configuration ---
+        // --- Firebase Configuration ---
         const firebaseConfig = {
-            apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200",
-            authDomain: "shh-chat-db9d0.firebaseapp.com",
-            databaseURL: "https://shh-chat-db9d0-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "shh-chat-db9d0",
-            storageBucket: "shh-chat-db9d0.appspot.com",
-            messagingSenderId: "20040883450",
-            appId: "1:20040883450:web:833660405c634b2aaffd43"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
         
         // --- DOM Element Declarations ---
@@ -234,8 +222,6 @@
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
 
-        const emojiBtn = document.getElementById('emojiBtn');
-        const emojiPicker = document.getElementById('emojiPicker');
         const replyBar = document.getElementById('replyBar');
         const replyBarText = document.getElementById('replyBarText');
         const closeReplyBtn = document.getElementById('closeReplyBtn');
@@ -278,7 +264,6 @@
         };
 
         // --- Core Chat Functions ---
-        // FIX: Rewrote function to correctly handle user presence with onDisconnect.
         async function createOrJoinRoom(roomCode, userName) {
             if (!database) { alert("Database not initialized."); return null; }
             
@@ -296,12 +281,9 @@
                     await set(roomRef, { createdAt: serverTimestamp() });
                 }
                 
-                // Set up robust onDisconnect hooks. These tell the Firebase server
-                // to remove the user's data if the connection is lost.
                 await onDisconnect(userRef).remove();
                 await onDisconnect(typingRef).remove();
 
-                // Once disconnect hooks are set, mark the user as online.
                 await set(userRef, { name: userName, joinedAt: serverTimestamp() });
 
                 chatData.currentRoom = effectiveRoomCode;
@@ -370,11 +352,9 @@
             const typingRef = ref(database, `rooms/${currentRoomCode}/typing/${leavingUserId}`);
             
             try {
-                // Cancel the onDisconnect hooks since this is a clean exit.
                 await onDisconnect(userRef).cancel();
                 await onDisconnect(typingRef).cancel();
 
-                // Manually remove user and typing status.
                 await remove(userRef);
                 await remove(typingRef);
                 
@@ -443,9 +423,6 @@
                         <span class="message-timestamp">${formatTime(message.timestamp)}</span>
                         ${readReceiptHTML}
                     </div>
-                    <div class="message-actions">
-                        <button class="icon-button reply-btn" title="Reply">↩️</button>
-                    </div>
                 `;
 
                 if (!isSent) {
@@ -460,7 +437,7 @@
             }
             messagesContainer.appendChild(div);
 
-            if (wasScrolledToBottom) {
+            if (wasScrolledToBottom || message.userId === chatData.currentUser.id) {
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
         }
@@ -543,8 +520,6 @@
             });
             chatData.messageListeners.push(unsubRemoved);
             
-            // FIX: Replaced inefficient onValue listener with performant onChildChanged.
-            // This now only fires for the message that was updated (e.g., seen).
             const unsubChanged = onChildChanged(messagesQuery, (snapshot) => {
                  const message = snapshot.val();
                  const messageId = snapshot.key;
@@ -565,30 +540,36 @@
         function updateOnlineCount() {
             const usersRef = ref(database, `rooms/${chatData.currentRoom}/users`);
             const unsub = onValue(usersRef, (snapshot) => {
-                onlineCount.textContent = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+                const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+                onlineCount.textContent = count;
+                console.log(`Online count updated to: ${count}`); // Debug log
             });
             chatData.messageListeners.push(unsub);
         }
         
-        function populateEmojiPicker() {
-            const emojis = ['😀', '😂', '😍', '🤔', '👍', '❤️', '🎉', '🔥', '💯', '🙏', '😢', '😠'];
-            emojiPicker.innerHTML = ''; // Clear existing emojis before populating
-            emojis.forEach(emoji => {
-                const btn = document.createElement('button');
-                btn.textContent = emoji;
-                btn.onclick = () => {
-                    messageInput.value += emoji;
-                    messageInput.focus();
-                };
-                emojiPicker.appendChild(btn);
-            });
+        // --- Swipe-to-Reply ---
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        messagesContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        messagesContainer.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe(e);
+        });
+
+        function handleSwipe(e) {
+            const diffX = touchEndX - touchStartX;
+            const messageElement = e.target.closest('.message');
+            if (messageElement && Math.abs(diffX) > 50) { // Threshold for swipe
+                if (diffX < 0) { // Swipe left to reply
+                    startReply(messageElement);
+                }
+            }
         }
         
-        function toggleEmojiPicker() {
-            const isVisible = emojiPicker.style.display === 'block';
-            emojiPicker.style.display = isVisible ? 'none' : 'block';
-        }
-
         function handleJoinClick() {
             const userName = userNameInput.value.trim();
             const roomCode = chatCodeInput.value.trim().toUpperCase();
@@ -641,17 +622,8 @@
                 leaveRoom();
             }
         });
-        
-        emojiBtn.addEventListener('click', toggleEmojiPicker);
-        closeReplyBtn.addEventListener('click', cancelReply);
-        messagesContainer.addEventListener('click', (e) => {
-            const replyButton = e.target.closest('.reply-btn');
-            if (replyButton) {
-                const messageElement = e.target.closest('.message');
-                startReply(messageElement);
-            }
-        });
 
+        closeReplyBtn.addEventListener('click', cancelReply);
         messagesContainer.addEventListener('scroll', () => {
             const isScrolledUp = messagesContainer.scrollHeight - messagesContainer.clientHeight - messagesContainer.scrollTop > 150;
             scrollToBottomBtn.classList.toggle('visible', isScrolledUp);
@@ -668,9 +640,6 @@
         
         window.addEventListener('resize', setViewportHeight);
         
-        // FIX: Removed the unreliable 'beforeunload' event listener. 
-        // Firebase onDisconnect is now the source of truth for presence.
-
         // --- Initial Load ---
         (function init() {
             setViewportHeight();
@@ -679,10 +648,8 @@
                 document.body.classList.add('dark-mode');
                 themeToggle.textContent = '☀️';
             }
-            populateEmojiPicker();
             userNameInput.focus();
         })();
-
     </script>
 </body>
 </html>
