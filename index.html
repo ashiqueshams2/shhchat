@@ -116,14 +116,12 @@
 
         .input-area { padding: 12px 15px; background: var(--bg-input-area); border-top: 1px solid var(--border-secondary); flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease; position: sticky; bottom: 0; z-index: 2; }
         
-        /* New: Reply Bar Styling */
         .reply-bar { display: none; padding: 8px 15px; background-color: var(--bg-reply-bar); border-bottom: 1px solid var(--border-reply); font-size: 0.9em; color: var(--text-secondary); }
         .reply-bar-content { display: flex; justify-content: space-between; align-items: center; }
         .reply-bar-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .reply-bar-text strong { color: var(--text-primary); }
         .close-reply-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--text-secondary); padding: 0 5px;}
 
-        /* New: Typing Indicator Styling */
         .typing-indicator { font-size: 0.8em; color: var(--text-secondary); height: 20px; padding: 0 15px 4px; font-style: italic; }
 
         .input-container { display: flex; gap: 10px; align-items: flex-end; }
@@ -135,7 +133,6 @@
         .send-btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-primary) 25%, transparent); }
         .send-btn:disabled { background: var(--text-tertiary); cursor: not-allowed; transform: none; box-shadow: none; }
         
-        /* New: Emoji Picker Styling */
         .emoji-picker { display: none; position: absolute; bottom: 55px; right: 0; background: var(--bg-emoji-picker); border: 1px solid var(--border-secondary); border-radius: 12px; box-shadow: 0 5px 15px var(--shadow-primary); width: 280px; height: 200px; padding: 10px; overflow-y: auto; z-index: 10; }
         .emoji-picker button { background: none; border: none; font-size: 1.5em; padding: 5px; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
         .emoji-picker button:hover { background-color: var(--bg-button-hover); }
@@ -204,11 +201,11 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { 
             getDatabase, ref, set, push, get, 
-            onChildAdded, onChildRemoved, onValue, 
-            remove, update, serverTimestamp, query 
+            onChildAdded, onChildRemoved, onValue, onChildChanged, // FIX: Added onChildChanged for performance
+            remove, update, serverTimestamp, query, onDisconnect // FIX: Added onDisconnect for presence
         } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-        // --- Firebase Configuration ---
+   // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200",
             authDomain: "shh-chat-db9d0.firebaseapp.com",
@@ -237,7 +234,6 @@
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
 
-        // New DOM elements for features
         const emojiBtn = document.getElementById('emojiBtn');
         const emojiPicker = document.getElementById('emojiPicker');
         const replyBar = document.getElementById('replyBar');
@@ -252,8 +248,8 @@
             currentUser: null,
             currentRoom: null,
             messageListeners: [],
-            replyTo: null, // New: To store reply context
-            typingTimeout: null // New: For typing indicator
+            replyTo: null,
+            typingTimeout: null
         };
 
         // --- Firebase Initialization ---
@@ -282,6 +278,7 @@
         };
 
         // --- Core Chat Functions ---
+        // FIX: Rewrote function to correctly handle user presence with onDisconnect.
         async function createOrJoinRoom(roomCode, userName) {
             if (!database) { alert("Database not initialized."); return null; }
             
@@ -291,8 +288,7 @@
 
             const roomRef = ref(database, `rooms/${effectiveRoomCode}`);
             const userRef = ref(database, `rooms/${effectiveRoomCode}/users/${userId}`);
-            const presenceRef = ref(database, `.info/connected`); // For presence
-            const typingRef = ref(database, `rooms/${effectiveRoomCode}/typing/${userId}`); // For typing indicator
+            const typingRef = ref(database, `rooms/${effectiveRoomCode}/typing/${userId}`);
 
             try {
                 const roomSnapshot = await get(roomRef);
@@ -300,14 +296,13 @@
                     await set(roomRef, { createdAt: serverTimestamp() });
                 }
                 
-                // Set user data and handle disconnects
+                // Set up robust onDisconnect hooks. These tell the Firebase server
+                // to remove the user's data if the connection is lost.
+                await onDisconnect(userRef).remove();
+                await onDisconnect(typingRef).remove();
+
+                // Once disconnect hooks are set, mark the user as online.
                 await set(userRef, { name: userName, joinedAt: serverTimestamp() });
-                onValue(presenceRef, async (snap) => {
-                    if (snap.val() === true) {
-                        await remove(userRef).catch(()=>{}); // Clean up on disconnect
-                        await remove(typingRef).catch(()=>{}); // Clean up typing status on disconnect
-                    }
-                });
 
                 chatData.currentRoom = effectiveRoomCode;
                 await addSystemMessage(`${userName} joined the chat.`);
@@ -329,10 +324,9 @@
                 userId: chatData.currentUser.id,
                 userName: chatData.currentUser.name,
                 timestamp: serverTimestamp(),
-                seenBy: {} // New: For read receipts
+                seenBy: {}
             };
             
-            // Add reply context if it exists
             if (chatData.replyTo) {
                 message.replyTo = chatData.replyTo;
             }
@@ -341,9 +335,9 @@
                 const messagesRef = ref(database, `rooms/${chatData.currentRoom}/messages`);
                 await push(messagesRef, message);
                 messageInput.value = '';
-                messageInput.style.height = 'auto'; // Reset height
-                cancelReply(); // Clear reply context
-                updateTypingStatus(false); // User is no longer typing
+                messageInput.style.height = 'auto';
+                cancelReply();
+                updateTypingStatus(false);
             } catch (error) {
                 console.error("Error sending message:", error);
                 alert(`Error sending message: ${error.message}`);
@@ -369,7 +363,6 @@
             
             await addSystemMessage(`${leavingUserName} left the chat.`); 
 
-            // Stop all listeners before removing data
             chatData.messageListeners.forEach(unsubscribe => unsubscribe());
             chatData.messageListeners = [];
 
@@ -377,11 +370,14 @@
             const typingRef = ref(database, `rooms/${currentRoomCode}/typing/${leavingUserId}`);
             
             try {
-                // Remove user and their typing status
+                // Cancel the onDisconnect hooks since this is a clean exit.
+                await onDisconnect(userRef).cancel();
+                await onDisconnect(typingRef).cancel();
+
+                // Manually remove user and typing status.
                 await remove(userRef);
                 await remove(typingRef);
                 
-                // Check if room is empty to clean it up
                 const roomUsersRef = ref(database, `rooms/${currentRoomCode}/users`);
                 const usersSnapshot = await get(roomUsersRef);
                 if (!usersSnapshot.exists()) {
@@ -422,7 +418,6 @@
                 
                 let senderNameHTML = !isSent ? `<div class="sender-name">${escapeHtml(message.userName)}</div>` : '';
                 
-                // New: Render replied-to message quote
                 let quoteHTML = '';
                 if (message.replyTo) {
                     quoteHTML = `
@@ -433,7 +428,6 @@
                     `;
                 }
                 
-                // New: Show read receipt if message is sent and seen by others
                 const hasBeenSeen = !isSent || (message.seenBy && Object.keys(message.seenBy).length > 0);
                 const readReceiptHTML = isSent && hasBeenSeen ? `<span class="read-receipt">Seen</span>` : '';
 
@@ -454,12 +448,11 @@
                     </div>
                 `;
 
-                // New: Read Receipt Logic - mark as seen when it becomes visible
                 if (!isSent) {
                     const observer = new IntersectionObserver((entries) => {
                         if (entries[0].isIntersecting) {
                             markMessageAsRead(messageId);
-                            observer.disconnect(); // Only mark as read once
+                            observer.disconnect();
                         }
                     }, { threshold: 0.8 });
                     observer.observe(div);
@@ -472,15 +465,13 @@
             }
         }
 
-        // New: Reply feature functions
         function startReply(messageElement) {
             const messageId = messageElement.dataset.messageId;
             const originalBubble = messageElement.querySelector('.message-bubble');
             const senderName = messageElement.querySelector('.sender-name')?.textContent || 'You';
             
             if (!messageId || !originalBubble) return;
-
-            const originalText = originalBubble.textContent.trim();
+            const originalText = originalBubble.querySelector('.quote-text')?.textContent || originalBubble.textContent.trim();
             
             chatData.replyTo = {
                 id: messageId,
@@ -498,7 +489,6 @@
             replyBar.style.display = 'none';
         }
         
-        // New: Read Receipt function
         async function markMessageAsRead(messageId) {
             if (!chatData.currentRoom || !chatData.currentUser) return;
             const messageSeenRef = ref(database, `rooms/${chatData.currentRoom}/messages/${messageId}/seenBy/${chatData.currentUser.id}`);
@@ -509,7 +499,6 @@
             }
         }
 
-        // New: Typing indicator functions
         function updateTypingStatus(isTyping) {
             const typingRef = ref(database, `rooms/${chatData.currentRoom}/typing/${chatData.currentUser.id}`);
             if (isTyping) {
@@ -524,7 +513,6 @@
             const unsub = onValue(typingQuery, (snapshot) => {
                 const typers = [];
                 snapshot.forEach(childSnapshot => {
-                    // Don't show our own typing status
                     if (childSnapshot.key !== chatData.currentUser.id) {
                         typers.push(escapeHtml(childSnapshot.val()));
                     }
@@ -555,21 +543,21 @@
             });
             chatData.messageListeners.push(unsubRemoved);
             
-            // New: Listen for changes (e.g., read receipts)
-            const unsubChanged = onValue(messagesQuery, (snapshot) => {
-                 snapshot.forEach(childSnapshot => {
-                     const message = childSnapshot.val();
-                     const messageId = childSnapshot.key;
-                     const el = document.querySelector(`[data-message-id="${messageId}"]`);
-                     if (el && message.userId === chatData.currentUser.id) {
-                         const receiptEl = el.querySelector('.read-receipt');
-                         const hasBeenSeen = message.seenBy && Object.keys(message.seenBy).length > 0;
-                         if (hasBeenSeen && !receiptEl) {
-                             const metaEl = el.querySelector('.message-meta');
-                             metaEl.innerHTML += `<span class="read-receipt">Seen</span>`;
-                         }
+            // FIX: Replaced inefficient onValue listener with performant onChildChanged.
+            // This now only fires for the message that was updated (e.g., seen).
+            const unsubChanged = onChildChanged(messagesQuery, (snapshot) => {
+                 const message = snapshot.val();
+                 const messageId = snapshot.key;
+                 const el = document.querySelector(`[data-message-id="${messageId}"]`);
+
+                 if (el && message.userId === chatData.currentUser.id) {
+                     const receiptEl = el.querySelector('.read-receipt');
+                     const hasBeenSeen = message.seenBy && Object.keys(message.seenBy).length > 0;
+                     if (hasBeenSeen && !receiptEl) {
+                         const metaEl = el.querySelector('.message-meta');
+                         if(metaEl) metaEl.innerHTML += `<span class="read-receipt">Seen</span>`;
                      }
-                 });
+                 }
             });
             chatData.messageListeners.push(unsubChanged);
         }
@@ -582,9 +570,9 @@
             chatData.messageListeners.push(unsub);
         }
         
-        // New: Emoji Picker functions
         function populateEmojiPicker() {
             const emojis = ['😀', '😂', '😍', '🤔', '👍', '❤️', '🎉', '🔥', '💯', '🙏', '😢', '😠'];
+            emojiPicker.innerHTML = ''; // Clear existing emojis before populating
             emojis.forEach(emoji => {
                 const btn = document.createElement('button');
                 btn.textContent = emoji;
@@ -618,7 +606,7 @@
                     
                     listenForMessages();
                     updateOnlineCount();
-                    listenForTyping(); // New
+                    listenForTyping();
                 }
             }).finally(() => {
                 startJoinButton.disabled = false;
@@ -641,12 +629,11 @@
             messageInput.style.height = 'auto';
             messageInput.style.height = `${messageInput.scrollHeight}px`;
             
-            // Typing indicator logic
             if (chatData.typingTimeout) clearTimeout(chatData.typingTimeout);
             updateTypingStatus(true);
             chatData.typingTimeout = setTimeout(() => {
                 updateTypingStatus(false);
-            }, 2000); // Consider user stopped typing after 2 seconds
+            }, 2000);
         });
         
         endChatButton.addEventListener('click', () => {
@@ -655,7 +642,6 @@
             }
         });
         
-        // New event listeners for features
         emojiBtn.addEventListener('click', toggleEmojiPicker);
         closeReplyBtn.addEventListener('click', cancelReply);
         messagesContainer.addEventListener('click', (e) => {
@@ -681,15 +667,9 @@
         });
         
         window.addEventListener('resize', setViewportHeight);
-        window.addEventListener('beforeunload', () => {
-             // Try to clean up user data if they close the tab
-             if (chatData.currentUser && chatData.currentRoom) {
-                 const userRef = ref(database, `rooms/${chatData.currentRoom}/users/${chatData.currentUser.id}`);
-                 const typingRef = ref(database, `rooms/${chatData.currentRoom}/typing/${chatData.currentUser.id}`);
-                 remove(userRef);
-                 remove(typingRef);
-             }
-        });
+        
+        // FIX: Removed the unreliable 'beforeunload' event listener. 
+        // Firebase onDisconnect is now the source of truth for presence.
 
         // --- Initial Load ---
         (function init() {
@@ -699,7 +679,7 @@
                 document.body.classList.add('dark-mode');
                 themeToggle.textContent = '☀️';
             }
-            populateEmojiPicker(); // New
+            populateEmojiPicker();
             userNameInput.focus();
         })();
 
