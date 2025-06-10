@@ -55,7 +55,8 @@
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { height: 100vh; }
+        /* Use JS-calculated viewport height to avoid mobile browser UI issues */
+        html { height: calc(var(--vh, 1vh) * 100); }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-page); height: 100%; display: flex; justify-content: center; align-items: center; color: var(--text-primary); overflow: hidden; transition: background-color 0.3s ease; }
         
         .login-screen { background: var(--bg-container); padding: 35px 40px; border-radius: 24px; box-shadow: 0 20px 50px var(--shadow-primary); text-align: center; width: 90%; max-width: 400px; display: flex; flex-direction: column; align-items: center; transition: background-color 0.3s ease; }
@@ -67,7 +68,7 @@
         .login-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px color-mix(in srgb, var(--accent-primary) 30%, transparent); }
         .login-button:disabled { background: var(--text-tertiary); cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .chat-screen { display: none; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; }
+        .chat-screen { display: none; width: 100%; height: 100%; position: fixed; top: 0; left: 0; }
         .chat-container { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-container); position: relative; }
 
         .chat-header { background: var(--bg-header); color: var(--text-primary); padding: 12px 20px; flex-shrink: 0; border-bottom: 1px solid var(--border-secondary); display: flex; justify-content: space-between; align-items: center; transition: background-color 0.3s ease, border-color 0.3s ease; position: sticky; top: 0; z-index: 2; }
@@ -81,9 +82,19 @@
         .icon-button:hover { background-color: var(--bg-button-hover); }
 
         .messages { flex-grow: 1; padding: 15px; overflow-y: auto; background: var(--bg-messages); transition: background-color 0.3s ease; }
-        .message { display: flex; flex-direction: column; margin-bottom: 2px; }
+        .message { display: flex; flex-direction: column; margin-bottom: 12px; } /* Increased margin for group effect */
         .message.sent { align-items: flex-end; }
         .message.received { align-items: flex-start; }
+        
+        /* New style for the sender's name */
+        .sender-name {
+            font-size: 0.8em;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-left: 15px;
+            margin-bottom: 4px;
+        }
+
         .message-content-wrapper { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
         .message.sent .message-content-wrapper { flex-direction: row-reverse; }
         .message-bubble { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; line-height: 1.5; box-shadow: 0 1px 2px var(--shadow-primary); color: var(--text-on-accent); }
@@ -213,6 +224,11 @@
             div.textContent = text;
             return div.innerHTML;
         };
+        const setViewportHeight = () => {
+            // Fix for 100vh on mobile browsers
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
 
         // --- Core Chat Functions ---
         async function createOrJoinRoom(roomCode, userName) {
@@ -333,26 +349,31 @@
         function addMessageToDOM(message, messageId) {
             const wasScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 5;
             
+            const div = document.createElement('div');
+            div.dataset.messageId = messageId;
+
             if (message.type === 'system') {
-                const div = document.createElement('div');
                 div.className = 'system-message';
-                div.dataset.messageId = messageId;
                 div.textContent = escapeHtml(message.text);
-                messagesContainer.appendChild(div);
             } else {
                 const isSent = message.userId === chatData.currentUser.id;
-                const div = document.createElement('div');
                 div.className = `message ${isSent ? 'sent' : 'received'}`;
-                div.dataset.messageId = messageId;
+                
+                let senderNameHTML = '';
+                // Add sender's name only for received messages
+                if (!isSent) {
+                    senderNameHTML = `<div class="sender-name">${escapeHtml(message.userName)}</div>`;
+                }
                 
                 div.innerHTML = `
+                    ${senderNameHTML}
                     <div class="message-content-wrapper">
                         <div class="message-bubble">${escapeHtml(message.text)}</div>
                         <span class="message-timestamp">${formatTime(message.timestamp)}</span>
                     </div>
                 `;
-                messagesContainer.appendChild(div);
             }
+            messagesContainer.appendChild(div);
 
             if (wasScrolledToBottom) {
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -444,9 +465,13 @@
             themeToggle.textContent = isDark ? '☀️' : '🌙';
             localStorage.setItem('shhh-theme', isDark ? 'dark' : 'light');
         });
+        
+        // Viewport height listener
+        window.addEventListener('resize', setViewportHeight);
 
         // --- Initial Load ---
         (function init() {
+            setViewportHeight(); // Set initial height
             const savedTheme = localStorage.getItem('shhh-theme');
             if (savedTheme === 'dark') {
                 document.body.classList.add('dark-mode');
