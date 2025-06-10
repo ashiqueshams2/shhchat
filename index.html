@@ -18,6 +18,8 @@
             --bg-bubble-sent: linear-gradient(135deg, #0088cc, #006699);
             --bg-bubble-received: #e9ebee;
             --bg-button-hover: #f0f0f0;
+            --bg-reply-bar: #f7f7f7;
+            --bg-emoji-picker: #ffffff;
 
             --text-primary: #050505;
             --text-secondary: #65676b;
@@ -26,6 +28,7 @@
 
             --border-primary: #ced0d4;
             --border-secondary: #e0e0e0;
+            --border-reply: #dce0e4;
             --shadow-primary: rgba(0, 0, 0, 0.08);
             
             --accent-primary: #007bff;
@@ -41,6 +44,8 @@
             --bg-bubble-sent: linear-gradient(135deg, #4b88da, #3a6ab2);
             --bg-bubble-received: #3a3b3c;
             --bg-button-hover: #4a4a4c;
+            --bg-reply-bar: #2e2f30;
+            --bg-emoji-picker: #2d2d2d;
 
             --text-primary: #e4e6eb;
             --text-secondary: #b0b3b8;
@@ -48,6 +53,7 @@
             
             --border-primary: #3a3b3c;
             --border-secondary: #303132;
+            --border-reply: #3e4042;
             --shadow-primary: rgba(0, 0, 0, 0.4);
             
             --accent-primary: #4b88da;
@@ -55,7 +61,6 @@
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        /* Use JS-calculated viewport height to avoid mobile browser UI issues */
         html { height: calc(var(--vh, 1vh) * 100); }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-page); height: 100%; display: flex; justify-content: center; align-items: center; color: var(--text-primary); overflow: hidden; transition: background-color 0.3s ease; }
         
@@ -82,35 +87,58 @@
         .icon-button:hover { background-color: var(--bg-button-hover); }
 
         .messages { flex-grow: 1; padding: 15px; overflow-y: auto; background: var(--bg-messages); transition: background-color 0.3s ease; }
-        .message { display: flex; flex-direction: column; margin-bottom: 12px; } /* Increased margin for group effect */
+        .message { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; }
         .message.sent { align-items: flex-end; }
         .message.received { align-items: flex-start; }
+        .message:hover .message-actions { opacity: 1; }
         
-        /* New style for the sender's name */
-        .sender-name {
-            font-size: 0.8em;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-left: 15px;
-            margin-bottom: 4px;
-        }
-
+        .sender-name { font-size: 0.8em; font-weight: 500; color: var(--text-secondary); margin-left: 15px; margin-bottom: 4px; }
         .message-content-wrapper { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
         .message.sent .message-content-wrapper { flex-direction: row-reverse; }
         .message-bubble { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; line-height: 1.5; box-shadow: 0 1px 2px var(--shadow-primary); color: var(--text-on-accent); }
         .message.sent .message-bubble { background: var(--bg-bubble-sent); border-bottom-right-radius: 6px; }
         .message.received .message-bubble { background: var(--bg-bubble-received); color: var(--text-primary); border-bottom-left-radius: 6px; }
-        .message-timestamp { font-size: 0.7em; color: var(--text-tertiary); margin: 0 4px 2px 4px; white-space: nowrap; display: none; }
-        .message:hover .message-timestamp { display: block; }
+        
+        .message-quote { border-left: 3px solid var(--accent-primary); padding-left: 10px; margin-bottom: 8px; opacity: 0.8; font-size: 0.9em; }
+        .message-quote .quote-author { font-weight: 600; }
+        .message-quote .quote-text { white-space: pre-wrap; word-break: break-word; }
+
+        .message-meta { display: flex; align-items: center; gap: 6px; margin: 2px 4px 4px 4px; }
+        .message-timestamp { font-size: 0.7em; color: var(--text-tertiary); white-space: nowrap; }
+        .read-receipt { font-size: 0.7em; color: var(--accent-primary); font-weight: 600; }
+        
+        .message-actions { position: absolute; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s; }
+        .message.sent .message-actions { right: 100%; margin-right: 5px; }
+        .message.received .message-actions { left: 100%; margin-left: 5px; }
+        .message-actions .icon-button { font-size: 1.1em; padding: 5px; }
+
         .system-message { text-align: center; color: var(--text-secondary); font-size: 0.85em; padding: 12px 0; font-style: italic; }
 
         .input-area { padding: 12px 15px; background: var(--bg-input-area); border-top: 1px solid var(--border-secondary); flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease; position: sticky; bottom: 0; z-index: 2; }
+        
+        /* New: Reply Bar Styling */
+        .reply-bar { display: none; padding: 8px 15px; background-color: var(--bg-reply-bar); border-bottom: 1px solid var(--border-reply); font-size: 0.9em; color: var(--text-secondary); }
+        .reply-bar-content { display: flex; justify-content: space-between; align-items: center; }
+        .reply-bar-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .reply-bar-text strong { color: var(--text-primary); }
+        .close-reply-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--text-secondary); padding: 0 5px;}
+
+        /* New: Typing Indicator Styling */
+        .typing-indicator { font-size: 0.8em; color: var(--text-secondary); height: 20px; padding: 0 15px 4px; font-style: italic; }
+
         .input-container { display: flex; gap: 10px; align-items: flex-end; }
         .message-input { flex: 1; border: 1px solid var(--border-primary); background: var(--bg-messages); color: var(--text-primary); border-radius: 22px; padding: 12px 18px; resize: none; outline: none; font-family: inherit; font-size: 1em; max-height: 120px; transition: all 0.2s ease; line-height: 1.5; }
         .message-input:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 15%, transparent); }
+        
+        .input-buttons { display: flex; align-items: center; gap: 5px; position: relative; }
         .send-btn { background: var(--accent-primary); color: var(--text-on-accent); font-size: 1.2em; width: 46px; height: 46px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 3px 10px var(--shadow-primary); border: none; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
         .send-btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-primary) 25%, transparent); }
         .send-btn:disabled { background: var(--text-tertiary); cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        /* New: Emoji Picker Styling */
+        .emoji-picker { display: none; position: absolute; bottom: 55px; right: 0; background: var(--bg-emoji-picker); border: 1px solid var(--border-secondary); border-radius: 12px; box-shadow: 0 5px 15px var(--shadow-primary); width: 280px; height: 200px; padding: 10px; overflow-y: auto; z-index: 10; }
+        .emoji-picker button { background: none; border: none; font-size: 1.5em; padding: 5px; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
+        .emoji-picker button:hover { background-color: var(--bg-button-hover); }
 
         .scroll-to-bottom-btn { position: absolute; bottom: 90px; right: 20px; width: 40px; height: 40px; background-color: var(--bg-container); color: var(--text-secondary); border: 1px solid var(--border-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 10px var(--shadow-primary); opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease; visibility: hidden; }
         .scroll-to-bottom-btn.visible { opacity: 1; transform: translateY(0); visibility: visible; }
@@ -148,10 +176,24 @@
             
             <div class="messages" id="messagesContainer"></div>
             <button id="scrollToBottomBtn" class="scroll-to-bottom-btn" aria-label="Scroll to Bottom" title="Scroll to Bottom">↓</button>
+            
             <div class="input-area">
+                <div class="reply-bar" id="replyBar">
+                    <div class="reply-bar-content">
+                        <div class="reply-bar-text" id="replyBarText"></div>
+                        <button class="close-reply-btn" id="closeReplyBtn" aria-label="Cancel Reply">&times;</button>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator"></div>
+
                 <div class="input-container">
                     <textarea id="messageInput" class="message-input" placeholder="Type a message..." rows="1"></textarea>
-                    <button class="send-btn" id="sendBtn" aria-label="Send Message" title="Send Message">➤</button>
+                    <div class="input-buttons">
+                        <button class="icon-button" id="emojiBtn" aria-label="Open Emojis" title="Open Emojis">😀</button>
+                        <div class="emoji-picker" id="emojiPicker"></div>
+                        <button class="send-btn" id="sendBtn" aria-label="Send Message" title="Send Message">➤</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -194,6 +236,14 @@
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
+
+        // New DOM elements for features
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPicker = document.getElementById('emojiPicker');
+        const replyBar = document.getElementById('replyBar');
+        const replyBarText = document.getElementById('replyBarText');
+        const closeReplyBtn = document.getElementById('closeReplyBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
         
         // --- App State ---
         let app;
@@ -201,7 +251,9 @@
         const chatData = {
             currentUser: null,
             currentRoom: null,
-            messageListeners: [] 
+            messageListeners: [],
+            replyTo: null, // New: To store reply context
+            typingTimeout: null // New: For typing indicator
         };
 
         // --- Firebase Initialization ---
@@ -225,7 +277,6 @@
             return div.innerHTML;
         };
         const setViewportHeight = () => {
-            // Fix for 100vh on mobile browsers
             const vh = window.innerHeight * 0.01;
             document.documentElement.style.setProperty('--vh', `${vh}px`);
         };
@@ -240,13 +291,23 @@
 
             const roomRef = ref(database, `rooms/${effectiveRoomCode}`);
             const userRef = ref(database, `rooms/${effectiveRoomCode}/users/${userId}`);
+            const presenceRef = ref(database, `.info/connected`); // For presence
+            const typingRef = ref(database, `rooms/${effectiveRoomCode}/typing/${userId}`); // For typing indicator
 
             try {
                 const roomSnapshot = await get(roomRef);
                 if (!roomSnapshot.exists()) {
                     await set(roomRef, { createdAt: serverTimestamp() });
                 }
+                
+                // Set user data and handle disconnects
                 await set(userRef, { name: userName, joinedAt: serverTimestamp() });
+                onValue(presenceRef, async (snap) => {
+                    if (snap.val() === true) {
+                        await remove(userRef).catch(()=>{}); // Clean up on disconnect
+                        await remove(typingRef).catch(()=>{}); // Clean up typing status on disconnect
+                    }
+                });
 
                 chatData.currentRoom = effectiveRoomCode;
                 await addSystemMessage(`${userName} joined the chat.`);
@@ -267,14 +328,22 @@
                 text: text,
                 userId: chatData.currentUser.id,
                 userName: chatData.currentUser.name,
-                timestamp: serverTimestamp()
+                timestamp: serverTimestamp(),
+                seenBy: {} // New: For read receipts
             };
             
+            // Add reply context if it exists
+            if (chatData.replyTo) {
+                message.replyTo = chatData.replyTo;
+            }
+
             try {
                 const messagesRef = ref(database, `rooms/${chatData.currentRoom}/messages`);
                 await push(messagesRef, message);
                 messageInput.value = '';
-                messageInput.style.height = 'auto'; // Reset height after sending
+                messageInput.style.height = 'auto'; // Reset height
+                cancelReply(); // Clear reply context
+                updateTypingStatus(false); // User is no longer typing
             } catch (error) {
                 console.error("Error sending message:", error);
                 alert(`Error sending message: ${error.message}`);
@@ -295,36 +364,28 @@
         async function leaveRoom() {
             if (!chatData.currentRoom || !chatData.currentUser) return;
 
-            const leavingUserId = chatData.currentUser.id;
-            const leavingUserName = chatData.currentUser.name;
-            const currentRoomCode = chatData.currentRoom;
+            const { id: leavingUserId, name: leavingUserName } = chatData.currentUser;
+            const { currentRoom: currentRoomCode } = chatData;
             
             await addSystemMessage(`${leavingUserName} left the chat.`); 
 
-            const roomUsersRef = ref(database, `rooms/${currentRoomCode}/users`);
-            const currentUserInRoomRef = ref(database, `rooms/${currentRoomCode}/users/${leavingUserId}`);
+            // Stop all listeners before removing data
+            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
+            chatData.messageListeners = [];
+
+            const userRef = ref(database, `rooms/${currentRoomCode}/users/${leavingUserId}`);
+            const typingRef = ref(database, `rooms/${currentRoomCode}/typing/${leavingUserId}`);
             
             try {
-                await remove(currentUserInRoomRef);
+                // Remove user and their typing status
+                await remove(userRef);
+                await remove(typingRef);
+                
+                // Check if room is empty to clean it up
+                const roomUsersRef = ref(database, `rooms/${currentRoomCode}/users`);
                 const usersSnapshot = await get(roomUsersRef);
-                const isRoomEmpty = !usersSnapshot.exists();
-
-                if (isRoomEmpty) {
+                if (!usersSnapshot.exists()) {
                     await remove(ref(database, `rooms/${currentRoomCode}`));
-                } else {
-                    const messagesRef = ref(database, `rooms/${currentRoomCode}/messages`);
-                    const messagesSnapshot = await get(messagesRef);
-                    if (messagesSnapshot.exists()) {
-                        const updates = {};
-                        messagesSnapshot.forEach(childSnapshot => {
-                            if (childSnapshot.val().userId === leavingUserId) {
-                                updates[childSnapshot.key] = null;
-                            }
-                        });
-                        if (Object.keys(updates).length > 0) {
-                            await update(messagesRef, updates);
-                        }
-                    }
                 }
             } catch (error) {
                 console.error("Error during leave room cleanup:", error);
@@ -334,8 +395,7 @@
         }
 
         function resetUI() {
-            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-            Object.assign(chatData, { currentUser: null, currentRoom: null, messageListeners: [] });
+            Object.assign(chatData, { currentUser: null, currentRoom: null, replyTo: null });
             
             chatScreen.style.display = 'none';
             loginScreen.style.display = 'flex';
@@ -343,6 +403,7 @@
             chatCodeInput.value = '';
             messagesContainer.innerHTML = '';
             userNameInput.focus();
+            cancelReply();
         }
 
         // --- DOM Manipulation and Listeners ---
@@ -359,25 +420,125 @@
                 const isSent = message.userId === chatData.currentUser.id;
                 div.className = `message ${isSent ? 'sent' : 'received'}`;
                 
-                let senderNameHTML = '';
-                // Add sender's name only for received messages
-                if (!isSent) {
-                    senderNameHTML = `<div class="sender-name">${escapeHtml(message.userName)}</div>`;
+                let senderNameHTML = !isSent ? `<div class="sender-name">${escapeHtml(message.userName)}</div>` : '';
+                
+                // New: Render replied-to message quote
+                let quoteHTML = '';
+                if (message.replyTo) {
+                    quoteHTML = `
+                        <div class="message-quote">
+                            <div class="quote-author">${escapeHtml(message.replyTo.userName)}</div>
+                            <div class="quote-text">${escapeHtml(message.replyTo.text)}</div>
+                        </div>
+                    `;
                 }
                 
+                // New: Show read receipt if message is sent and seen by others
+                const hasBeenSeen = !isSent || (message.seenBy && Object.keys(message.seenBy).length > 0);
+                const readReceiptHTML = isSent && hasBeenSeen ? `<span class="read-receipt">Seen</span>` : '';
+
                 div.innerHTML = `
                     ${senderNameHTML}
                     <div class="message-content-wrapper">
-                        <div class="message-bubble">${escapeHtml(message.text)}</div>
+                         <div class="message-bubble">
+                            ${quoteHTML}
+                            ${escapeHtml(message.text)}
+                         </div>
+                    </div>
+                    <div class="message-meta">
                         <span class="message-timestamp">${formatTime(message.timestamp)}</span>
+                        ${readReceiptHTML}
+                    </div>
+                    <div class="message-actions">
+                        <button class="icon-button reply-btn" title="Reply">↩️</button>
                     </div>
                 `;
+
+                // New: Read Receipt Logic - mark as seen when it becomes visible
+                if (!isSent) {
+                    const observer = new IntersectionObserver((entries) => {
+                        if (entries[0].isIntersecting) {
+                            markMessageAsRead(messageId);
+                            observer.disconnect(); // Only mark as read once
+                        }
+                    }, { threshold: 0.8 });
+                    observer.observe(div);
+                }
             }
             messagesContainer.appendChild(div);
 
             if (wasScrolledToBottom) {
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
+        }
+
+        // New: Reply feature functions
+        function startReply(messageElement) {
+            const messageId = messageElement.dataset.messageId;
+            const originalBubble = messageElement.querySelector('.message-bubble');
+            const senderName = messageElement.querySelector('.sender-name')?.textContent || 'You';
+            
+            if (!messageId || !originalBubble) return;
+
+            const originalText = originalBubble.textContent.trim();
+            
+            chatData.replyTo = {
+                id: messageId,
+                userName: senderName,
+                text: originalText.substring(0, 50) + (originalText.length > 50 ? '...' : '')
+            };
+
+            replyBarText.innerHTML = `Replying to <strong>${escapeHtml(senderName)}</strong>: "${escapeHtml(chatData.replyTo.text)}"`;
+            replyBar.style.display = 'block';
+            messageInput.focus();
+        }
+
+        function cancelReply() {
+            chatData.replyTo = null;
+            replyBar.style.display = 'none';
+        }
+        
+        // New: Read Receipt function
+        async function markMessageAsRead(messageId) {
+            if (!chatData.currentRoom || !chatData.currentUser) return;
+            const messageSeenRef = ref(database, `rooms/${chatData.currentRoom}/messages/${messageId}/seenBy/${chatData.currentUser.id}`);
+            try {
+                await set(messageSeenRef, true);
+            } catch (error) {
+                console.error("Failed to mark message as read:", error);
+            }
+        }
+
+        // New: Typing indicator functions
+        function updateTypingStatus(isTyping) {
+            const typingRef = ref(database, `rooms/${chatData.currentRoom}/typing/${chatData.currentUser.id}`);
+            if (isTyping) {
+                set(typingRef, chatData.currentUser.name);
+            } else {
+                remove(typingRef);
+            }
+        }
+
+        function listenForTyping() {
+            const typingQuery = ref(database, `rooms/${chatData.currentRoom}/typing`);
+            const unsub = onValue(typingQuery, (snapshot) => {
+                const typers = [];
+                snapshot.forEach(childSnapshot => {
+                    // Don't show our own typing status
+                    if (childSnapshot.key !== chatData.currentUser.id) {
+                        typers.push(escapeHtml(childSnapshot.val()));
+                    }
+                });
+
+                if (typers.length === 0) {
+                    typingIndicator.textContent = '';
+                } else if (typers.length === 1) {
+                    typingIndicator.textContent = `${typers[0]} is typing...`;
+                } else {
+                    typingIndicator.textContent = `${typers.join(', ')} are typing...`;
+                }
+            });
+            chatData.messageListeners.push(unsub);
         }
         
         function listenForMessages() {
@@ -393,6 +554,24 @@
                 if (el) el.remove();
             });
             chatData.messageListeners.push(unsubRemoved);
+            
+            // New: Listen for changes (e.g., read receipts)
+            const unsubChanged = onValue(messagesQuery, (snapshot) => {
+                 snapshot.forEach(childSnapshot => {
+                     const message = childSnapshot.val();
+                     const messageId = childSnapshot.key;
+                     const el = document.querySelector(`[data-message-id="${messageId}"]`);
+                     if (el && message.userId === chatData.currentUser.id) {
+                         const receiptEl = el.querySelector('.read-receipt');
+                         const hasBeenSeen = message.seenBy && Object.keys(message.seenBy).length > 0;
+                         if (hasBeenSeen && !receiptEl) {
+                             const metaEl = el.querySelector('.message-meta');
+                             metaEl.innerHTML += `<span class="read-receipt">Seen</span>`;
+                         }
+                     }
+                 });
+            });
+            chatData.messageListeners.push(unsubChanged);
         }
 
         function updateOnlineCount() {
@@ -401,6 +580,25 @@
                 onlineCount.textContent = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
             });
             chatData.messageListeners.push(unsub);
+        }
+        
+        // New: Emoji Picker functions
+        function populateEmojiPicker() {
+            const emojis = ['😀', '😂', '😍', '🤔', '👍', '❤️', '🎉', '🔥', '💯', '🙏', '😢', '😠'];
+            emojis.forEach(emoji => {
+                const btn = document.createElement('button');
+                btn.textContent = emoji;
+                btn.onclick = () => {
+                    messageInput.value += emoji;
+                    messageInput.focus();
+                };
+                emojiPicker.appendChild(btn);
+            });
+        }
+        
+        function toggleEmojiPicker() {
+            const isVisible = emojiPicker.style.display === 'block';
+            emojiPicker.style.display = isVisible ? 'none' : 'block';
         }
 
         function handleJoinClick() {
@@ -420,6 +618,7 @@
                     
                     listenForMessages();
                     updateOnlineCount();
+                    listenForTyping(); // New
                 }
             }).finally(() => {
                 startJoinButton.disabled = false;
@@ -439,9 +638,15 @@
             }
         });
         messageInput.addEventListener('input', () => {
-             // Auto-resize textarea
             messageInput.style.height = 'auto';
             messageInput.style.height = `${messageInput.scrollHeight}px`;
+            
+            // Typing indicator logic
+            if (chatData.typingTimeout) clearTimeout(chatData.typingTimeout);
+            updateTypingStatus(true);
+            chatData.typingTimeout = setTimeout(() => {
+                updateTypingStatus(false);
+            }, 2000); // Consider user stopped typing after 2 seconds
         });
         
         endChatButton.addEventListener('click', () => {
@@ -449,8 +654,18 @@
                 leaveRoom();
             }
         });
+        
+        // New event listeners for features
+        emojiBtn.addEventListener('click', toggleEmojiPicker);
+        closeReplyBtn.addEventListener('click', cancelReply);
+        messagesContainer.addEventListener('click', (e) => {
+            const replyButton = e.target.closest('.reply-btn');
+            if (replyButton) {
+                const messageElement = e.target.closest('.message');
+                startReply(messageElement);
+            }
+        });
 
-        // Scroll to bottom button logic
         messagesContainer.addEventListener('scroll', () => {
             const isScrolledUp = messagesContainer.scrollHeight - messagesContainer.clientHeight - messagesContainer.scrollTop > 150;
             scrollToBottomBtn.classList.toggle('visible', isScrolledUp);
@@ -459,24 +674,32 @@
             messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: 'smooth' });
         });
         
-        // Theme toggle logic
         themeToggle.addEventListener('click', () => {
             const isDark = document.body.classList.toggle('dark-mode');
             themeToggle.textContent = isDark ? '☀️' : '🌙';
             localStorage.setItem('shhh-theme', isDark ? 'dark' : 'light');
         });
         
-        // Viewport height listener
         window.addEventListener('resize', setViewportHeight);
+        window.addEventListener('beforeunload', () => {
+             // Try to clean up user data if they close the tab
+             if (chatData.currentUser && chatData.currentRoom) {
+                 const userRef = ref(database, `rooms/${chatData.currentRoom}/users/${chatData.currentUser.id}`);
+                 const typingRef = ref(database, `rooms/${chatData.currentRoom}/typing/${chatData.currentUser.id}`);
+                 remove(userRef);
+                 remove(typingRef);
+             }
+        });
 
         // --- Initial Load ---
         (function init() {
-            setViewportHeight(); // Set initial height
+            setViewportHeight();
             const savedTheme = localStorage.getItem('shhh-theme');
             if (savedTheme === 'dark') {
                 document.body.classList.add('dark-mode');
                 themeToggle.textContent = '☀️';
             }
+            populateEmojiPicker(); // New
             userNameInput.focus();
         })();
 
