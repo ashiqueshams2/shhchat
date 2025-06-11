@@ -104,6 +104,119 @@
         .message:hover .message-timestamp { display: block; }
         .system-message { text-align: center; color: var(--text-secondary); font-size: 0.85em; padding: 12px 0; font-style: italic; }
 
+        /* --- NEW CSS FOR REPLY PREVIEW --- */
+        .reply-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-messages); /* Matches message area background */
+            padding: 6px 10px;
+            border-radius: 12px;
+            margin-bottom: 6px; /* Space between reply preview and message bubble */
+            max-width: 100%;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px var(--border-secondary); /* subtle border */
+        }
+        .message.sent .reply-preview {
+            margin-right: 15px; /* Align with sent bubble */
+        }
+        .message.received .reply-preview {
+            margin-left: 15px; /* Align with received bubble */
+        }
+
+        .reply-preview .reply-line {
+            width: 3px;
+            height: 100%;
+            background-color: var(--accent-primary);
+            border-radius: 1.5px;
+            flex-shrink: 0;
+        }
+
+        .reply-preview .reply-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .reply-preview .reply-content strong {
+            font-size: 0.8em;
+            color: var(--accent-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .reply-preview .reply-content span {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .reply-preview-container {
+            display: none; /* Hidden by default, shown by JS */
+            background: var(--bg-input-area);
+            padding: 8px 15px;
+            border-top: 1px solid var(--border-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .reply-preview-container .reply-line {
+            width: 4px;
+            height: 30px; /* Fixed height for input area preview */
+            background-color: var(--accent-primary);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .reply-preview-container .reply-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .reply-preview-container .reply-content strong {
+            font-size: 0.9em;
+            color: var(--accent-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .reply-preview-container .reply-content span {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .reply-preview-container .clear-reply-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+
+        .reply-preview-container .clear-reply-btn:hover {
+            background-color: var(--bg-button-hover);
+        }
+        /* --- END NEW CSS FOR REPLY PREVIEW --- */
+
+
         .input-area { padding: 12px 15px; background: var(--bg-input-area); border-top: 1px solid var(--border-secondary); flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease; position: sticky; bottom: 0; z-index: 2; }
         .input-container { display: flex; gap: 10px; align-items: flex-end; }
         .message-input { flex: 1; border: 1px solid var(--border-primary); background: var(--bg-messages); color: var(--text-primary); border-radius: 22px; padding: 12px 18px; resize: none; outline: none; font-family: inherit; font-size: 1em; max-height: 120px; transition: all 0.2s ease; line-height: 1.5; }
@@ -149,6 +262,14 @@
             <div class="messages" id="messagesContainer"></div>
             <button id="scrollToBottomBtn" class="scroll-to-bottom-btn" aria-label="Scroll to Bottom" title="Scroll to Bottom">↓</button>
             <div class="input-area">
+                <div id="replyPreviewContainer" class="reply-preview-container" style="display: none;">
+                    <div class="reply-line"></div>
+                    <div class="reply-content">
+                        <strong></strong>
+                        <span></span>
+                    </div>
+                    <button class="clear-reply-btn" aria-label="Clear Reply" title="Clear Reply">✕</button>
+                </div>
                 <div class="input-container">
                     <textarea id="messageInput" class="message-input" placeholder="Type a message..." rows="1"></textarea>
                     <button class="send-btn" id="sendBtn" aria-label="Send Message" title="Send Message">➤</button>
@@ -194,6 +315,13 @@
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
+
+        // NEW: Reply Preview DOM elements
+        const replyPreviewContainer = document.getElementById('replyPreviewContainer');
+        const clearReplyBtn = replyPreviewContainer.querySelector('.clear-reply-btn');
+        const replyPreviewSender = replyPreviewContainer.querySelector('.reply-content strong');
+        const replyPreviewText = replyPreviewContainer.querySelector('.reply-content span');
+        // END NEW
         
         // --- App State ---
         let app;
@@ -201,7 +329,8 @@
         const chatData = {
             currentUser: null,
             currentRoom: null,
-            messageListeners: [] 
+            messageListeners: [],
+            replyingToMessage: null // NEW: To store data of the message being replied to
         };
 
         // --- Firebase Initialization ---
@@ -229,6 +358,22 @@
             const vh = window.innerHeight * 0.01;
             document.documentElement.style.setProperty('--vh', `${vh}px`);
         };
+
+        // NEW: Functions for reply preview UI
+        function showReplyPreview(senderName, textPreview) {
+            replyPreviewSender.textContent = senderName;
+            replyPreviewText.textContent = textPreview;
+            replyPreviewContainer.style.display = 'flex';
+            messageInput.focus();
+        }
+
+        function hideReplyPreview() {
+            replyPreviewContainer.style.display = 'none';
+            replyPreviewSender.textContent = '';
+            replyPreviewText.textContent = '';
+            chatData.replyingToMessage = null;
+        }
+        // END NEW
 
         // --- Core Chat Functions ---
         async function createOrJoinRoom(roomCode, userName) {
@@ -270,14 +415,27 @@
                 timestamp: serverTimestamp()
             };
             
+            // NEW: Add replyTo data if replying
+            if (chatData.replyingToMessage) {
+                message.replyTo = {
+                    messageId: chatData.replyingToMessage.messageId,
+                    senderName: chatData.replyingToMessage.senderName,
+                    textPreview: chatData.replyingToMessage.textPreview
+                };
+                hideReplyPreview(); // Hide the reply UI after message is composed
+            }
+            // END NEW
+            
             try {
                 const messagesRef = ref(database, `rooms/${chatData.currentRoom}/messages`);
                 await push(messagesRef, message);
                 messageInput.value = '';
                 messageInput.style.height = 'auto'; // Reset height after sending
+                sendBtn.disabled = false; // Ensure button is re-enabled
             } catch (error) {
                 console.error("Error sending message:", error);
                 alert(`Error sending message: ${error.message}`);
+                sendBtn.disabled = false; // Re-enable on error
             }
         }
 
@@ -307,7 +465,7 @@
             try {
                 await remove(currentUserInRoomRef);
                 const usersSnapshot = await get(roomUsersRef);
-                const isRoomEmpty = !usersSnapshot.exists();
+                const isRoomEmpty = !usersSnapshot.exists() || Object.keys(usersSnapshot.val()).length === 0;
 
                 if (isRoomEmpty) {
                     await remove(ref(database, `rooms/${currentRoomCode}`));
@@ -335,8 +493,9 @@
 
         function resetUI() {
             chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-            Object.assign(chatData, { currentUser: null, currentRoom: null, messageListeners: [] });
-            
+            Object.assign(chatData, { currentUser: null, currentRoom: null, messageListeners: [], replyingToMessage: null }); // Reset replying state
+            hideReplyPreview(); // Ensure reply preview is hidden
+
             chatScreen.style.display = 'none';
             loginScreen.style.display = 'flex';
             
@@ -350,7 +509,7 @@
             const wasScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 5;
             
             const div = document.createElement('div');
-            div.dataset.messageId = messageId;
+            div.dataset.messageId = messageId; // Store message ID on the DOM element
 
             if (message.type === 'system') {
                 div.className = 'system-message';
@@ -360,13 +519,30 @@
                 div.className = `message ${isSent ? 'sent' : 'received'}`;
                 
                 let senderNameHTML = '';
-                // Add sender's name only for received messages
                 if (!isSent) {
                     senderNameHTML = `<div class="sender-name">${escapeHtml(message.userName)}</div>`;
                 }
                 
+                // NEW: Reply preview HTML within the message bubble
+                let replyPreviewHTML = '';
+                if (message.replyTo) {
+                    const originalSender = escapeHtml(message.replyTo.senderName);
+                    const originalText = escapeHtml(message.replyTo.textPreview);
+                    replyPreviewHTML = `
+                        <div class="reply-preview">
+                            <div class="reply-line"></div>
+                            <div class="reply-content">
+                                <strong>${originalSender}</strong>
+                                <span>${originalText}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                // END NEW
+                
                 div.innerHTML = `
                     ${senderNameHTML}
+                    ${replyPreviewHTML}
                     <div class="message-content-wrapper">
                         <div class="message-bubble">${escapeHtml(message.text)}</div>
                         <span class="message-timestamp">${formatTime(message.timestamp)}</span>
@@ -450,6 +626,8 @@
             }
         });
 
+        clearReplyBtn.addEventListener('click', hideReplyPreview); // NEW: Clear reply button listener
+
         // Scroll to bottom button logic
         messagesContainer.addEventListener('scroll', () => {
             const isScrolledUp = messagesContainer.scrollHeight - messagesContainer.clientHeight - messagesContainer.scrollTop > 150;
@@ -468,6 +646,122 @@
         
         // Viewport height listener
         window.addEventListener('resize', setViewportHeight);
+
+        // --- NEW: Swipe/Drag to Reply Logic ---
+        let startX = 0;
+        let currentMessageElement = null;
+        const replyThreshold = 60; // Pixels to drag to trigger reply
+
+        messagesContainer.addEventListener('mousedown', (e) => {
+            const messageBubble = e.target.closest('.message-bubble');
+            if (messageBubble) {
+                // Get the parent .message element which holds the messageId
+                currentMessageElement = messageBubble.closest('.message'); 
+                if (currentMessageElement && currentMessageElement.dataset.messageId) {
+                    startX = e.clientX;
+                    currentMessageElement.style.transition = 'none'; // Disable transition during drag
+                } else {
+                    currentMessageElement = null; // Not a valid message to swipe
+                }
+            }
+        });
+
+        messagesContainer.addEventListener('mousemove', (e) => {
+            if (currentMessageElement) {
+                const diffX = e.clientX - startX;
+                if (diffX > 0) { // Only allow dragging to the right
+                    currentMessageElement.style.transform = `translateX(${diffX}px)`;
+                }
+            }
+        });
+
+        messagesContainer.addEventListener('mouseup', (e) => {
+            if (currentMessageElement) {
+                const currentTransform = currentMessageElement.style.transform;
+                // Parse the translateX value
+                const matrix = new WebKitCSSMatrix(currentTransform);
+                const translatedX = matrix.m41; 
+
+                if (translatedX > replyThreshold) {
+                    // Trigger reply
+                    const messageId = currentMessageElement.dataset.messageId;
+                    const originalSenderName = currentMessageElement.querySelector('.sender-name')?.textContent || 'Someone'; // Fallback if name not found
+                    const messageTextElement = currentMessageElement.querySelector('.message-bubble');
+                    const originalTextPreview = messageTextElement ? (messageTextElement.textContent.substring(0, 50) + (messageTextElement.textContent.length > 50 ? '...' : '')) : '';
+
+                    chatData.replyingToMessage = {
+                        messageId: messageId,
+                        senderName: originalSenderName,
+                        textPreview: originalTextPreview
+                    };
+                    showReplyPreview(originalSenderName, originalTextPreview);
+                }
+
+                // Reset the element's position and re-enable transition
+                currentMessageElement.style.transition = 'transform 0.2s ease-out';
+                currentMessageElement.style.transform = 'translateX(0)';
+                currentMessageElement = null;
+            }
+        });
+
+        // Touch events for mobile
+        messagesContainer.addEventListener('touchstart', (e) => {
+            const messageBubble = e.target.closest('.message-bubble');
+            if (messageBubble) {
+                currentMessageElement = messageBubble.closest('.message');
+                if (currentMessageElement && currentMessageElement.dataset.messageId) {
+                    startX = e.touches[0].clientX;
+                    currentMessageElement.style.transition = 'none';
+                } else {
+                    currentMessageElement = null;
+                }
+            }
+        }, { passive: true }); // Use passive for better scroll performance
+
+        messagesContainer.addEventListener('touchmove', (e) => {
+            if (currentMessageElement) {
+                const diffX = e.touches[0].clientX - startX;
+                if (diffX > 0) { // Only allow dragging to the right
+                    currentMessageElement.style.transform = `translateX(${diffX}px)`;
+                }
+            }
+        }, { passive: true });
+
+        messagesContainer.addEventListener('touchend', (e) => {
+            if (currentMessageElement) {
+                const currentTransform = currentMessageElement.style.transform;
+                const matrix = new WebKitCSSMatrix(currentTransform);
+                const translatedX = matrix.m41;
+
+                if (translatedX > replyThreshold) {
+                    const messageId = currentMessageElement.dataset.messageId;
+                    const originalSenderName = currentMessageElement.querySelector('.sender-name')?.textContent || 'Someone';
+                    const messageTextElement = currentMessageElement.querySelector('.message-bubble');
+                    const originalTextPreview = messageTextElement ? (messageTextElement.textContent.substring(0, 50) + (messageTextElement.textContent.length > 50 ? '...' : '')) : '';
+
+                    chatData.replyingToMessage = {
+                        messageId: messageId,
+                        senderName: originalSenderName,
+                        textPreview: originalTextPreview
+                    };
+                    showReplyPreview(originalSenderName, originalTextPreview);
+                }
+
+                currentMessageElement.style.transition = 'transform 0.2s ease-out';
+                currentMessageElement.style.transform = 'translateX(0)';
+                currentMessageElement = null;
+            }
+        });
+
+        // Handle touchcancel to ensure element isn't stuck if touch is interrupted
+        messagesContainer.addEventListener('touchcancel', (e) => {
+            if (currentMessageElement) {
+                currentMessageElement.style.transition = 'transform 0.2s ease-out';
+                currentMessageElement.style.transform = 'translateX(0)';
+                currentMessageElement = null;
+            }
+        });
+        // --- END NEW: Swipe/Drag to Reply Logic ---
 
         // --- Initial Load ---
         (function init() {
