@@ -1,389 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Shh Chat 🤫</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Shh Chat 🤫</title>
 
-    <link rel="apple-touch-icon" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    <!-- Note: A manifest.json is typically required for true PWA "add to home screen" with background badges, 
-         but foreground notifications are handled below. -->
-    <!-- <link rel="manifest" href="manifest.json"> --> 
-    <meta name="theme-color" content="#1a73e8">
+  <link rel="apple-touch-icon" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
+  <meta name="theme-color" content="#1a73e8">
 
-    <style>
-       /* General Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', Arial, sans-serif;
-}
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', Arial, sans-serif; }
+    body { background-color: #f7f9fb; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1rem; }
 
-html {
-    height: 100%;
-    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape on iOS */
-    text-size-adjust: 100%;
-}
-
-body {
-    background-color: #f7f9fb;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 1rem;
-}
-
-/* Card Container */
-.chat-app {
-    width: 100%;
-    max-width: 420px;
-    background-color: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    min-height: 500px;
-    max-height: 90vh;
-    overflow: hidden;
-    position: relative;
-}
-
-/* Welcome Screen */
-.welcome-screen {
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-grow: 1;
-    text-align: center;
-}
-
-.welcome-screen h1 {
-    font-size: 2.2rem;
-    color: #1a73e8;
-    margin-bottom: 0.5rem;
-    font-weight: 800;
-}
-
-.welcome-screen p {
-    color: #6a737d;
-    margin-bottom: 1.5rem;
-}
-
-.input-group {
-    width: 100%;
-    margin-bottom: 1rem;
-    text-align: left;
-}
-
-.input-group label {
-    display: block;
-    font-size: 0.85rem;
-    color: #3b424d;
-    margin-bottom: 0.25rem;
-    font-weight: 600;
-}
-
-.text-input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    background-color: #f7f9fb;
-}
-
-.text-input:focus {
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
-    outline: none;
-    background-color: #ffffff;
-}
-
-.action-button {
-    width: 100%;
-    padding: 0.85rem;
-    background-color: #1a73e8;
-    color: white;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    margin-top: 0.5rem;
-    transition: background-color 0.3s, transform 0.1s;
-    box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
-}
-
-.action-button:hover {
-    background-color: #0f62d1;
-}
-
-.action-button:active {
-    transform: scale(0.98);
-}
-
-.error-message {
-    color: #e53e3e;
-    font-size: 0.875rem;
-    margin-top: 1rem;
-    font-weight: 500;
-}
-
-/* Chat Container */
-.chat-container {
-    display: none; /* Controlled by JS */
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.chat-header {
-    background-color: #1a73e8;
-    color: white;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.chat-header h2 {
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.leave-button {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    color: white;
-    padding: 0.3rem 0.6rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: background-color 0.2s;
-}
-
-.leave-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.messages-container {
-    flex-grow: 1;
-    padding: 1rem;
-    overflow-y: auto;
-    background-color: #f7f9fb;
-}
-
-/* Message Styles */
-.message-bubble {
-    display: flex;
-    margin-bottom: 0.75rem;
-}
-
-.message-text {
-    max-width: 80%;
-    padding: 0.6rem 0.9rem;
-    border-radius: 18px;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    position: relative;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.user-message {
-    justify-content: flex-end;
-}
-
-.user-message .message-text {
-    background-color: #1a73e8;
-    color: white;
-    border-bottom-right-radius: 4px;
-}
-
-.other-message {
-    justify-content: flex-start;
-}
-
-.other-message .message-text {
-    background-color: #e5e7eb;
-    color: #3b424d;
-    border-bottom-left-radius: 4px;
-}
-
-.sender-name {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 0.2rem;
-    color: #1a73e8;
-}
-
-.user-message .sender-name {
-    display: none; /* Hide name for self-messages */
-}
-
-.system-message {
-    text-align: center;
-    font-style: italic;
-    color: #9ca3af;
-    margin: 1rem 0;
-    font-size: 0.85rem;
-}
-
-/* Message Input Area */
-.message-input-area {
-    padding: 1rem;
-    border-top: 1px solid #e5e7eb;
-    background-color: white;
-    display: flex;
-    gap: 0.5rem;
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
-}
-
-#messageInput {
-    flex-grow: 1;
-    border: 2px solid #e5e7eb;
-    border-radius: 20px;
-    padding: 0.7rem 1rem;
-    font-size: 1rem;
-}
-
-#messageInput:focus {
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
-    outline: none;
-}
-
-#sendMessageButton {
-    width: auto;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 1rem;
-}
-
-.online-users-container {
-    padding: 0.5rem 1rem;
-    background-color: #e3f2fd;
-    color: #1a73e8;
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-align: center;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
     .chat-app {
-        max-height: 100vh;
-        min-height: 100vh;
-        border-radius: 0;
-        box-shadow: none;
+      width: 100%;
+      max-width: 420px;
+      background-color: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      min-height: 500px;
+      max-height: 90vh;
+      overflow: hidden;
+      position: relative;
     }
-    body {
-        padding: 0;
+
+    .welcome-screen { padding: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; text-align: center; }
+    .welcome-screen h1 { font-size: 2.2rem; color: #1a73e8; margin-bottom: .5rem; font-weight: 800; }
+    .welcome-screen p { color: #6a737d; margin-bottom: 1.5rem; }
+
+    .input-group { width: 100%; margin-bottom: 1rem; text-align: left; }
+    .input-group label { display: block; font-size: .85rem; color: #3b424d; margin-bottom: .25rem; font-weight: 600; }
+
+    .text-input {
+      width: 100%; padding: .75rem; border: 2px solid #e5e7eb; border-radius: 8px;
+      font-size: 1rem; transition: border-color .3s, box-shadow .3s; background-color: #f7f9fb;
     }
-}
-    </style>
+    .text-input:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 3px rgba(26,115,232,.2);
+      outline: none; background-color: #fff;
+    }
+
+    .action-button {
+      width: 100%; padding: .85rem; background-color: #1a73e8; color: #fff;
+      font-weight: 700; border: none; border-radius: 8px; cursor: pointer;
+      font-size: 1rem; margin-top: .5rem; transition: background-color .3s, transform .1s;
+      box-shadow: 0 4px 15px rgba(26,115,232,.3);
+    }
+    .action-button:hover { background-color: #0f62d1; }
+    .action-button:active { transform: scale(.98); }
+
+    .error-message { color: #e53e3e; font-size: .875rem; margin-top: 1rem; font-weight: 500; }
+
+    .chat-container { display: none; flex-direction: column; flex-grow: 1; }
+    .chat-header { background-color: #1a73e8; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .chat-header h2 { font-size: 1.25rem; font-weight: 700; }
+
+    .leave-button {
+      background: none; border: 1px solid rgba(255,255,255,.5);
+      color: white; padding: .3rem .6rem; border-radius: 6px;
+      cursor: pointer; font-size: .8rem;
+    }
+    .leave-button:hover { background-color: rgba(255,255,255,.2); }
+
+    .online-users-container { padding: .5rem 1rem; background-color: #e3f2fd; color: #1a73e8; font-size: .85rem; text-align: center; }
+
+    .messages-container { flex-grow: 1; padding: 1rem; overflow-y: auto; background-color: #f7f9fb; }
+    .message-bubble { display: flex; margin-bottom: .75rem; }
+    .message-text {
+      max-width: 80%; padding: .6rem .9rem; border-radius: 18px;
+      font-size: .95rem; line-height: 1.4; position: relative;
+      box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    }
+
+    .user-message { justify-content: flex-end; }
+    .user-message .message-text { background-color: #1a73e8; color: white; border-bottom-right-radius: 4px; }
+    .other-message { justify-content: flex-start; }
+    .other-message .message-text { background-color: #e5e7eb; color: #3b424d; border-bottom-left-radius: 4px; }
+
+    .sender-name { display: block; font-size: .75rem; font-weight: 600; margin-bottom: .2rem; color: #1a73e8; }
+    .user-message .sender-name { display: none; }
+
+    .system-message { text-align: center; font-style: italic; color: #9ca3af; margin: 1rem 0; font-size: .85rem; }
+
+    .message-input-area { padding: 1rem; border-top: 1px solid #e5e7eb; background-color: white; display: flex; gap: .5rem; }
+    #messageInput {
+      flex-grow: 1; border: 2px solid #e5e7eb; border-radius: 20px; padding: .7rem 1rem; font-size: 1rem;
+    }
+    #messageInput:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 3px rgba(26,115,232,.2);
+      outline: none;
+    }
+
+    #sendMessageButton { width: auto; padding: .5rem 1rem; border-radius: 20px; font-size: 1rem; }
+
+    @media (max-width: 600px) {
+      .chat-app { max-height: 100vh; min-height: 100vh; border-radius: 0; box-shadow: none; }
+      body { padding: 0; }
+    }
+  </style>
 </head>
+
 <body>
+  <div class="chat-app">
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen" class="welcome-screen">
+      <h1>Shh Chat 🤫</h1>
+      <p>Ephemeral, end-to-end chat using shared room codes. No history is kept!</p>
 
-    <div class="chat-app">
-        <!-- Welcome Screen -->
-        <div id="welcomeScreen" class="welcome-screen">
-            <h1>Shh Chat 🤫</h1>
-            <p>Ephemeral, end-to-end chat using shared room codes. No history is kept!</p>
+      <div class="input-group">
+        <label for="displayNameInput">Your Name</label>
+        <input id="displayNameInput" type="text" class="text-input" placeholder="e.g., GhostWriter">
+      </div>
 
-            <div class="input-group">
-                <label for="displayNameInput">Your Name</label>
-                <input id="displayNameInput" type="text" class="text-input" placeholder="e.g., GhostWriter">
-            </div>
+      <div class="input-group">
+        <label for="roomCodeInput">Room Code (4-6 letters)</label>
+        <input id="roomCodeInput" type="text" class="text-input" placeholder="e.g., SECRET">
+      </div>
 
-            <div class="input-group">
-                <label for="roomCodeInput">Room Code (4-6 letters)</label>
-                <input id="roomCodeInput" type="text" class="text-input" placeholder="e.g., SECRET">
-            </div>
-
-            <button id="joinOrCreateRoomButton" class="action-button">JOIN or CREATE ROOM</button>
-
-            <p id="errorMessage" class="error-message" style="display: none;"></p>
-        </div>
-
-        <!-- Chat Container -->
-        <div id="chatContainer" class="chat-container">
-            <div class="chat-header">
-                <h2 id="roomTitle"></h2>
-                <button id="leaveRoomButton" class="leave-button">Leave Room</button>
-            </div>
-
-            <!-- Online Users Info -->
-            <div class="online-users-container">
-                <span id="onlineUsersCount"></span> online: <span id="onlineUsersList"></span>
-            </div>
-
-            <div id="messagesContainer" class="messages-container">
-                <!-- Messages will be rendered here -->
-            </div>
-
-            <div class="message-input-area">
-                <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off">
-                <button id="sendMessageButton" class="action-button">Send</button>
-            </div>
-        </div>
+      <button id="joinOrCreateRoomButton" class="action-button">JOIN or CREATE ROOM</button>
+      <p id="errorMessage" class="error-message" style="display: none;"></p>
     </div>
 
-    <!-- Firebase Imports -->
-    <script type="module">
+    <!-- Chat Container -->
+    <div id="chatContainer" class="chat-container">
+      <div class="chat-header">
+        <h2 id="roomTitle"></h2>
+        <button id="leaveRoomButton" class="leave-button">Leave Room</button>
+      </div>
+
+      <div class="online-users-container">
+        <span id="onlineUsersCount"></span> online: <span id="onlineUsersList"></span>
+      </div>
+
+      <div id="messagesContainer" class="messages-container"></div>
+
+      <div class="message-input-area">
+        <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off">
+        <button id="sendMessageButton" class="action-button">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase + Chat Logic -->
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, orderBy, getDocs, serverTimestamp, runTransaction, setLogLevel, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore, doc, getDoc, addDoc, setDoc, updateDoc,
+      onSnapshot, collection, query, orderBy,
+      serverTimestamp, runTransaction, setLogLevel,
+      arrayUnion, arrayRemove
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- GLOBAL SETUP & CONSTANTS ---
-    setLogLevel('Debug');
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    
-    // Attempt to load and parse the configuration
-    let firebaseConfig = {};
-    if (typeof __firebase_config !== 'undefined') {
-        try {
-            firebaseConfig = JSON.parse(__firebase_config);
-        } catch (e) {
-            console.error("Error parsing __firebase_config:", e);
-        }
-    }
-    
-    // Log the configuration for debugging purposes
-    console.log("DEBUG: Loaded Firebase Config:", firebaseConfig);
+    // --- FIREBASE CONFIG ---
+    setLogLevel('debug');
+    const appId = 'default-app-id';
+    const firebaseConfig = {
+      apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200",
+      authDomain: "shh-chat-db9d0.firebaseapp.com",
+      projectId: "shh-chat-db9d0",
+      storageBucket: "shh-chat-db9d0.appspot.com",
+      messagingSenderId: "20040883450",
+      appId: "1:20040883450:web:833660405c634b2aaffd43"
+    };
 
-    // CRITICAL CHECK: If projectId is missing, Firebase initialization will fail.
-    if (!firebaseConfig.projectId) {
-        console.error("CRITICAL ERROR: 'projectId' is missing in the Firebase Configuration. Authentication and Database operations will fail. Please ensure '__firebase_config' is correctly provided by the environment.");
-        // We will defer the call to initializeApp until we are certain we have a config,
-        // but for now, we'll initialize with whatever we have to avoid the immediate uncaught error if the environment is only partially broken.
-        // NOTE: This will still likely fail at the first Firestore/Auth operation if config is invalid.
-    }
-    
-    // Initialize Firebase (will throw if projectId is truly missing from the config object)
-    let app, db, auth;
-    try {
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
-    } catch (e) {
-        // Catch and log the original Firebase initialization error
-        console.error("Firebase Initialization Failed during initializeApp:", e);
-    }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    const MESSAGES_COLLECTION = 'messages';
+    // --- COLLECTION NAMES ---
     const ROOMS_COLLECTION = 'rooms';
-    const USERS_COLLECTION = 'users';
+    const MESSAGES_COLLECTION = 'messages';
 
     // --- DOM Elements ---
     const welcomeScreen = document.getElementById('welcomeScreen');
@@ -400,467 +193,160 @@ body {
     const onlineUsersCountSpan = document.getElementById('onlineUsersCount');
     const onlineUsersListSpan = document.getElementById('onlineUsersList');
 
-    // --- STATE MANAGEMENT ---
-    const chatData = {
-        currentUser: null,
-        currentRoom: null,
-        messageListeners: [], // To store unsubscribe functions
-        userPresenceListener: null, // Listener for online users
-        lastMessageTimestamp: 0 // To track the time of the last message received
-    };
+    const chatData = { currentUser: null, currentRoom: null, messageListeners: [], userPresenceListener: null, lastMessageTimestamp: 0 };
 
-    // --- NOTIFICATION STATE & UTILS ---
-    let isTabFocused = true;
-    let unreadCount = 0;
-    let notificationPermission = 'default';
+    // --- PATH HELPERS (FIXED) ---
+    const getRoomRef = (roomCode) => doc(db, "artifacts", appId, "public", "data", ROOMS_COLLECTION, roomCode);
+    const getMessagesRef = (roomCode) => collection(db, "artifacts", appId, "public", "data", MESSAGES_COLLECTION, roomCode, "messages");
 
-    // Initialize audio (A short, quiet sound placeholder)
-    const notificationSoundUrl = "https://cdn.jsdelivr.net/gh/anars/blank-audio/samples/sample-0.mp3"; 
-    const notificationAudio = new Audio(notificationSoundUrl);
-    notificationAudio.volume = 0.5;
-
-    /** Updates the document title to show unread count. */
-    function updateTitleAndIcon(reset = false) {
-        const baseTitle = 'Shh Chat 🤫';
-        if (reset || unreadCount === 0) {
-            document.title = baseTitle;
-        } else {
-            // This creates the "red notification bubble" effect in the browser tab/PWA
-            document.title = `(${unreadCount} New!) | ${baseTitle}`;
-        }
+    // --- UTIL FUNCTIONS ---
+    function displayError(msg) {
+      errorMessage.textContent = msg;
+      errorMessage.style.display = 'block';
+      setTimeout(() => errorMessage.style.display = 'none', 5000);
     }
 
-    /** Plays the notification sound. */
-    function playNotificationSound() {
-        notificationAudio.currentTime = 0;
-        // Playing audio is often restricted without user interaction, 
-        // but since the user clicks "Join Room", this might work.
-        notificationAudio.play().catch(e => console.log('Audio playback failed (user interaction required/error):', e));
-    }
-
-    /** Requests browser notification permission. */
-    function requestNotificationPermission() {
-        if (!("Notification" in window)) {
-            console.log("Browser does not support desktop notification");
-            return;
-        }
-        notificationPermission = Notification.permission;
-        if (notificationPermission === 'default') {
-            Notification.requestPermission().then(permission => {
-                notificationPermission = permission;
-                console.log("Notification Permission:", permission);
-            }).catch(err => console.error("Error requesting notification permission:", err));
-        }
-    }
-
-    /** Shows a desktop notification. */
-    function showDesktopNotification(senderName, messageText) {
-        if (notificationPermission === 'granted') {
-            const options = {
-                body: messageText,
-                icon: 'https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png',
-                tag: chatData.currentRoom.id // Prevent multiple notifications stacking for the same room
-            };
-            // Notification with required format: "User name has messaged you."
-            const notification = new Notification(`${senderName} has messaged you!`, options);
-
-            notification.onclick = function() {
-                window.focus(); // Focus the tab when clicked
-                this.close();
-            };
-        }
-    }
-
-    // --- FOCUS/BLUR LISTENERS (NEW) ---
-    window.addEventListener('focus', () => {
-        isTabFocused = true;
-        if (unreadCount > 0) {
-            unreadCount = 0;
-            updateTitleAndIcon(true);
-            console.log("Tab focused, unread count reset.");
-        }
-    });
-
-    window.addEventListener('blur', () => {
-        isTabFocused = false;
-    });
-
-
-    // --- FIREBASE PATH UTILS ---
-    const getRoomPath = (roomCode) => `/artifacts/${appId}/public/data/${ROOMS_COLLECTION}/${roomCode}`;
-    const getMessagesPath = (roomCode) => `/artifacts/${appId}/public/data/${MESSAGES_COLLECTION}/${roomCode}/messages`;
-    const getOnlineUsersPath = (roomCode) => `/artifacts/${appId}/public/data/${ROOMS_COLLECTION}/${roomCode}/onlineUsers`;
-
-
-    // --- UI RENDERING FUNCTIONS ---
-
-    function displayError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = 'block';
-        setTimeout(() => {
-            errorMessage.style.display = 'none';
-        }, 5000);
-    }
-
-    function renderMessage(message) {
-        const isUserMessage = chatData.currentUser && message.senderId === chatData.currentUser.id;
-        const bubble = document.createElement('div');
-        bubble.className = `message-bubble ${isUserMessage ? 'user-message' : 'other-message'}`;
-
-        const textContent = document.createElement('div');
-        textContent.className = 'message-text';
-
-        if (!isUserMessage) {
-            const senderName = document.createElement('span');
-            senderName.className = 'sender-name';
-            senderName.textContent = message.senderName || 'Anonymous';
-            textContent.appendChild(senderName);
-        }
-
-        const text = document.createElement('p');
-        // Simple sanitization against XSS in the message display
-        text.textContent = message.text;
-        textContent.appendChild(text);
-
-        bubble.appendChild(textContent);
-        messagesContainer.appendChild(bubble);
+    function renderMessage(msg) {
+      const isUser = chatData.currentUser && msg.senderId === chatData.currentUser.id;
+      const bubble = document.createElement('div');
+      bubble.className = `message-bubble ${isUser ? 'user-message' : 'other-message'}`;
+      const textDiv = document.createElement('div');
+      textDiv.className = 'message-text';
+      if (!isUser) {
+        const name = document.createElement('span');
+        name.className = 'sender-name';
+        name.textContent = msg.senderName || 'Anonymous';
+        textDiv.appendChild(name);
+      }
+      const text = document.createElement('p');
+      text.textContent = msg.text;
+      textDiv.appendChild(text);
+      bubble.appendChild(textDiv);
+      messagesContainer.appendChild(bubble);
     }
 
     function renderSystemMessage(text) {
-        const msg = document.createElement('div');
-        msg.className = 'system-message';
-        msg.textContent = text;
-        messagesContainer.appendChild(msg);
+      const div = document.createElement('div');
+      div.className = 'system-message';
+      div.textContent = text;
+      messagesContainer.appendChild(div);
     }
 
     function scrollToBottom() {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
-
-
-    // --- CORE CHAT FUNCTIONS ---
 
     async function handleAuthState() {
-        return new Promise(async (resolve, reject) => {
-             if (auth.currentUser) {
-                // Already authenticated
-                resolve(auth.currentUser.uid);
-                return;
-            }
-            try {
-                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        resolve(user.uid);
-                    } else {
-                        reject('Auth failed.');
-                    }
-                });
-            } catch (error) {
-                console.error("Authentication failed:", error);
-                reject(error);
-            }
-        });
+      if (auth.currentUser) return auth.currentUser.uid;
+      await signInAnonymously(auth);
+      return new Promise((resolve, reject) => {
+        onAuthStateChanged(auth, (user) => user ? resolve(user.uid) : reject('Auth failed.'));
+      });
     }
 
-    async function updatePresence(roomCode, userName, isJoining = true) {
-        // Ensure db is defined before trying to use it
-        if (!db) return;
-        
-        const userId = chatData.currentUser.id;
-        const roomRef = doc(db, getRoomPath(roomCode));
-
-        try {
-            await runTransaction(db, async (transaction) => {
-                const roomDoc = await transaction.get(roomRef);
-                if (roomDoc.exists()) {
-                    // Note: Online users array management is done within transaction for atomicity
-                    const userEntry = { id: userId, name: userName };
-
-                    if (isJoining) {
-                        transaction.update(roomRef, {
-                            onlineUsers: arrayUnion(userEntry),
-                            lastActivity: serverTimestamp()
-                        });
-                        renderSystemMessage(`${userName} has joined the room.`);
-                    } else {
-                        transaction.update(roomRef, {
-                            onlineUsers: arrayRemove(userEntry),
-                            lastActivity: serverTimestamp()
-                        });
-                        renderSystemMessage(`${userName} has left the room.`);
-                    }
-                }
-            });
-        } catch (error) {
-            console.error(`Presence update failed (${isJoining ? 'join' : 'leave'}):`, error);
+    async function updatePresence(roomCode, name, isJoining = true) {
+      const userId = chatData.currentUser.id;
+      const roomRef = getRoomRef(roomCode);
+      await runTransaction(db, async (tx) => {
+        const docSnap = await tx.get(roomRef);
+        if (docSnap.exists()) {
+          const userObj = { id: userId, name };
+          tx.update(roomRef, {
+            onlineUsers: isJoining ? arrayUnion(userObj) : arrayRemove(userObj),
+            lastActivity: serverTimestamp()
+          });
+          renderSystemMessage(`${name} has ${isJoining ? 'joined' : 'left'} the room.`);
         }
+      });
     }
-
 
     async function joinOrCreateRoom() {
-        // Check 1: Ensure we have a valid database instance
-        if (!db) {
-            displayError("Chat is not initialized. Firebase Project ID is missing.");
-            return;
+      const roomCode = roomCodeInput.value.toUpperCase().trim();
+      const displayName = displayNameInput.value.trim();
+      if (roomCode.length < 4 || roomCode.length > 6 || !/^[A-Z0-9]+$/.test(roomCode)) return displayError('Room code must be 4-6 alphanumeric chars.');
+      if (displayName.length < 2 || displayName.length > 20) return displayError('Name must be 2-20 chars.');
+
+      const userId = await handleAuthState();
+      chatData.currentUser = { id: userId, name: displayName };
+      chatData.currentRoom = { id: roomCode };
+
+      const roomRef = getRoomRef(roomCode);
+      const roomSnap = await getDoc(roomRef);
+      if (!roomSnap.exists()) {
+        await setDoc(roomRef, { id: roomCode, createdAt: serverTimestamp(), creatorId: userId, onlineUsers: [], lastActivity: serverTimestamp() });
+      }
+
+      welcomeScreen.style.display = 'none';
+      chatContainer.style.display = 'flex';
+      roomTitle.textContent = `Room: ${roomCode}`;
+      messagesContainer.innerHTML = '';
+      renderSystemMessage(`Welcome to ${roomCode}, ${displayName}!`);
+
+      // Listen for presence
+      if (chatData.userPresenceListener) chatData.userPresenceListener();
+      chatData.userPresenceListener = onSnapshot(roomRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          const users = data.onlineUsers || [];
+          onlineUsersCountSpan.textContent = users.length;
+          onlineUsersListSpan.textContent = users.map(u => u.name).join(', ');
         }
+      });
 
-        const roomCode = roomCodeInput.value.toUpperCase().trim();
-        const displayName = displayNameInput.value.trim();
+      // Listen for messages
+      const msgRef = getMessagesRef(roomCode);
+      const q = query(msgRef, orderBy('timestamp', 'asc'));
+      chatData.messageListeners.forEach(u => u());
+      chatData.messageListeners = [];
+      chatData.messageListeners.push(onSnapshot(q, (snapshot) => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            renderMessage(change.doc.data());
+          }
+        });
+        scrollToBottom();
+      }));
 
-        if (roomCode.length < 4 || roomCode.length > 6 || !/^[A-Z0-9]+$/.test(roomCode)) {
-            displayError('Room code must be 4-6 alphanumeric characters.');
-            return;
-        }
-
-        if (displayName.length < 2 || displayName.length > 20) {
-            displayError('Display name must be 2-20 characters long.');
-            return;
-        }
-
-        // 2. Authenticate and get userId
-        let userId;
-        try {
-            userId = await handleAuthState();
-            chatData.currentUser = { id: userId, name: displayName };
-        } catch (e) {
-            displayError('Could not authenticate. Please try again.');
-            return;
-        }
-
-        // 3. Set current room context
-        chatData.currentRoom = { id: roomCode };
-
-        try {
-            // 4. Request Notification Permission on user interaction
-            requestNotificationPermission();
-
-            // 5. Try to create or update room document
-            const roomRef = doc(db, getRoomPath(roomCode));
-            const roomDoc = await getDoc(roomRef);
-
-            if (!roomDoc.exists()) {
-                // Create new room
-                await setDoc(roomRef, {
-                    id: roomCode,
-                    createdAt: serverTimestamp(),
-                    creatorId: userId,
-                    onlineUsers: [], // Initialize online users array
-                    lastActivity: serverTimestamp()
-                });
-                console.log(`Room ${roomCode} created.`);
-            }
-
-            // 6. Update UI
-            welcomeScreen.style.display = 'none';
-            chatContainer.style.display = 'flex';
-            roomTitle.textContent = `Room: ${roomCode}`;
-            messagesContainer.innerHTML = '';
-            renderSystemMessage(`Welcome to ${roomCode}, ${displayName}!`);
-
-            // 7. Set up real-time listener for presence
-            if (chatData.userPresenceListener) chatData.userPresenceListener(); // Remove existing listener
-            
-            const presenceUnsubscribe = onSnapshot(roomRef, (docSnapshot) => {
-                if (docSnapshot.exists()) {
-                    const data = docSnapshot.data();
-                    const onlineUsers = data.onlineUsers || [];
-                    onlineUsersCountSpan.textContent = onlineUsers.length;
-                    onlineUsersListSpan.textContent = onlineUsers.map(u => u.name).join(', ');
-                } else {
-                    console.error("Room document disappeared! This should not happen in shhchat.");
-                }
-            });
-            chatData.userPresenceListener = presenceUnsubscribe;
-
-
-            // 8. Set up real-time listener for messages
-            const messagesRef = collection(db, getMessagesPath(roomCode));
-            const q = query(messagesRef, orderBy('timestamp', 'asc'));
-
-            // Remove previous listener if exists
-            chatData.messageListeners.forEach(unsub => unsub());
-            chatData.messageListeners = [];
-
-            const messagesUnsubscribe = onSnapshot(q, (snapshot) => {
-                let shouldScroll = false;
-                
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === 'added') {
-                        const message = change.doc.data();
-                        const isUserMessage = message.senderId === chatData.currentUser.id;
-                        
-                        // Check if the message is from a timestamp later than the last message we saw
-                        const currentTimestamp = message.timestamp ? message.timestamp.toMillis() : Date.now();
-                        const isNewMessageAfterJoin = currentTimestamp > chatData.lastMessageTimestamp;
-                        
-                        // Only render if it's new (not historical load) or sent by the current user
-                        if (isNewMessageAfterJoin || isUserMessage) {
-                            renderMessage(message);
-                            shouldScroll = true;
-                        }
-
-                        // Update last message timestamp
-                        chatData.lastMessageTimestamp = currentTimestamp;
-
-
-                        // --- NOTIFICATION LOGIC ---
-                        if (!isUserMessage) {
-                            // 1. Play sound for any new message from others
-                            playNotificationSound();
-
-                            // 2. Handle desktop notification/title update if tab is unfocused
-                            if (!isTabFocused) {
-                                unreadCount++;
-                                updateTitleAndIcon();
-                                // Notification: "User name has messaged you."
-                                showDesktopNotification(message.senderName, message.text);
-                            }
-                        }
-                    }
-                });
-
-                if (shouldScroll) {
-                    // Slight delay to allow DOM render before scrolling
-                    setTimeout(scrollToBottom, 50);
-                }
-            });
-
-            chatData.messageListeners.push(messagesUnsubscribe);
-            
-            // 9. Update presence status (must happen after chatData.currentUser is set)
-            await updatePresence(roomCode, displayName, true);
-
-        } catch (error) {
-            console.error('Error joining or creating room:', error);
-            displayError('Failed to join or create room. Check console for details.');
-            // Clean up UI if initial join fails
-            chatContainer.style.display = 'none';
-            welcomeScreen.style.display = 'flex';
-        }
+      await updatePresence(roomCode, displayName, true);
     }
 
-
     async function leaveRoom() {
-        if (!chatData.currentRoom || !chatData.currentUser) return;
-
-        // 1. Update presence (remove user)
-        await updatePresence(chatData.currentRoom.id, chatData.currentUser.name, false);
-
-        // 2. Remove listeners
-        chatData.messageListeners.forEach(unsub => unsub());
-        chatData.messageListeners = [];
-        if (chatData.userPresenceListener) {
-            chatData.userPresenceListener();
-            chatData.userPresenceListener = null;
-        }
-
-        // 3. Clear current room context and UI
-        chatData.currentRoom = null;
-        chatData.lastMessageTimestamp = 0;
-        
-        // 4. Update UI
-        chatContainer.style.display = 'none';
-        welcomeScreen.style.display = 'flex';
-        messagesContainer.innerHTML = '<div class="system-message">You have left the room.</div>';
-        
-        // Reset notifications
-        unreadCount = 0;
-        updateTitleAndIcon(true);
+      if (!chatData.currentRoom) return;
+      await updatePresence(chatData.currentRoom.id, chatData.currentUser.name, false);
+      chatData.messageListeners.forEach(u => u());
+      if (chatData.userPresenceListener) chatData.userPresenceListener();
+      chatContainer.style.display = 'none';
+      welcomeScreen.style.display = 'flex';
+      messagesContainer.innerHTML = '<div class="system-message">You have left the room.</div>';
     }
 
     async function sendMessage() {
-        if (!chatData.currentRoom || !chatData.currentUser) {
-            displayError('Not in a room.');
-            return;
-        }
-
-        const text = messageInput.value.trim();
-        if (text === '') return;
-
-        const roomCode = chatData.currentRoom.id;
-        const userId = chatData.currentUser.id;
-        const userName = chatData.currentUser.name;
-
-        const message = {
-            senderId: userId,
-            senderName: userName,
-            text: text,
-            timestamp: serverTimestamp(),
-            roomCode: roomCode
-        };
-
-        try {
-            const messagesRef = collection(db, getMessagesPath(roomCode));
-            await addDoc(messagesRef, message);
-            messageInput.value = '';
-        } catch (error) {
-            console.error('Error sending message:', error);
-            displayError('Failed to send message.');
-        }
+      if (!chatData.currentRoom || !chatData.currentUser) return;
+      const text = messageInput.value.trim();
+      if (!text) return;
+      const msg = {
+        senderId: chatData.currentUser.id,
+        senderName: chatData.currentUser.name,
+        text,
+        timestamp: serverTimestamp()
+      };
+      const msgRef = getMessagesRef(chatData.currentRoom.id);
+      await addDoc(msgRef, msg);
+      messageInput.value = '';
     }
 
     // --- EVENT LISTENERS ---
-
     joinOrCreateRoomButton.addEventListener('click', joinOrCreateRoom);
     leaveRoomButton.addEventListener('click', leaveRoom);
     sendMessageButton.addEventListener('click', sendMessage);
-
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
+    messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
     // --- INITIALIZATION ---
     window.addEventListener('load', async () => {
-         // Create a default placeholder name if one doesn't exist
-         const defaultName = `User-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-         displayNameInput.value = defaultName;
-         
-         // Check 2: Ensure Firebase Initialization was successful
-         if (!db) {
-            displayError("Initialization failed. Please provide a valid Firebase Config.");
-            return;
-        }
-        
-        // Attempt anonymous sign-in immediately to determine user ID
-        try {
-             const userId = await handleAuthState();
-             // Store initial user data (only ID, name will be set by input)
-             chatData.currentUser = { id: userId, name: displayNameInput.value };
-             
-             // Check URL for existing room code
-             const urlParams = new URLSearchParams(window.location.search);
-             const roomFromUrl = urlParams.get('room');
-             
-             if (roomFromUrl) {
-                // If room is in URL, prefill and prompt for join
-                roomCodeInput.value = roomFromUrl.toUpperCase();
-                
-                // Automatically attempt to join the room if both fields are filled
-                if (displayNameInput.value && roomCodeInput.value) {
-                    // Call join logic directly
-                    await joinOrCreateRoom();
-                }
-
-             } else {
-                 // No room, ensure welcome screen is visible
-                 welcomeScreen.style.display = 'flex';
-                 chatContainer.style.display = 'none';
-             }
-
-        } catch (error) {
-            console.error("Initial auth/setup failed:", error);
-            displayError("Initialization failed. Please check connection.");
-        }
+      displayNameInput.value = `User-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      await handleAuthState();
+      welcomeScreen.style.display = 'flex';
     });
-
-    </script>
+  </script>
 </body>
 </html>
