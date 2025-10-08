@@ -324,7 +324,7 @@ body {
             </div>
 
             <!-- Online Users Info -->
-            <div id="onlineUsersContainer" class="online-users-container">
+            <div class="online-users-container">
                 <span id="onlineUsersCount"></span> online: <span id="onlineUsersList"></span>
             </div>
 
@@ -348,7 +348,25 @@ body {
     // --- GLOBAL SETUP & CONSTANTS ---
     setLogLevel('Debug');
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    
+    // FIX/DEBUG: Ensure firebaseConfig is loaded correctly and log it
+    let firebaseConfig = {};
+    if (typeof __firebase_config !== 'undefined') {
+        try {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } catch (e) {
+            console.error("Error parsing __firebase_config:", e);
+        }
+    }
+    
+    // Log the configuration to help the user diagnose the "projectId not provided" error
+    console.log("DEBUG: Loaded Firebase Config:", firebaseConfig);
+
+    // If projectId is missing, all Firebase operations will fail.
+    if (!firebaseConfig.projectId) {
+        console.error("CRITICAL ERROR: 'projectId' is missing in the Firebase Configuration. Authentication and Database operations will fail. Please ensure '__firebase_config' is correctly provided by the environment.");
+    }
+    
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
@@ -576,6 +594,11 @@ body {
 
 
     async function joinOrCreateRoom() {
+        if (!firebaseConfig.projectId) {
+            displayError("Firebase is not configured. Cannot join room.");
+            return;
+        }
+
         const roomCode = roomCodeInput.value.toUpperCase().trim();
         const displayName = displayNameInput.value.trim();
 
@@ -622,7 +645,7 @@ body {
                 console.log(`Room ${roomCode} created.`);
             }
 
-            // 5. Update UI (Removed window.history.pushState to fix the SecurityError)
+            // 5. Update UI
             welcomeScreen.style.display = 'none';
             chatContainer.style.display = 'flex';
             roomTitle.textContent = `Room: ${roomCode}`;
@@ -732,7 +755,7 @@ body {
         chatData.currentRoom = null;
         chatData.lastMessageTimestamp = 0;
         
-        // 4. Update UI (Removed window.history.pushState to fix the SecurityError)
+        // 4. Update UI
         chatContainer.style.display = 'none';
         welcomeScreen.style.display = 'flex';
         messagesContainer.innerHTML = '<div class="system-message">You have left the room.</div>';
@@ -787,6 +810,11 @@ body {
 
     // --- INITIALIZATION ---
     window.addEventListener('load', async () => {
+         if (!firebaseConfig.projectId) {
+            displayError("Firebase setup failed. Check console for 'CRITICAL ERROR'.");
+            return;
+        }
+        
         // Attempt anonymous sign-in immediately to determine user ID
         try {
              const userId = await handleAuthState();
@@ -823,9 +851,6 @@ body {
             displayError("Initialization failed. Please check connection.");
         }
     });
-
-    // NOTE: Removed window.addEventListener('popstate', ...) block to prevent history manipulation errors in iframe environment.
-    // We will rely only on URL query parameter reading on initial load.
 
     </script>
 </body>
