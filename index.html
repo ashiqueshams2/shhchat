@@ -622,10 +622,7 @@ body {
                 console.log(`Room ${roomCode} created.`);
             }
 
-            // 5. Update browser URL and UI
-            const newUrl = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
-            window.history.pushState({ path: newUrl }, '', newUrl);
-
+            // 5. Update UI (Removed window.history.pushState to fix the SecurityError)
             welcomeScreen.style.display = 'none';
             chatContainer.style.display = 'flex';
             roomTitle.textContent = `Room: ${roomCode}`;
@@ -735,10 +732,7 @@ body {
         chatData.currentRoom = null;
         chatData.lastMessageTimestamp = 0;
         
-        // 4. Update URL and UI
-        const newUrl = `${window.location.origin}${window.location.pathname}`;
-        window.history.pushState({ path: newUrl }, '', newUrl);
-
+        // 4. Update UI (Removed window.history.pushState to fix the SecurityError)
         chatContainer.style.display = 'none';
         welcomeScreen.style.display = 'flex';
         messagesContainer.innerHTML = '<div class="system-message">You have left the room.</div>';
@@ -830,37 +824,8 @@ body {
         }
     });
 
-    // Handle back/forward navigation
-    window.addEventListener('popstate', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomFromUrl = urlParams.get('room');
-
-            if (chatData.currentRoom) {
-                // If we were in a room and URL no longer has it (navigated back)
-                if (!roomFromUrl || roomFromUrl.toUpperCase() !== chatData.currentRoom.id) {
-                    // Need to manually call leave room without updating history state
-                    // This is tricky, a full page reload is often easier for simple apps
-                    // For now, let's just reset the UI state without Firebase cleanup which happens on window close anyway.
-                    // A proper leave logic (like the one in leaveRoom()) should run if the user truly left.
-                    // For popstate, we will rely on the user manually clicking 'Leave Room' or re-joining.
-                    // As a simple fix, let's enforce a UI reset if the URL room code doesn't match the current state.
-                    if (!roomFromUrl) {
-                        leaveRoom();
-                    } else if (roomFromUrl.toUpperCase() !== chatData.currentRoom.id) {
-                         // User navigated to a different room via history - refresh might be needed or a forced join.
-                         // For simplicity, we just reset the view back to the welcome screen if the room code doesn't match
-                        leaveRoom(); // This will clean up and reset UI to welcome screen.
-                        // Pre-fill the new room code if it exists
-                        roomCodeInput.value = roomFromUrl.toUpperCase();
-                    }
-                }
-            } else {
-                 // If user was not in a room, but URL now has a room, prefill it.
-                if (roomFromUrl) {
-                    roomCodeInput.value = roomFromUrl.toUpperCase();
-                }
-            }
-        });
+    // NOTE: Removed window.addEventListener('popstate', ...) block to prevent history manipulation errors in iframe environment.
+    // We will rely only on URL query parameter reading on initial load.
 
     </script>
 </body>
