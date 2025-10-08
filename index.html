@@ -349,7 +349,7 @@ body {
     setLogLevel('Debug');
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     
-    // FIX/DEBUG: Ensure firebaseConfig is loaded correctly and log it
+    // Attempt to load and parse the configuration
     let firebaseConfig = {};
     if (typeof __firebase_config !== 'undefined') {
         try {
@@ -359,17 +359,28 @@ body {
         }
     }
     
-    // Log the configuration to help the user diagnose the "projectId not provided" error
+    // Log the configuration for debugging purposes
     console.log("DEBUG: Loaded Firebase Config:", firebaseConfig);
 
-    // If projectId is missing, all Firebase operations will fail.
+    // CRITICAL CHECK: If projectId is missing, Firebase initialization will fail.
     if (!firebaseConfig.projectId) {
         console.error("CRITICAL ERROR: 'projectId' is missing in the Firebase Configuration. Authentication and Database operations will fail. Please ensure '__firebase_config' is correctly provided by the environment.");
+        // We will defer the call to initializeApp until we are certain we have a config,
+        // but for now, we'll initialize with whatever we have to avoid the immediate uncaught error if the environment is only partially broken.
+        // NOTE: This will still likely fail at the first Firestore/Auth operation if config is invalid.
     }
     
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+    // Initialize Firebase (will throw if projectId is truly missing from the config object)
+    let app, db, auth;
+    try {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+    } catch (e) {
+        // Catch and log the original Firebase initialization error
+        console.error("Firebase Initialization Failed during initializeApp:", e);
+    }
+
     const MESSAGES_COLLECTION = 'messages';
     const ROOMS_COLLECTION = 'rooms';
     const USERS_COLLECTION = 'users';
@@ -398,7 +409,7 @@ body {
         lastMessageTimestamp: 0 // To track the time of the last message received
     };
 
-    // --- NOTIFICATION STATE & UTILS (NEW) ---
+    // --- NOTIFICATION STATE & UTILS ---
     let isTabFocused = true;
     let unreadCount = 0;
     let notificationPermission = 'default';
@@ -531,7 +542,7 @@ body {
 
     async function handleAuthState() {
         return new Promise(async (resolve, reject) => {
-            if (auth.currentUser) {
+             if (auth.currentUser) {
                 // Already authenticated
                 resolve(auth.currentUser.uid);
                 return;
@@ -558,6 +569,9 @@ body {
     }
 
     async function updatePresence(roomCode, userName, isJoining = true) {
+        // Ensure db is defined before trying to use it
+        if (!db) return;
+        
         const userId = chatData.currentUser.id;
         const roomRef = doc(db, getRoomPath(roomCode));
 
@@ -565,20 +579,16 @@ body {
             await runTransaction(db, async (transaction) => {
                 const roomDoc = await transaction.get(roomRef);
                 if (roomDoc.exists()) {
-                    const currentOnlineUsers = roomDoc.data().onlineUsers || [];
-                    
+                    // Note: Online users array management is done within transaction for atomicity
                     const userEntry = { id: userId, name: userName };
 
                     if (isJoining) {
-                        // Add if not already present (using simple array comparison, though Firestore doesn't directly support array of object filtering without map/set)
-                        // For simplicity and Firestore array limits, we'll rely on arrayUnion/arrayRemove
                         transaction.update(roomRef, {
                             onlineUsers: arrayUnion(userEntry),
                             lastActivity: serverTimestamp()
                         });
                         renderSystemMessage(`${userName} has joined the room.`);
                     } else {
-                        // Removing the user entry based on content match
                         transaction.update(roomRef, {
                             onlineUsers: arrayRemove(userEntry),
                             lastActivity: serverTimestamp()
@@ -594,8 +604,9 @@ body {
 
 
     async function joinOrCreateRoom() {
-        if (!firebaseConfig.projectId) {
-            displayError("Firebase is not configured. Cannot join room.");
+        // Check 1: Ensure we have a valid database instance
+        if (!db) {
+            displayError("Chat is not initialized. Firebase Project ID is missing.");
             return;
         }
 
@@ -612,7 +623,7 @@ body {
             return;
         }
 
-        // 1. Authenticate and get userId
+        // 2. Authenticate and get userId
         let userId;
         try {
             userId = await handleAuthState();
@@ -622,14 +633,14 @@ body {
             return;
         }
 
-        // 2. Set current room context
+        // 3. Set current room context
         chatData.currentRoom = { id: roomCode };
 
         try {
-            // 3. Request Notification Permission on user interaction (NEW)
+            // 4. Request Notification Permission on user interaction
             requestNotificationPermission();
 
-            // 4. Try to create or update room document
+            // 5. Try to create or update room document
             const roomRef = doc(db, getRoomPath(roomCode));
             const roomDoc = await getDoc(roomRef);
 
@@ -645,14 +656,14 @@ body {
                 console.log(`Room ${roomCode} created.`);
             }
 
-            // 5. Update UI
+            // 6. Update UI
             welcomeScreen.style.display = 'none';
             chatContainer.style.display = 'flex';
             roomTitle.textContent = `Room: ${roomCode}`;
             messagesContainer.innerHTML = '';
             renderSystemMessage(`Welcome to ${roomCode}, ${displayName}!`);
 
-            // 6. Set up real-time listener for presence
+            // 7. Set up real-time listener for presence
             if (chatData.userPresenceListener) chatData.userPresenceListener(); // Remove existing listener
             
             const presenceUnsubscribe = onSnapshot(roomRef, (docSnapshot) => {
@@ -662,14 +673,13 @@ body {
                     onlineUsersCountSpan.textContent = onlineUsers.length;
                     onlineUsersListSpan.textContent = onlineUsers.map(u => u.name).join(', ');
                 } else {
-                    // Room might have been deleted, though Shh Chat doesn't have auto-delete.
-                    console.error("Room document disappeared!");
+                    console.error("Room document disappeared! This should not happen in shhchat.");
                 }
             });
             chatData.userPresenceListener = presenceUnsubscribe;
 
 
-            // 7. Set up real-time listener for messages
+            // 8. Set up real-time listener for messages
             const messagesRef = collection(db, getMessagesPath(roomCode));
             const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
@@ -699,7 +709,7 @@ body {
                         chatData.lastMessageTimestamp = currentTimestamp;
 
 
-                        // --- NEW NOTIFICATION LOGIC START ---
+                        // --- NOTIFICATION LOGIC ---
                         if (!isUserMessage) {
                             // 1. Play sound for any new message from others
                             playNotificationSound();
@@ -712,7 +722,6 @@ body {
                                 showDesktopNotification(message.senderName, message.text);
                             }
                         }
-                        // --- NEW NOTIFICATION LOGIC END ---
                     }
                 });
 
@@ -724,7 +733,7 @@ body {
 
             chatData.messageListeners.push(messagesUnsubscribe);
             
-            // 8. Update presence status (must happen after chatData.currentUser is set)
+            // 9. Update presence status (must happen after chatData.currentUser is set)
             await updatePresence(roomCode, displayName, true);
 
         } catch (error) {
@@ -810,8 +819,13 @@ body {
 
     // --- INITIALIZATION ---
     window.addEventListener('load', async () => {
-         if (!firebaseConfig.projectId) {
-            displayError("Firebase setup failed. Check console for 'CRITICAL ERROR'.");
+         // Create a default placeholder name if one doesn't exist
+         const defaultName = `User-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+         displayNameInput.value = defaultName;
+         
+         // Check 2: Ensure Firebase Initialization was successful
+         if (!db) {
+            displayError("Initialization failed. Please provide a valid Firebase Config.");
             return;
         }
         
@@ -819,7 +833,7 @@ body {
         try {
              const userId = await handleAuthState();
              // Store initial user data (only ID, name will be set by input)
-             chatData.currentUser = { id: userId, name: displayNameInput.value || `User-${userId.substring(0,4)}` };
+             chatData.currentUser = { id: userId, name: displayNameInput.value };
              
              // Check URL for existing room code
              const urlParams = new URLSearchParams(window.location.search);
@@ -828,10 +842,6 @@ body {
              if (roomFromUrl) {
                 // If room is in URL, prefill and prompt for join
                 roomCodeInput.value = roomFromUrl.toUpperCase();
-                // Set initial display name placeholder if not provided
-                if (!displayNameInput.value) {
-                    displayNameInput.value = chatData.currentUser.name;
-                }
                 
                 // Automatically attempt to join the room if both fields are filled
                 if (displayNameInput.value && roomCodeInput.value) {
@@ -843,7 +853,6 @@ body {
                  // No room, ensure welcome screen is visible
                  welcomeScreen.style.display = 'flex';
                  chatContainer.style.display = 'none';
-                 displayNameInput.value = chatData.currentUser.name; // Use placeholder
              }
 
         } catch (error) {
