@@ -380,10 +380,10 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, query, where, deleteDoc, runTransaction, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // FIX: Renamed the RTDB serverTimestamp import to avoid declaration collision with Firestore's serverTimestamp.
         import { getDatabase, ref, onValue, set, onDisconnect, serverTimestamp as rtServerTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-        // --- Firebase Config ---
+        // --- Firebase Config and Initialization ---
+
         const firebaseConfig = {
             apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200", // Replace with your actual config
             authDomain: "shh-chat-db9d0.firebaseapp.com",
@@ -531,15 +531,13 @@
                 const userRef = doc(db, `rooms/${roomId}/users/${chatData.currentUser.id}`);
                 await setDoc(userRef, { name: displayName, isOnline: true });
 
-                // Setup presence
+                // Setup presence using RTDB alias: rtServerTimestamp
                 const userStatusRef = ref(rtdb, `status/${roomId}/${chatData.currentUser.id}`);
                 const presenceRef = ref(rtdb, `.info/connected`);
                 onValue(presenceRef, (snap) => {
                     if (snap.val() === false) { return; }
-                    // Use rtServerTimestamp for RTDB presence
                     onDisconnect(userStatusRef).set({ isOnline: false, timestamp: rtServerTimestamp })
                         .then(() => {
-                            // Use rtServerTimestamp for RTDB presence
                             set(userStatusRef, { isOnline: true, timestamp: rtServerTimestamp });
                         });
                 });
