@@ -2,589 +2,386 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Shh Chat 🤫</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Shh Chat 🤫 - Anonymous Detective</title>
 
     <link rel="apple-touch-icon" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
     <link rel="icon" type="image/png" sizes="192x192" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
     <link rel="icon" type="image/png" sizes="512x512" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a73e8">
-
+    
     <style>
        /* General Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', Arial, sans-serif;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', Arial, sans-serif;
+        }
 
-html {
-    height: 100%;
-    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape on iOS */
-    text-size-adjust: 100%;
-}
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background-color: #f0f2f5;
+        }
 
-html, body {
-    height: 100%;
-    overflow: hidden;
-}
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-body {
-    background: #f0f2f5; /* Lighter background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* Ensure body at least fills viewport height */
-    height: 100%;     /* Make body take full viewport height if possible */
-    color: #333;
-    line-height: 1.6;
-    overscroll-behavior-y: contain; /* Prevents pull-to-refresh or scrolling beyond content on body */
-}
+        /* Welcome Screen */
+        #welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
 
-.container {
-    width: 100%;
-    max-width: 420px; /* Slightly wider */
-    background-color: white;
-    border-radius: 12px; /* More rounded */
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1); /* Softer shadow */
-    overflow: hidden; /* Crucial: clips content and helps define boundaries */
-    display: flex;
-    flex-direction: column;
-    /* Responsive height, ensures container itself doesn't grow indefinitely */
-    height: clamp(450px, 90vh, 700px); /* Min height, preferred viewport height, max height */
-    max-height: 90vh; /* Explicit max-height related to viewport */
-}
+        #welcome-screen h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
 
-/* Welcome Screen */
-.welcome-card { 
-    padding: 30px 25px;
-    text-align: center;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden; /* Prevents scrolling */
-    height: 100vh;    /* Add this line */
-    max-height: 100vh;/* Add this line */
-}
+        #welcome-screen p {
+            margin-bottom: 30px;
+            color: #555;
+        }
+        
+        #connection-status {
+            margin-bottom: 20px;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .error-message {
+            color: #d93025;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
 
-.welcome-title {
-    font-size: 2rem; /* Larger title */
-    color: #1a73e8; /* Primary color */
-    margin-bottom: 10px;
-    font-weight: 600;
-}
+        .input-group {
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-.welcome-subtitle {
-    color: #5f6368; /* Subtler subtitle color */
-    font-size: 1rem;
-    margin-bottom: 30px;
-}
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            text-align: center;
+            text-transform: uppercase;
+        }
 
-.form-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
+        .button-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
 
-.form-label {
-    font-size: 0.9rem;
-    color: #3c4043;
-    margin-bottom: 8px;
-    display: block;
-    font-weight: 500;
-}
+        .button-group button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .button-group button:disabled {
+            background-color: #dcdcdc;
+            cursor: not-allowed;
+            color: #888;
+        }
 
-.form-input {
-    width: 100%;
-    padding: 12px 15px; /* More padding */
-    border: 1px solid #dadce0; /* Lighter border */
-    border-radius: 8px; /* More rounded */
-    font-size: 1rem;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
+        #create-room-btn {
+            background-color: #4285F4;
+            color: white;
+        }
+         #create-room-btn:hover:not(:disabled) {
+             background-color: #357ae8;
+         }
 
-.form-input:focus {
-    outline: none;
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2); /* Focus ring */
-}
+        #join-room-btn {
+            background-color: #34A853;
+            color: white;
+        }
+        #join-room-btn:hover:not(:disabled) {
+            background-color: #2c9c42;
+        }
 
-.join-btn {
-    width: 100%;
-    padding: 12px 15px;
-    background: #1a73e8; /* Primary color */
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
+        /* Chat Container */
+        #chat-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            max-width: 800px; /* Optional: limit width on desktop */
+            margin: 0 auto;
+        }
 
-.join-btn:hover {
-    background: #1765cc; /* Darker shade on hover */
-}
+        header {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        header h2 {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-.join-btn:disabled {
-    background: #e0e0e0;
-    cursor: not-allowed;
-}
+        header h2 #room-code-display {
+            background-color: #e0e0e0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 1rem;
+            user-select: all;
+        }
+        
+        #header-buttons {
+            display: flex;
+            gap: 10px;
+        }
 
-/* Chat Interface */
-.chat-container { /* update */
-    display: none; /* Initially hidden */
-    flex-direction: column;
-    width: 100%;
-    height: 100vh;
-    max-height: 100vh;
-    overflow: hidden;
-}
+        #leave-room-btn, #start-game-btn {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        #leave-room-btn:hover, #start-game-btn:hover {
+            background-color: #f1f1f1;
+        }
+        #start-game-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
 
-.chat-header {
-    background: #1a73e8;
-    color: white;
-    padding: 15px 20px; /* More padding */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #1765cc; /* Subtle border */
-    /* Sticky positioning */
-    position: sticky;
-    top: 0;
-    z-index: 100; /* Ensure it's above messages */
-    width: 100%; /* Ensure it spans full width */
-    flex-shrink: 0; /* Prevent header from shrinking */
-}
+        /* --- Game UI Styles --- */
+        #game-status-container {
+            padding: 10px 20px;
+            background-color: #e8f0fe;
+            border-bottom: 1px solid #d2e3fc;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #1967d2;
+            flex-shrink: 0;
+        }
+        #game-topic { font-weight: bold; }
+        #game-phase { margin-top: 5px; }
 
-.room-info h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-}
+        #voting-container {
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            border-top: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+        }
+        .vote-button {
+            padding: 10px 15px;
+            border: 1px solid #4285F4;
+            color: #4285F4;
+            background-color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .vote-button:hover {
+            background-color: #4285F4;
+            color: white;
+        }
+        .vote-button.voted {
+             background-color: #d1e3ff;
+             border-color: #a8c7fa;
+             color: #174ea6;
+             cursor: not-allowed;
+        }
 
-.online-count {
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    opacity: 0.9;
-}
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
 
-.online-dot {
-    width: 8px;
-    height: 8px;
-    background: #34a853; /* Green dot */
-    border-radius: 50%;
-}
+        #messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-.chat-actions {
-    display: flex;
-    gap: 10px;
-}
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+            align-self: flex-start;
+        }
 
-.action-btn {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: rgba(255,255,255,0.15); /* More subtle */
-    color: white;
-    border-radius: 8px; /* More rounded */
-    cursor: pointer;
-    font-size: 1.1rem; /* Larger icons */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease-in-out;
-}
+        .message-bubble {
+            padding: 10px 15px;
+            border-radius: 20px;
+            background-color: #e9e9eb;
+            word-wrap: break-word;
+        }
+        
+        .message-sender {
+            font-size: 0.8rem;
+            color: #65676b;
+            margin-bottom: 4px;
+            padding-left: 10px;
+        }
 
-.action-btn:hover {
-    background: rgba(255,255,255,0.25);
-}
+        .my-message {
+            align-self: flex-end;
+        }
 
-.messages-container {
-        flex: 1 1 auto;
-    overflow-y: auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* More space between messages */
-    background-color: #f8f9fa; /* Light background for messages area */
-    -webkit-overflow-scrolling: touch; /* For momentum scrolling on touch devices */
-}
+        .my-message .message-bubble {
+            background-color: #4285F4;
+            color: white;
+        }
 
-.message {
-    display: flex;
-    flex-direction: column;
-    max-width: 85%; /* Slightly wider messages */
-}
+        .my-message .message-sender {
+            align-self: flex-end;
+            padding-right: 10px;
+        }
 
-.message.own {
-    align-self: flex-end;
-}
+        .system-message, .game-message {
+            align-self: center;
+            text-align: center;
+            background-color: #f0f2f5;
+            color: #65676b;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            max-width: 90%;
+        }
+        .game-message {
+            background-color: #fff0c7;
+            color: #5d470a;
+            font-weight: 500;
+        }
 
-.message.other {
-    align-self: flex-start;
-}
+        #message-form {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+            flex-shrink: 0;
+        }
 
-.message-bubble {
-    padding: 10px 15px; /* More padding */
-    border-radius: 18px; /* Bubble shape */
-    font-size: 0.95rem;
-    line-height: 1.5;
-    word-wrap: break-word; /* Ensure long words wrap */
-}
+        #message-form input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
 
-.message.own .message-bubble {
-    background: #1a73e8;
-    color: white;
-    border-bottom-right-radius: 4px; /* Tail effect */
-}
-
-.message.other .message-bubble {
-    background: #e9ebee; /* Lighter grey for other messages */
-    color: #202124; /* Darker text for readability */
-    border-bottom-left-radius: 4px; /* Tail effect */
-}
-
-.message-info {
-    font-size: 0.75rem; /* Smaller info text */
-    color: #5f6368;
-    margin-bottom: 4px; /* Space between info and bubble */
-    padding: 0 5px;
-}
-
-.message.own .message-info {
-    text-align: right;
-}
-
-.message.other .message-info {
-    text-align: left;
-}
-
-.message-input-container {
-    padding: 15px;
-    display: flex;
-    gap: 10px;
-    border-top: 1px solid #dadce0; /* Clearer separator */
-    background-color: #fff;
-    /* Sticky positioning */
-    position: sticky;
-    bottom: 0;
-    z-index: 100; /* Ensure it's above messages */
-    width: 100%; /* Ensure it spans full width */
-    flex-shrink: 0; /* Prevent input area from shrinking */
-}
-
-.message-input {
-    flex: 1;
-    padding: 12px 15px;
-    border: 1px solid #dadce0;
-    border-radius: 20px; /* Pill shape */
-    font-size: 0.95rem;
-}
-
-.message-input:focus {
-    outline: none;
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
-}
-
-.send-btn {
-    width: 44px; /* Larger send button */
-    height: 44px;
-    border: none;
-    background: #1a73e8;
-    color: white;
-    border-radius: 50%; /* Circular button */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem; /* Larger send icon */
-    transition: background-color 0.2s ease-in-out;
-}
-
-.send-btn:hover {
-    background: #1765cc;
-}
-
-.send-btn:disabled {
-    background-color: #e0e0e0;
-    cursor: not-allowed;
-}
-
-.system-message {
-    text-align: center;
-    color: #5f6368;
-    font-size: 0.85rem;
-    padding: 8px 0;
-    font-style: italic;
-}
-
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    height: 20px; /* Ensure it has height for alignment */
-}
-
-.loading-dot {
-    width: 8px;
-    height: 8px;
-    background: white; /* Dots are white on blue button */
-    border-radius: 50%;
-    animation: loadingPulse 1.4s infinite ease-in-out;
-}
-
-.loading-dot:nth-child(1) { animation-delay: -0.32s; }
-.loading-dot:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes loadingPulse {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1.0); }
-}
-
-/* Modal Styles */
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    display: none; /* Hidden by default */
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Ensure modal is on top of everything */
-}
-
-.modal-content {
-    background-color: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    width: 90%;
-    max-width: 350px;
-    text-align: center;
-}
-
-.modal-message {
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.modal-button {
-    padding: 10px 20px;
-    border-radius: 6px;
-    border: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.modal-button.confirm {
-    background-color: #1a73e8;
-    color: white;
-}
-
-.modal-button.confirm:hover {
-    background-color: #1765cc;
-}
-
-.modal-button.cancel {
-    background-color: #e0e0e0;
-    color: #333;
-}
-
-.modal-button.cancel:hover {
-    background-color: #d5d5d5;
-}
-
-/* Media Queries */
-@media (max-width: 480px) {
-    .container {
-        margin: 0;
-        border-radius: 0;
-        height: 100%; /* Use 100% to fill the viewport height on small screens */
-        max-height: 100vh; /* Ensure it respects viewport height */
-        box-shadow: none;
-    }
-
-    .chat-container {
-        height: 100%; /* Full height on mobile */
-        border-radius: 0;
-    }
-
-    .messages-container {
-        padding: 10px; /* Slightly less padding on mobile */
-    }
-
-    .message-input-container {
-        padding: 10px; /* Slightly less padding on mobile */
-    }
-}
-@media (max-width: 600px) {
-    .chat-container {
-        height: 100dvh;
-        max-height: 100dvh;
-    }
-}
+        #message-form button {
+            padding: 12px 20px;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* Loading Spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4285F4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="welcome-card" id="welcomeScreen">
-            <h1 class="welcome-title">Shh Chat 🤫</h1>
-            <p class="welcome-subtitle">Join or create a temporary chat room</p>
-            <form id="joinForm">
-                <div class="form-group">
-                    <label class="form-label" for="displayName">Your Name</label>
-                    <input type="text" class="form-input" id="displayName" placeholder="Enter your name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="roomCode">Room Code (optional)</label>
-                    <input type="text" class="form-input" id="roomCode" placeholder="Enter code or leave blank to create">
-                </div>
-                <button type="submit" class="join-btn" id="joinBtn">
-                    Join Chat
-                </button>
-            </form>
-        </div>
 
-        <div class="chat-container" id="chatContainer">
-            <div class="chat-header">
-                <div class="room-info">
-                    <h3 id="roomTitle">Room</h3>
-                    <div class="online-count">
-                        <div class="online-dot"></div>
-                        <span id="onlineCount">0 online</span>
-                    </div>
-                </div>
-                <div class="chat-actions">
-                    <button class="action-btn" id="shareRoomBtn" title="Share Room">↗</button>
-                    <button class="action-btn" id="leaveRoomBtn" title="Leave Room">×</button>
-                </div>
-            </div>
-            <div class="messages-container" id="messagesContainer">
-                </div>
-            <div class="message-input-container">
-                <input type="text" class="message-input" id="messageInput" placeholder="Type a message..." maxlength="500">
-                <button class="send-btn" id="sendBtn" title="Send Message">→</button>
-            </div>
+    <div id="welcome-screen">
+        <h1>Shh Chat 🤫</h1>
+        <p>Join or create an anonymous chat room. No history, no accounts.</p>
+        <div id="connection-status">Connecting...</div>
+        <div id="error-message-display" class="error-message" style="display: none;"></div>
+        <div class="input-group">
+            <input type="text" id="display-name-input" placeholder="Enter Your Name">
+        </div>
+        <div class="input-group">
+            <input type="text" id="room-code-input" placeholder="Enter Room Code (e.g., ABCD)">
+        </div>
+        <div class="button-group">
+            <button id="create-room-btn" disabled>Create Room</button>
+            <button id="join-room-btn" disabled>Join Room</button>
         </div>
     </div>
 
-    <div class="modal-backdrop" id="customModal">
-        <div class="modal-content">
-            <p class="modal-message" id="modalMessageText"></p>
-            <div class="modal-buttons">
-                <button class="modal-button confirm" id="modalConfirmBtn">OK</button>
-                <button class="modal-button cancel" id="modalCancelBtn">Cancel</button>
+    <div id="chat-container" style="display: none;">
+        <header>
+            <h2>Room: <span id="room-code-display"></span></h2>
+            <div id="header-buttons">
+                <button id="start-game-btn">Start Detective Game</button>
+                <button id="leave-room-btn">Leave</button>
             </div>
+        </header>
+        <!-- Game UI -->
+        <div id="game-status-container" style="display: none;">
+            <div id="game-topic"></div>
+            <div id="game-phase"></div>
         </div>
+        <main>
+            <div id="messages-container">
+                <!-- Messages will be dynamically inserted here -->
+            </div>
+        </main>
+        <div id="voting-container" style="display: none;">
+            <!-- Voting buttons will be dynamically inserted here -->
+        </div>
+        <form id="message-form">
+            <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
+            <button type="submit">Send</button>
+        </form>
     </div>
-
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-        import { 
-            getDatabase, 
-            ref, 
-            set, 
-            push, 
-            get, 
-            onChildAdded,
-            onChildRemoved, // Added for message deletion
-            onValue,
-            remove,
-            update, // Added for multi-path deletes
-            serverTimestamp,
-            query // Added for potential future ordering, though not strictly needed with push keys
-        } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, query, where, deleteDoc, runTransaction, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getDatabase, ref, onValue, set, onDisconnect, serverTime } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-        // --- DOM Element Declarations ---
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const chatContainer = document.getElementById('chatContainer');
-        const joinForm = document.getElementById('joinForm');
-        const displayNameInput = document.getElementById('displayName');
-        const roomCodeInput = document.getElementById('roomCode');
-        const roomTitle = document.getElementById('roomTitle');
-        const onlineCountEl = document.getElementById('onlineCount');
-        const messagesContainer = document.getElementById('messagesContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const shareRoomBtn = document.getElementById('shareRoomBtn');
-        const leaveRoomBtn = document.getElementById('leaveRoomBtn');
-        const joinBtn = document.getElementById('joinBtn');
-
-        const customModal = document.getElementById('customModal');
-        const modalMessageText = document.getElementById('modalMessageText');
-        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
-        const modalCancelBtn = document.getElementById('modalCancelBtn');
-        let modalConfirmCallback = null;
-
-        function showCustomAlert(message) {
-            if (modalMessageText && customModal && modalConfirmBtn && modalCancelBtn) {
-                modalMessageText.textContent = message;
-                modalConfirmBtn.style.display = 'inline-block';
-                modalCancelBtn.style.display = 'none';
-                customModal.style.display = 'flex';
-                return new Promise((resolve) => {
-                    modalConfirmCallback = () => {
-                        customModal.style.display = 'none';
-                        resolve(true);
-                    };
-                });
-            } else {
-                console.error("Modal elements not ready for alert:", message);
-                alert(message); 
-                return Promise.resolve(true);
-            }
-        }
-
-        function showCustomConfirm(message) {
-            if (modalMessageText && customModal && modalConfirmBtn && modalCancelBtn) {
-                modalMessageText.textContent = message;
-                modalConfirmBtn.style.display = 'inline-block';
-                modalCancelBtn.style.display = 'inline-block';
-                customModal.style.display = 'flex';
-                return new Promise((resolve) => {
-                    modalConfirmCallback = (confirmed) => {
-                        customModal.style.display = 'none';
-                        resolve(confirmed);
-                    };
-                });
-            } else {
-                console.error("Modal elements not ready for confirm:", message);
-                return Promise.resolve(window.confirm(message));
-            }
-        }
-        
-        if (modalConfirmBtn) {
-            modalConfirmBtn.addEventListener('click', () => {
-                if (modalConfirmCallback) modalConfirmCallback(true);
-            });
-        }
-        if (modalCancelBtn) {
-            modalCancelBtn.addEventListener('click', () => {
-                if (modalConfirmCallback) modalConfirmCallback(false);
-            });
-        }
 
         const firebaseConfig = {
             apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200", // Replace with your actual config
@@ -595,457 +392,538 @@ body {
             messagingSenderId: "20040883450",
             appId: "1:20040883450:web:833660405c634b2aaffd43"
         };
-        
-        let app;
-        let database;
 
-        try {
-            app = initializeApp(firebaseConfig);
-            database = getDatabase(app);
-            console.log("Firebase initialized successfully.");
-        } catch (error) {
-            console.error("Firebase initialization error:", error);
-            showCustomAlert(`Firebase initialization error. Please check your configuration and the console. Error: ${error.message}`);
-            if (joinBtn) { 
-                joinBtn.disabled = true;
-                joinBtn.textContent = 'Firebase Error';
-            }
-        }
+        // --- DOM Elements ---
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatContainer = document.getElementById('chat-container');
+        const displayNameInput = document.getElementById('display-name-input');
+        const roomCodeInput = document.getElementById('room-code-input');
+        const createRoomBtn = document.getElementById('create-room-btn');
+        const joinRoomBtn = document.getElementById('join-room-btn');
+        const leaveRoomBtn = document.getElementById('leave-room-btn');
+        const roomCodeDisplay = document.getElementById('room-code-display');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const connectionStatus = document.getElementById('connection-status');
+        const errorMessageDisplay = document.getElementById('error-message-display');
 
-        const chatData = {
+        // --- Game UI Elements ---
+        const startGameBtn = document.getElementById('start-game-btn');
+        const gameStatusContainer = document.getElementById('game-status-container');
+        const gameTopic = document.getElementById('game-topic');
+        const gamePhase = document.getElementById('game-phase');
+        const votingContainer = document.getElementById('voting-container');
+
+        // --- App State ---
+        let chatData = {
             currentUser: null,
             currentRoom: null,
-            messageListeners: [] 
+            messageListeners: [],
+            presenceRef: null,
         };
 
-        function generateRoomCode() {
-            return Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
+        // --- Game State & Content ---
+        const TOPIC_PAIRS = [
+            { detective: "Going to the Beach", liar: "Going to a Public Pool" },
+            { detective: "Attending a fancy wedding", liar: "Attending a high school prom" },
+            { detective: "Camping in the forest", liar: "Attending a music festival" },
+            { detective: "Shopping at a supermarket", liar: "Shopping at a farmer's market" },
+            { detective: "Working as a librarian", liar: "Working at a bookstore" },
+            { detective: "Visiting an art museum", liar: "Visiting a history museum" },
+            { detective: "Flying on an airplane", liar: "Riding a long-distance train" }
+        ];
 
-        function generateUserId() {
-            return self.crypto?.randomUUID ? self.crypto.randomUUID() : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2,15) ;
-        }
+        // --- Authentication ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                chatData.currentUser = { id: user.uid, name: '' };
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('room')) {
+                    roomCodeInput.value = urlParams.get('room').toUpperCase();
+                }
+                // Enable UI now that we are authenticated
+                connectionStatus.style.display = 'none';
+                createRoomBtn.disabled = false;
+                joinRoomBtn.disabled = false;
 
-        function formatTime(timestamp) {
-            if (!timestamp) return '';
-            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        async function createOrJoinRoom(roomCode, userName) {
-            if (!database) {
-                 showCustomAlert("Database not initialized. Cannot join room.");
-                 return null;
+            } else {
+                signInAnonymously(auth).catch(error => {
+                    console.error("Anonymous sign-in failed:", error);
+                    connectionStatus.textContent = "Connection failed. Please refresh.";
+                });
             }
-            const userId = generateUserId();
-            const user = {
-                id: userId,
-                name: userName,
-                joinedAt: serverTimestamp(),
-                lastSeen: serverTimestamp()
-            };
+        });
 
-            chatData.currentUser = user;
+        // --- Event Listeners ---
+        createRoomBtn.addEventListener('click', createRoom);
+        joinRoomBtn.addEventListener('click', joinRoom);
+        leaveRoomBtn.addEventListener('click', leaveRoom);
+        messageForm.addEventListener('submit', sendMessage);
+        startGameBtn.addEventListener('click', startGame);
 
-            const effectiveRoomCode = roomCode || generateRoomCode();
-            const roomRefPath = 'rooms/' + effectiveRoomCode;
-            const roomRef = ref(database, roomRefPath);
+        // --- Utility ---
+        function showWelcomeError(message) {
+            errorMessageDisplay.textContent = message;
+            errorMessageDisplay.style.display = 'block';
+        }
+
+        // --- Core Functions ---
+        function generateRoomCode() {
+            return Math.random().toString(36).substring(2, 6).toUpperCase();
+        }
+
+        async function createRoom() {
+            const displayName = displayNameInput.value.trim();
+            if (!displayName) {
+                showWelcomeError("Please enter a name.");
+                return;
+            }
+            createRoomBtn.disabled = true; // Prevent double-clicks
+            joinRoomBtn.disabled = true;
+            try {
+                chatData.currentUser.name = displayName;
+                const roomId = generateRoomCode();
+                const roomRef = doc(db, 'rooms', roomId);
+                await setDoc(roomRef, { createdAt: serverTimestamp() });
+                await joinRoom(roomId);
+            } catch (error) {
+                console.error("Error creating room:", error);
+                showWelcomeError("Could not create room. Please try again.");
+                createRoomBtn.disabled = false;
+                joinRoomBtn.disabled = false;
+            }
+        }
+
+        async function joinRoom(providedRoomId = null) {
+            const displayName = displayNameInput.value.trim();
+            const roomId = (providedRoomId && typeof providedRoomId === 'string') ? providedRoomId : roomCodeInput.value.trim().toUpperCase();
+
+            if (!displayName || !roomId) {
+                showWelcomeError("Please enter your name and a room code.");
+                return;
+            }
+            
+            createRoomBtn.disabled = true;
+            joinRoomBtn.disabled = true;
+            errorMessageDisplay.style.display = 'none';
             
             try {
-                const snapshot = await get(roomRef);
-                if (!snapshot.exists()) {
-                    await set(roomRef, {
-                        code: effectiveRoomCode,
-                        createdAt: serverTimestamp(),
-                        users: { [userId]: {name: userName, joinedAt: serverTimestamp()} } 
-                    });
-                } else {
-                    await set(ref(database, `${roomRefPath}/users/${userId}`), {name: userName, joinedAt: serverTimestamp()});
+                const roomRef = doc(db, 'rooms', roomId);
+                const roomDoc = await getDoc(roomRef);
+
+                if (!roomDoc.exists()) {
+                    showWelcomeError("Room not found!");
+                    welcomeScreen.style.display = 'flex';
+                    chatContainer.style.display = 'none';
+                    createRoomBtn.disabled = false;
+                    joinRoomBtn.disabled = false;
+                    return;
                 }
-                chatData.currentRoom = effectiveRoomCode;
-                addSystemMessage(`${userName} joined the chat.`); // System message sent before other messages load
-                return { roomCode: effectiveRoomCode, userId };
+
+                messagesContainer.innerHTML = '<div class="loader"></div>';
+                welcomeScreen.style.display = 'none';
+                chatContainer.style.display = 'flex';
+                
+                chatData.currentUser.name = displayName;
+                chatData.currentRoom = roomId;
+
+                const userRef = doc(db, `rooms/${roomId}/users/${chatData.currentUser.id}`);
+                await setDoc(userRef, { name: displayName, isOnline: true });
+
+                // Setup presence
+                const userStatusRef = ref(rtdb, `status/${roomId}/${chatData.currentUser.id}`);
+                const presenceRef = ref(rtdb, `.info/connected`);
+                onValue(presenceRef, (snap) => {
+                    if (snap.val() === false) { return; }
+                    onDisconnect(userStatusRef).set({ isOnline: false, timestamp: serverTime() })
+                        .then(() => {
+                            set(userStatusRef, { isOnline: true, timestamp: serverTime() });
+                        });
+                });
+                
+                chatData.presenceRef = onValue(ref(rtdb, `status/${roomId}`), (snap) => {
+                    const statuses = snap.val();
+                    if(!statuses) return;
+                    const batch = writeBatch(db);
+                    Object.keys(statuses).forEach(uid => {
+                        const userDocRef = doc(db, `rooms/${roomId}/users/${uid}`);
+                        batch.update(userDocRef, { isOnline: statuses[uid].isOnline });
+                    });
+                    batch.commit().catch(e => {}); // Ignore minor errors if user doc isn't there yet
+                });
+
+
+                roomCodeDisplay.textContent = roomId;
+                history.pushState(null, '', `?room=${roomId}`);
+
+                initializeListeners(roomId);
+                addSystemMessage(`${displayName} has joined the chat.`);
 
             } catch (error) {
-                console.error("Error creating/joining room:", error);
-                showCustomAlert(`Error joining room: ${error.message}`);
-                return null;
+                console.error("Error joining room:", error);
+                showWelcomeError("Could not join room. Check the code and try again.");
+                welcomeScreen.style.display = 'flex';
+                chatContainer.style.display = 'none';
+                createRoomBtn.disabled = false;
+                joinRoomBtn.disabled = false;
+            }
+        }
+
+        function initializeListeners(roomId) {
+            // Clear existing listeners
+            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
+            chatData.messageListeners = [];
+
+            // Listener for messages
+            const messagesQuery = query(collection(db, `rooms/${roomId}/messages`));
+            const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
+                messagesContainer.innerHTML = ''; // Clear and re-render all
+                snapshot.docs
+                    .sort((a, b) => a.data().createdAt?.toMillis() - b.data().createdAt?.toMillis())
+                    .forEach(doc => renderMessage(doc.data()));
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, (error) => console.error("Message listener error:", error));
+
+            // --- GAME LISTENER ---
+            const gameDocRef = doc(db, `rooms/${roomId}/game/state`);
+            const unsubscribeGame = onSnapshot(gameDocRef, (doc) => {
+                if(doc.exists()){
+                    renderGameState(doc.data());
+                } else {
+                    renderGameState(null); // Game doesn't exist or was reset
+                }
+            }, (error) => console.error("Game listener error:", error));
+
+            chatData.messageListeners.push(unsubscribeMessages, unsubscribeGame);
+        }
+
+        async function leaveRoom() {
+            if (!chatData.currentRoom || !chatData.currentUser) return;
+            
+            // Set user offline in RTDB which will trigger firestore update
+            const userStatusRef = ref(rtdb, `status/${chatData.currentRoom}/${chatData.currentUser.id}`);
+            await set(userStatusRef, { isOnline: false, timestamp: serverTime() });
+            
+            addSystemMessage(`${chatData.currentUser.name} has left the chat.`);
+
+            const userRef = doc(db, `rooms/${chatData.currentRoom}/users/${chatData.currentUser.id}`);
+            await deleteDoc(userRef);
+
+            // Unsubscribe from all listeners
+            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
+            chatData.messageListeners = [];
+
+            // Reset UI
+            chatContainer.style.display = 'none';
+            welcomeScreen.style.display = 'flex';
+            createRoomBtn.disabled = false;
+            joinRoomBtn.disabled = false;
+            history.pushState(null, '', window.location.pathname);
+            chatData.currentRoom = null;
+        }
+
+        async function sendMessage(e) {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            const message = {
+                text: text,
+                senderId: chatData.currentUser.id,
+                senderName: chatData.currentUser.name,
+                createdAt: serverTimestamp(),
+                type: 'user'
+            };
+            try {
+                await addDoc(collection(db, `rooms/${chatData.currentRoom}/messages`), message);
+                messageInput.value = '';
+            } catch (error) {
+                console.error("Error sending message:", error);
             }
         }
         
         async function addSystemMessage(text) {
-            if (!chatData.currentRoom || !database) return;
-            const message = {
-                id: generateUserId(), // Though Firebase will assign its own key
-                type: 'system',
-                text: text,
-                timestamp: serverTimestamp()
-            };
-            const messagesRef = ref(database, `rooms/${chatData.currentRoom}/messages`);
-            try {
-                await push(messagesRef, message);
-            } catch (error) {
-                console.error("Error sending system message:", error);
-            }
+             if (!chatData.currentRoom) return;
+             try {
+                await addDoc(collection(db, `rooms/${chatData.currentRoom}/messages`), {
+                    text,
+                    type: 'system',
+                    createdAt: serverTimestamp()
+                });
+             } catch(e) {}
+        }
+        
+        async function addGameMessage(text) {
+             if (!chatData.currentRoom) return;
+              try {
+                await addDoc(collection(db, `rooms/${chatData.currentRoom}/messages`), {
+                    text,
+                    type: 'game',
+                    createdAt: serverTimestamp()
+                });
+             } catch(e) {}
         }
 
-        async function sendMessage() {
-            if (!database) return;
-            const text = messageInput.value.trim();
-            if (!text || !chatData.currentUser || !chatData.currentRoom) return;
-
-            const message = {
-                id: generateUserId(), // Client-side ID, primarily for local use if needed before Firebase key
-                type: 'user',
-                text: text,
-                userId: chatData.currentUser.id,
-                userName: chatData.currentUser.name,
-                timestamp: serverTimestamp()
-            };
-
-            const messagesRef = ref(database, `rooms/${chatData.currentRoom}/messages`);
-            try {
-                await push(messagesRef, message);
-                messageInput.value = ''; 
-            } catch (error) {
-                console.error("Error sending message:", error);
-                showCustomAlert(`Error sending message: ${error.message}`);
-            }
-        }
-
-        function addMessageToDOM(message, messageId) { // messageId is the Firebase key
-            if (!messagesContainer || !chatData.currentUser && message.type !== 'system') return;
-
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.setAttribute('data-message-id', messageId); // For easy removal
-
-            if (message.type === 'system') {
-                messageDiv.className = 'system-message'; // Overrides .message, ensure this is intended or combine
-                messageDiv.classList.add('message'); // Add back .message if common styling is needed
-                messageDiv.setAttribute('data-message-id', messageId); 
-                messageDiv.textContent = escapeHtml(message.text);
+        function renderMessage({ text, senderId, senderName, type }) {
+            const messageEl = document.createElement('div');
+            
+            if (type === 'system') {
+                messageEl.className = 'system-message';
+                messageEl.textContent = text;
+            } else if (type === 'game') {
+                messageEl.className = 'game-message';
+                messageEl.textContent = text;
             } else {
-                const isOwn = message.userId === chatData.currentUser.id;
-                messageDiv.classList.add(isOwn ? 'own' : 'other');
-                
-                const safeUserName = escapeHtml(message.userName || 'User');
-                const safeMessageText = escapeHtml(message.text);
-                const time = formatTime(message.timestamp);
-
-                messageDiv.innerHTML = `
-                    <div class="message-info">${safeUserName} • ${time}</div>
-                    <div class="message-bubble">${safeMessageText}</div>
+                messageEl.className = 'message';
+                if (senderId === chatData.currentUser.id) {
+                    messageEl.classList.add('my-message');
+                }
+                messageEl.innerHTML = `
+                    <div class="message-sender">${senderName}</div>
+                    <div class="message-bubble">${text}</div>
                 `;
             }
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+            messagesContainer.appendChild(messageEl);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function listenForMessages() {
-            if (!chatData.currentRoom || !database) return;
+        // --- GAME LOGIC FUNCTIONS ---
+        async function startGame() {
+            const roomId = chatData.currentRoom;
+            if (!roomId) return;
             
-            // Unsubscribe from previous listeners
-            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-            chatData.messageListeners = [];
-
-            // Clear messages currently in DOM for this new room session (the initial system message from join will be re-added if it's part of the DB or handled separately)
-            // messagesContainer.innerHTML = ''; // Keep this if you want a clean slate before loading.
-                                          // The current join process adds a welcome message locally, then listenForMessages.
-                                          // If the welcome message is not in DB, it'll be overwritten if we clear here without re-adding.
-                                          // Given current flow, it's okay to not clear here, as `onChildAdded` will append.
-
-            const messagesQueryRef = query(ref(database, `rooms/${chatData.currentRoom}/messages`)); // No specific ordering needed as push keys are chronological
-
-            const onChildAddedUnsubscribe = onChildAdded(messagesQueryRef, (snapshot) => {
-                const message = snapshot.val();
-                const messageId = snapshot.key;
-                if (message) { 
-                    // Avoid re-adding if element already exists (can happen with some listener setups, less likely here)
-                    if (!document.querySelector(`.message[data-message-id="${messageId}"]`)) {
-                        addMessageToDOM(message, messageId);
-                    }
-                }
-            }, (error) => {
-                console.error("Error listening for added messages:", error);
-                showCustomAlert("Error fetching new messages.");
-            });
-            chatData.messageListeners.push(onChildAddedUnsubscribe);
-
-            const onChildRemovedUnsubscribe = onChildRemoved(messagesQueryRef, (snapshot) => {
-                const messageId = snapshot.key;
-                const messageElement = document.querySelector(`.message[data-message-id="${messageId}"]`);
-                if (messageElement) {
-                    messageElement.remove();
-                }
-            }, (error) => {
-                console.error("Error listening for removed messages:", error);
-            });
-            chatData.messageListeners.push(onChildRemovedUnsubscribe);
-        }
-
-        function updateOnlineCount() {
-            if (!chatData.currentRoom || !database) return;
-            const usersRef = ref(database, `rooms/${chatData.currentRoom}/users`);
-            
-            const unsubscribe = onValue(usersRef, (snapshot) => {
-                const users = snapshot.val();
-                const count = users ? Object.keys(users).length : 0;
-                onlineCountEl.textContent = `${count} online`;
-            }, (error) => {
-                console.error("Error updating online count:", error);
-            });
-            chatData.messageListeners.push(unsubscribe); // Add to listeners to be cleaned up on leave
-        }
-
-        async function leaveRoom() {
-            if (!chatData.currentRoom || !chatData.currentUser || !database) return;
-            
-            const confirmed = await showCustomConfirm('Leave room? Your messages will be removed if others remain. The room is deleted if you are the last one.');
-            if (!confirmed) return;
-
-            const leavingUserId = chatData.currentUser.id;
-            const leavingUserName = chatData.currentUser.name;
-            const currentRoomCode = chatData.currentRoom;
-
-            // Send "left chat" message before removing user or messages
-            // This message will persist even if other messages by the user are removed.
-            await addSystemMessage(`${leavingUserName} left the chat.`); 
-
-            const roomUsersRef = ref(database, `rooms/${currentRoomCode}/users`);
-            const currentUserInRoomRef = ref(database, `rooms/${currentRoomCode}/users/${leavingUserId}`);
+            const gameDocRef = doc(db, `rooms/${roomId}/game/state`);
             
             try {
-                // Remove user from the list of users in the room
-                await remove(currentUserInRoomRef);
-
-                const usersSnapshot = await get(roomUsersRef);
-                const remainingUsers = usersSnapshot.val();
-                const isRoomEmpty = !usersSnapshot.exists() || Object.keys(remainingUsers || {}).length === 0;
-
-                if (isRoomEmpty) {
-                    // If room is empty, remove the entire room
-                    await remove(ref(database, `rooms/${currentRoomCode}`));
-                    console.log(`Room ${currentRoomCode} deleted as it was empty.`);
-                } else {
-                    // If other users remain, remove messages from the leaving user
-                    const messagesRef = ref(database, `rooms/${currentRoomCode}/messages`);
-                    const messagesSnapshot = await get(messagesRef);
-                    if (messagesSnapshot.exists()) {
-                        const allMessages = messagesSnapshot.val();
-                        const updates = {};
-                        let messagesDeleted = false;
-                        for (const messageId in allMessages) {
-                            // Only delete 'user' type messages from the leaving user
-                            if (allMessages[messageId].userId === leavingUserId && allMessages[messageId].type === 'user') {
-                                updates[`rooms/${currentRoomCode}/messages/${messageId}`] = null; // Mark for deletion
-                                messagesDeleted = true;
-                            }
-                        }
-                        if (messagesDeleted) {
-                            await update(ref(database), updates); // Perform multi-path update to delete messages
-                            console.log(`Removed messages from user ${leavingUserId} in room ${currentRoomCode}`);
-                        }
+                await runTransaction(db, async (transaction) => {
+                    const gameDoc = await transaction.get(gameDocRef);
+                    if(gameDoc.exists() && gameDoc.data().isActive) {
+                        throw new Error("A game is already in progress!");
                     }
-                }
+
+                    const usersQuery = query(collection(db, `rooms/${roomId}/users`), where("isOnline", "==", true));
+                    const usersSnapshot = await getDocs(usersQuery); // Use getDocs, not transaction.get for queries
+                    const players = usersSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+
+                    if (players.length < 3) {
+                        throw new Error("You need at least 3 online players to start the game.");
+                    }
+                    
+                    const liarIndex = Math.floor(Math.random() * players.length);
+                    const topicPair = TOPIC_PAIRS[Math.floor(Math.random() * TOPIC_PAIRS.length)];
+                    const liarId = players[liarIndex].id;
+                    const turnOrder = players.map(p => p.id).sort(() => Math.random() - 0.5);
+
+                    const initialGameState = {
+                        isActive: true,
+                        phase: 'describing',
+                        liarId: liarId,
+                        detectiveTopic: topicPair.detective,
+                        liarTopic: topicPair.liar,
+                        players: players.reduce((acc, player) => {
+                            acc[player.id] = { name: player.name, hasDescribed: false };
+                            return acc;
+                        }, {}),
+                        turnOrder: turnOrder,
+                        currentTurnIndex: 0,
+                        votes: {},
+                        startedBy: chatData.currentUser.id
+                    };
+                    transaction.set(gameDocRef, initialGameState);
+                });
+                
+                const gameData = (await getDoc(gameDocRef)).data();
+                addGameMessage(`A new game of Anonymous Detective has started! The first person to describe is ${gameData.players[gameData.turnOrder[0]].name}.`);
+
             } catch (error) {
-                console.error("Error leaving room:", error);
-                showCustomAlert(`Error leaving room: ${error.message}`);
-            } finally {
-                chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-                chatData.messageListeners = [];
-                chatData.currentUser = null;
-                chatData.currentRoom = null;
-
-                chatContainer.style.display = 'none';
-                welcomeScreen.style.display = 'flex'; 
-                displayNameInput.value = '';
-                roomCodeInput.value = '';
-                // Clear messages on client side, as new room/welcome screen is shown
-                messagesContainer.innerHTML = '<div class="system-message">Messages disappear when everyone leaves.</div>'; 
-                displayNameInput.focus();
+                console.error("Error starting game:", error);
+                alert(error.message);
             }
         }
+        
+        function renderGameState(gameData) {
+            const myId = chatData.currentUser.id;
+            const messageInput = document.getElementById('message-input');
+            const messageForm = document.getElementById('message-form');
 
-        async function shareRoom() {
-            if (!chatData.currentRoom) return;
-            const roomLink = `${window.location.origin}${window.location.pathname}?room=${chatData.currentRoom}`;
-            const shareText = `Join my Shh Chat room!\nCode: ${chatData.currentRoom}\nLink: ${roomLink}`;
-            try {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(shareText);
-                    showCustomAlert('Room code and link copied to clipboard!');
-                } else if (navigator.share) {
-                    await navigator.share({
-                        title: 'Shh Chat Room',
-                        text: `Join my Shh Chat room! Code: ${chatData.currentRoom}`,
-                        url: roomLink,
-                    });
-                }
-                else {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = shareText;
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        showCustomAlert('Room code and link copied to clipboard (fallback)!');
-                    } catch (err) {
-                        showCustomAlert('Failed to copy. Please copy manually:\n' + shareText);
+            if (!gameData || !gameData.isActive) {
+                gameStatusContainer.style.display = 'none';
+                votingContainer.style.display = 'none';
+                startGameBtn.style.display = 'block';
+                messageForm.style.display = 'flex';
+                messageInput.disabled = false;
+                messageInput.placeholder = "Type a message...";
+                messageForm.onsubmit = sendMessage;
+                return;
+            }
+            
+            startGameBtn.style.display = 'none';
+            gameStatusContainer.style.display = 'block';
+
+            const myTopic = (myId === gameData.liarId) ? gameData.liarTopic : gameData.detectiveTopic;
+            gameTopic.textContent = `Your Topic: ${myTopic}`;
+
+            switch(gameData.phase) {
+                case 'describing':
+                    votingContainer.style.display = 'none';
+                    messageForm.style.display = 'flex';
+                    const currentTurnId = gameData.turnOrder[gameData.currentTurnIndex];
+                    const currentTurnName = gameData.players[currentTurnId].name;
+                    gamePhase.textContent = `It's ${currentTurnName}'s turn to describe...`;
+
+                    if (myId === currentTurnId) {
+                        messageInput.disabled = false;
+                        messageInput.placeholder = "Describe your experience...";
+                        messageForm.onsubmit = handleDescriptionSubmit;
+                    } else {
+                        messageInput.disabled = true;
+                        messageInput.placeholder = `Waiting for ${currentTurnName}...`;
+                        messageForm.onsubmit = (e) => e.preventDefault();
                     }
-                    document.body.removeChild(textArea);
-                }
-            } catch (err) {
-                console.error('Could not copy/share text: ', err);
-                if (err.name !== 'AbortError') { // AbortError happens if user cancels share dialog
-                   showCustomAlert('Failed to copy/share room details. Please try again or copy manually.');
-                }
+                    break;
+                
+                case 'voting':
+                    messageForm.style.display = 'none';
+                    votingContainer.style.display = 'block';
+                    gamePhase.textContent = "Time to vote! Who is the Liar?";
+                    renderVoteButtons(gameData);
+                    break;
+                
+                case 'reveal':
+                    messageForm.style.display = 'flex';
+                    messageInput.disabled = true;
+                    messageInput.placeholder = "Game over! Start a new game.";
+                    votingContainer.style.display = 'none';
+                    
+                    const liarName = gameData.players[gameData.liarId].name;
+                    gamePhase.innerHTML = `Game Over! The Liar was <b>${liarName}</b>.`;
+                    gameTopic.innerHTML = `Detective Topic: ${gameData.detectiveTopic} <br> Liar Topic: ${gameData.liarTopic}`;
+                    
+                    setTimeout(resetGame, 15000); // Reset game after 15 seconds
+                    break;
             }
         }
-
-        // --- Event Listeners ---
-        joinForm.addEventListener('submit', async (e) => {
+        
+        async function handleDescriptionSubmit(e) {
             e.preventDefault();
-            if (!database) { 
-                showCustomAlert("Cannot join: Firebase is not connected.");
-                return;
-            }
-            const displayName = displayNameInput.value.trim();
-            let roomCode = roomCodeInput.value.trim().toUpperCase();
+            const text = messageInput.value.trim();
+            if(!text) return;
+            
+            const roomId = chatData.currentRoom;
+            const myId = chatData.currentUser.id;
 
-            if (!displayName) {
-                showCustomAlert('Please enter your name.');
-                return;
-            }
-            if (displayName.length > 25) { 
-                showCustomAlert('Name must be 25 characters or less.');
-                return;
-            }
-            if (roomCode && (roomCode.length < 4 || roomCode.length > 10)) { 
-                 showCustomAlert('Room code must be between 4 and 10 characters if provided.');
-                 return;
-            }
+            await addDoc(collection(db, `rooms/${roomId}/messages`), {
+                text: text,
+                senderId: myId,
+                senderName: chatData.currentUser.name,
+                createdAt: serverTimestamp(),
+                type: 'user'
+            });
+            messageInput.value = '';
 
-            // Check for room code in URL query params (for joining via link)
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomFromUrl = urlParams.get('room');
-            if (roomFromUrl && !roomCode) {
-                roomCode = roomFromUrl.toUpperCase();
-                roomCodeInput.value = roomCode; // Optionally populate the input
+            const gameDocRef = doc(db, `rooms/${roomId}/game/state`);
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const gameDoc = await transaction.get(gameDocRef);
+                    if (!gameDoc.exists()) throw "Game document not found!";
+                    
+                    let gameData = gameDoc.data();
+                    const nextTurnIndex = gameData.currentTurnIndex + 1;
+
+                    if(nextTurnIndex >= gameData.turnOrder.length) {
+                        transaction.update(gameDocRef, { phase: 'voting' });
+                        addGameMessage("Everyone has described their experience. It's time to vote for the Liar!");
+                    } else {
+                        const nextPlayerId = gameData.turnOrder[nextTurnIndex];
+                        const nextPlayerName = gameData.players[nextPlayerId].name;
+                        transaction.update(gameDocRef, { currentTurnIndex: nextTurnIndex });
+                        addGameMessage(`Next up is ${nextPlayerName}.`);
+                    }
+                });
+            } catch (error) {
+                console.error("Error advancing turn:", error);
             }
+        }
 
+        function renderVoteButtons(gameData) {
+            votingContainer.innerHTML = '';
+            const myId = chatData.currentUser.id;
+            const myVote = gameData.votes[myId];
+            
+            for(const playerId in gameData.players) {
+                if (playerId === myId) continue;
+                const player = gameData.players[playerId];
+                const button = document.createElement('button');
+                button.className = 'vote-button';
+                button.textContent = `Vote for ${player.name}`;
+                
+                if(myVote) {
+                    button.disabled = true;
+                    if(myVote === playerId) {
+                       button.classList.add('voted');
+                       button.textContent = `You voted for ${player.name}`;
+                    }
+                } else {
+                    button.onclick = () => castVote(playerId);
+                }
+                votingContainer.appendChild(button);
+            }
+        }
 
-            const originalBtnText = joinBtn.innerHTML;
-            joinBtn.innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
-            joinBtn.disabled = true;
+        async function castVote(targetPlayerId) {
+            const roomId = chatData.currentRoom;
+            const myId = chatData.currentUser.id;
+            const gameDocRef = doc(db, `rooms/${roomId}/game/state`);
 
             try {
-                const result = await createOrJoinRoom(roomCode, displayName);
-                if (result && result.roomCode) {
-                    welcomeScreen.style.display = 'none';
-                    chatContainer.style.display = 'flex';
-                    roomTitle.textContent = `Room: ${result.roomCode}`;
-                    
-                    // Update URL without reloading page, to reflect current room
-                    // and allow easy sharing/bookmarking of the current room.
-                    const newUrl = `${window.location.pathname}?room=${result.roomCode}`;
-                    history.pushState({room: result.roomCode}, '', newUrl);
+                await runTransaction(db, async (transaction) => {
+                    const gameDoc = await transaction.get(gameDocRef);
+                    if (!gameDoc.exists()) return;
 
-                    messagesContainer.innerHTML = '<div class="system-message">Welcome! Messages are temporary.</div>'; 
+                    let gameData = gameDoc.data();
+                    if (gameData.phase !== 'voting') return;
+                    let votes = gameData.votes || {};
+                    if (votes[myId]) return;
+
+                    votes[myId] = targetPlayerId;
+                    transaction.update(gameDocRef, { votes: votes });
                     
-                    listenForMessages();
-                    updateOnlineCount();
-                    
-                    messageInput.focus();
-                }
+                    const totalPlayers = Object.keys(gameData.players).length;
+                    const totalVotes = Object.keys(votes).length;
+
+                    if (totalVotes >= totalPlayers) {
+                        transaction.update(gameDocRef, { phase: 'reveal' });
+                        
+                        const liarId = gameData.liarId;
+                        const liarName = gameData.players[liarId].name;
+                        let votesForLiar = 0;
+                        Object.values(votes).forEach(vote => {
+                            if (vote === liarId) votesForLiar++;
+                        });
+
+                        const detectivesWon = votesForLiar > (totalVotes - votesForLiar);
+                        
+                        if (detectivesWon) {
+                            addGameMessage(`The Detectives win! They correctly identified ${liarName} as the Liar.`);
+                        } else {
+                            addGameMessage(`The Liar wins! ${liarName} successfully deceived the group.`);
+                        }
+                    }
+                });
             } catch (error) {
-                console.error("Join form submission error:", error);
-                showCustomAlert("An unexpected error occurred while joining the room.");
-            } finally {
-                joinBtn.innerHTML = originalBtnText;
-                joinBtn.disabled = false;
+                console.error("Error casting vote:", error);
             }
-        });
-
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); 
-                sendMessage();
-            }
-        });
-
-        shareRoomBtn.addEventListener('click', shareRoom);
-        leaveRoomBtn.addEventListener('click', leaveRoom);
-
-        // Initial UI setup
-        displayNameInput.focus();
-        // If room code in URL on page load, prefill it
-        const initialUrlParams = new URLSearchParams(window.location.search);
-        const initialRoomFromUrl = initialUrlParams.get('room');
-        if (initialRoomFromUrl) {
-            roomCodeInput.value = initialRoomFromUrl.toUpperCase();
         }
-        messagesContainer.innerHTML = '<div class="system-message">Messages disappear when everyone leaves.</div>';
 
-
-        window.addEventListener('beforeunload', async (event) => {
-            // This is tricky. Most modern browsers heavily restrict `beforeunload` actions.
-            // Trying to do async operations like `leaveRoom` here is unreliable and often blocked.
-            // The best practice is to rely on Firebase's presence system if you need robust "user disconnected" logic.
-            // For now, this simple confirmation might work on some browsers for explicit navigation.
-            if (chatData.currentRoom && chatData.currentUser) {
-                // The message in `returnValue` is often ignored by modern browsers.
-                // `event.preventDefault()` is the key to trigger a generic browser confirm dialog.
-                event.preventDefault(); 
-                event.returnValue = 'Are you sure you want to leave? Your session will end.'; 
-                // Note: You cannot reliably call `leaveRoom()` here and guarantee its completion.
-            }
-        });
-
-        // Handle back/forward navigation to potentially rejoin or leave room context
-        window.addEventListener('popstate', (event) => {
-            const state = event.state;
-            if (chatData.currentRoom) { // If user was in a room
-                const urlParams = new URLSearchParams(window.location.search);
-                const roomFromUrl = urlParams.get('room');
-                if (!roomFromUrl || roomFromUrl !== chatData.currentRoom) {
-                    // User navigated away from the room URL (e.g., back to no query params)
-                    // or to a different room URL. Treat as leaving the current room.
-                    // No confirmation here, as it's a browser navigation action.
-                    // Call a "silent" leave or reset.
-                    
-                    chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-                    chatData.messageListeners = [];
-                    // Don't remove user from Firebase here as it might be unintentional nav
-                    // Better to rely on timeout / Firebase presence for actual disconnects if not explicit leave.
-                    // For now, just reset UI:
-                    chatContainer.style.display = 'none';
-                    welcomeScreen.style.display = 'flex';
-                    roomCodeInput.value = roomFromUrl ? roomFromUrl.toUpperCase() : '';
-                    displayNameInput.value = chatData.currentUser ? chatData.currentUser.name : ''; // Keep display name
-                    messagesContainer.innerHTML = '<div class="system-message">Navigated away. Rejoin or create a new room.</div>';
-                    // Reset part of chatData, but keep currentUser name perhaps
-                    // chatData.currentRoom = null; // This should be reset if we are truly leaving room context
-                    console.log("Navigated away from room context.");
-                }
-            } else {
-                 // If user was not in a room, but URL now has a room, prefill it.
-                const urlParams = new URLSearchParams(window.location.search);
-                const roomFromUrl = urlParams.get('room');
-                 if (roomFromUrl) {
-                    roomCodeInput.value = roomFromUrl.toUpperCase();
-                }
-            }
-        });
-
+        async function resetGame() {
+            if (!chatData.currentRoom) return;
+            const gameDocRef = doc(db, `rooms/${chatData.currentRoom}/game/state`);
+            await deleteDoc(gameDocRef).catch(e => {});
+            addSystemMessage("The game has ended. Feel free to start a new one!");
+        }
 
     </script>
 </body>
 </html>
+
