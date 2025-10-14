@@ -380,10 +380,10 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, query, where, deleteDoc, runTransaction, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Using alias for Realtime Database's serverTimestamp to avoid 'serverTimestamp' declaration collision.
         import { getDatabase, ref, onValue, set, onDisconnect, serverTimestamp as rtServerTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         // --- Firebase Config and Initialization ---
-
         const firebaseConfig = {
             apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200", // Replace with your actual config
             authDomain: "shh-chat-db9d0.firebaseapp.com",
@@ -393,6 +393,13 @@
             messagingSenderId: "20040883450",
             appId: "1:20040883450:web:833660405c634b2aaffd43"
         };
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); 
+        const db = getFirestore(app);
+        const rtdb = getDatabase(app);
+
 
         // --- DOM Elements ---
         const welcomeScreen = document.getElementById('welcome-screen');
@@ -435,26 +442,31 @@
             { detective: "Flying on an airplane", liar: "Riding a long-distance train" }
         ];
 
-        // --- Authentication ---
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                chatData.currentUser = { id: user.uid, name: '' };
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('room')) {
-                    roomCodeInput.value = urlParams.get('room').toUpperCase();
-                }
-                // Enable UI now that we are authenticated
-                connectionStatus.style.display = 'none';
-                createRoomBtn.disabled = false;
-                joinRoomBtn.disabled = false;
+        // --- Authentication Initialization Function ---
+        function initializeAuthAndUI() {
+             onAuthStateChanged(auth, user => {
+                if (user) {
+                    chatData.currentUser = { id: user.uid, name: '' };
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('room')) {
+                        roomCodeInput.value = urlParams.get('room').toUpperCase();
+                    }
+                    // Enable UI now that we are authenticated
+                    connectionStatus.style.display = 'none';
+                    createRoomBtn.disabled = false;
+                    joinRoomBtn.disabled = false;
 
-            } else {
-                signInAnonymously(auth).catch(error => {
-                    console.error("Anonymous sign-in failed:", error);
-                    connectionStatus.textContent = "Connection failed. Please refresh.";
-                });
-            }
-        });
+                } else {
+                    signInAnonymously(auth).catch(error => {
+                        console.error("Anonymous sign-in failed:", error);
+                        connectionStatus.textContent = "Connection failed. Please refresh.";
+                    });
+                }
+            });
+        }
+        
+        // Call it immediately after everything is defined
+        initializeAuthAndUI();
 
         // --- Event Listeners ---
         createRoomBtn.addEventListener('click', createRoom);
@@ -553,379 +565,158 @@
                     });
                     batch.commit().catch(e => {}); // Ignore minor errors if user doc isn't there yet
                 });
-
-
+                
+                // --- Load Room Data and Setup Listeners ---
                 roomCodeDisplay.textContent = roomId;
-                history.pushState(null, '', `?room=${roomId}`);
+                listenToRoomChanges(roomId);
+                listenToMessages(roomId);
 
-                initializeListeners(roomId);
-                addSystemMessage(`${displayName} has joined the chat.`);
+                createRoomBtn.disabled = false;
+                joinRoomBtn.disabled = false;
 
             } catch (error) {
                 console.error("Error joining room:", error);
-                showWelcomeError("Could not join room. Check the code and try again.");
+                showWelcomeError("Could not join room. " + error.message);
                 welcomeScreen.style.display = 'flex';
                 chatContainer.style.display = 'none';
                 createRoomBtn.disabled = false;
                 joinRoomBtn.disabled = false;
             }
+        } // End of joinRoom
+
+        // --- Chat/Game Listener and Renderer Functions ---
+        
+        function listenToRoomChanges(roomId) {
+            const usersCollectionRef = collection(db, `rooms/${roomId}/users`);
+            // This snapshot listener updates the list of users in the room
+            const unsubscribe = onSnapshot(usersCollectionRef, (snapshot) => {
+                const users = [];
+                let onlineUsersCount = 0;
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.isOnline) onlineUsersCount++;
+                    users.push({ id: doc.id, ...data });
+                });
+                console.log(`Current Users: ${onlineUsersCount} online.`, users);
+                // Placeholder for updating player list/game host UI
+            }, (error) => {
+                console.error("Error listening to room changes:", error);
+            });
+            chatData.messageListeners.push(unsubscribe);
         }
 
-        function initializeListeners(roomId) {
-            // Clear existing listeners
-            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-            chatData.messageListeners = [];
+        function listenToMessages(roomId) {
+            const messagesCollectionRef = collection(db, `rooms/${roomId}/messages`);
 
-            // Listener for messages
-            const messagesQuery = query(collection(db, `rooms/${roomId}/messages`));
-            const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
-                messagesContainer.innerHTML = ''; // Clear and re-render all
-                snapshot.docs
-                    .sort((a, b) => a.data().createdAt?.toMillis() - b.data().createdAt?.toMillis())
-                    .forEach(doc => renderMessage(doc.data()));
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }, (error) => console.error("Message listener error:", error));
+            const unsubscribe = onSnapshot(messagesCollectionRef, (snapshot) => {
+                const messages = [];
+                snapshot.forEach(doc => {
+                    messages.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Sort messages in memory by timestamp
+                messages.sort((a, b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0));
+                
+                renderMessages(messages);
+            }, (error) => {
+                console.error("Error listening to messages:", error);
+            });
+            chatData.messageListeners.push(unsubscribe);
+        }
 
-            // --- GAME LISTENER ---
-            const gameDocRef = doc(db, `rooms/${roomId}/game/state`);
-            const unsubscribeGame = onSnapshot(gameDocRef, (doc) => {
-                if(doc.exists()){
-                    renderGameState(doc.data());
-                } else {
-                    renderGameState(null); // Game doesn't exist or was reset
+        function renderMessages(messages) {
+            messagesContainer.innerHTML = ''; // Clear existing
+            messages.forEach(msg => {
+                const isMyMessage = msg.senderId === chatData.currentUser.id;
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(isMyMessage ? 'my-message' : 'other-message');
+
+                if (msg.type === 'system') {
+                    messageDiv.className = 'system-message';
+                    messageDiv.textContent = msg.text;
+                } else if (msg.type === 'game') {
+                     messageDiv.className = 'game-message';
+                    messageDiv.textContent = msg.text;
+                } else { // type === 'chat'
+                    const senderSpan = document.createElement('div');
+                    senderSpan.classList.add('message-sender');
+                    senderSpan.textContent = isMyMessage ? 'You' : msg.senderName;
+                    
+                    const bubbleDiv = document.createElement('div');
+                    bubbleDiv.classList.add('message-bubble');
+                    bubbleDiv.textContent = msg.text;
+
+                    messageDiv.appendChild(senderSpan);
+                    messageDiv.appendChild(bubbleDiv);
                 }
-            }, (error) => console.error("Game listener error:", error));
 
-            chatData.messageListeners.push(unsubscribeMessages, unsubscribeGame);
+                messagesContainer.appendChild(messageDiv);
+            });
+            // Scroll to the latest message
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        async function leaveRoom() {
-            if (!chatData.currentRoom || !chatData.currentUser) return;
+        async function sendMessage(event) {
+            event.preventDefault();
+            const messageText = messageInput.value.trim();
+            if (!chatData.currentRoom || !messageText || !chatData.currentUser) return;
             
-            // Set user offline in RTDB which will trigger firestore update
-            // Use rtServerTimestamp for RTDB presence
-            const userStatusRef = ref(rtdb, `status/${chatData.currentRoom}/${chatData.currentUser.id}`);
-            await set(userStatusRef, { isOnline: false, timestamp: rtServerTimestamp });
-            
-            addSystemMessage(`${chatData.currentUser.name} has left the chat.`);
-
-            const userRef = doc(db, `rooms/${chatData.currentRoom}/users/${chatData.currentUser.id}`);
-            await deleteDoc(userRef);
-
-            // Unsubscribe from all listeners
-            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-            chatData.messageListeners = [];
-
-            // Reset UI
-            chatContainer.style.display = 'none';
-            welcomeScreen.style.display = 'flex';
-            createRoomBtn.disabled = false;
-            joinRoomBtn.disabled = false;
-            history.pushState(null, '', window.location.pathname);
-            chatData.currentRoom = null;
-        }
-
-        async function sendMessage(e) {
-            e.preventDefault();
-            const text = messageInput.value.trim();
-            if (!text) return;
-            
-            const message = {
-                text: text,
-                senderId: chatData.currentUser.id,
-                senderName: chatData.currentUser.name,
-                createdAt: serverTimestamp(),
-                type: 'user'
-            };
             try {
-                await addDoc(collection(db, `rooms/${chatData.currentRoom}/messages`), message);
+                await addDoc(collection(db, `rooms/${chatData.currentRoom}/messages`), {
+                    senderId: chatData.currentUser.id,
+                    senderName: chatData.currentUser.name,
+                    text: messageText,
+                    timestamp: serverTimestamp(),
+                    type: 'chat'
+                });
                 messageInput.value = '';
             } catch (error) {
                 console.error("Error sending message:", error);
             }
         }
         
-        async function addSystemMessage(text) {
-             if (!chatData.currentRoom) return;
-             try {
-                await addDoc(collection(db, `rooms/${chatData.currentRoom}/messages`), {
-                    text,
-                    type: 'system',
-                    createdAt: serverTimestamp()
+        async function leaveRoom() {
+            if (!chatData.currentRoom || !chatData.currentUser) return;
+
+            // 1. Unsubscribe from all listeners
+            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
+            chatData.messageListeners = [];
+            
+            // 2. Clear RTDB presence listener if it was set
+            if (chatData.presenceRef) {
+                // onValue returns an unsubscribe function for RTDB
+                chatData.presenceRef(); 
+                chatData.presenceRef = null;
+            }
+            
+            // 3. Mark user offline in RTDB (force offline immediately, don't wait for onDisconnect)
+            try {
+                await set(ref(rtdb, `status/${chatData.currentRoom}/${chatData.currentUser.id}`), {
+                    isOnline: false,
+                    timestamp: rtServerTimestamp
                 });
-             } catch(e) {}
+            } catch (error) {
+                console.error("Error setting offline status in RTDB:", error);
+            }
+            
+            // 4. Update UI/State
+            chatData.currentRoom = null;
+            welcomeScreen.style.display = 'flex';
+            chatContainer.style.display = 'none';
+            messagesContainer.innerHTML = '<div class="system-message">You have left the room.</div>';
+            roomCodeDisplay.textContent = '';
+            roomCodeInput.value = ''; // Clear room code for next join
+            
+            // Re-enable buttons
+            createRoomBtn.disabled = false;
+            joinRoomBtn.disabled = false;
         }
         
-        async function addGameMessage(text) {
-             if (!chatData.currentRoom) return;
-              try {
-                await addDoc(collection(db, `rooms/${chatData.currentRoom}/messages`), {
-                    text,
-                    type: 'game',
-                    createdAt: serverTimestamp()
-                });
-             } catch(e) {}
-        }
-
-        function renderMessage({ text, senderId, senderName, type }) {
-            const messageEl = document.createElement('div');
-            
-            if (type === 'system') {
-                messageEl.className = 'system-message';
-                messageEl.textContent = text;
-            } else if (type === 'game') {
-                messageEl.className = 'game-message';
-                messageEl.textContent = text;
-            } else {
-                messageEl.className = 'message';
-                if (senderId === chatData.currentUser.id) {
-                    messageEl.classList.add('my-message');
-                }
-                messageEl.innerHTML = `
-                    <div class="message-sender">${senderName}</div>
-                    <div class="message-bubble">${text}</div>
-                `;
-            }
-            messagesContainer.appendChild(messageEl);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        // --- GAME LOGIC FUNCTIONS ---
         async function startGame() {
-            const roomId = chatData.currentRoom;
-            if (!roomId) return;
-            
-            const gameDocRef = doc(db, `rooms/${roomId}/game/state`);
-            
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const gameDoc = await transaction.get(gameDocRef);
-                    if(gameDoc.exists() && gameDoc.data().isActive) {
-                        throw new Error("A game is already in progress!");
-                    }
-
-                    const usersQuery = query(collection(db, `rooms/${roomId}/users`), where("isOnline", "==", true));
-                    const usersSnapshot = await getDocs(usersQuery); // Use getDocs, not transaction.get for queries
-                    const players = usersSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
-
-                    if (players.length < 3) {
-                        throw new Error("You need at least 3 online players to start the game.");
-                    }
-                    
-                    const liarIndex = Math.floor(Math.random() * players.length);
-                    const topicPair = TOPIC_PAIRS[Math.floor(Math.random() * TOPIC_PAIRS.length)];
-                    const liarId = players[liarIndex].id;
-                    const turnOrder = players.map(p => p.id).sort(() => Math.random() - 0.5);
-
-                    const initialGameState = {
-                        isActive: true,
-                        phase: 'describing',
-                        liarId: liarId,
-                        detectiveTopic: topicPair.detective,
-                        liarTopic: topicPair.liar,
-                        players: players.reduce((acc, player) => {
-                            acc[player.id] = { name: player.name, hasDescribed: false };
-                            return acc;
-                        }, {}),
-                        turnOrder: turnOrder,
-                        currentTurnIndex: 0,
-                        votes: {},
-                        startedBy: chatData.currentUser.id
-                    };
-                    transaction.set(gameDocRef, initialGameState);
-                });
-                
-                const gameData = (await getDoc(gameDocRef)).data();
-                addGameMessage(`A new game of Anonymous Detective has started! The first person to describe is ${gameData.players[gameData.turnOrder[0]].name}.`);
-
-            } catch (error) {
-                console.error("Error starting game:", error);
-                // IMPORTANT: Since we cannot use alert(), this should be handled better, 
-                // but for a quick fix, if the error is a user-facing string, we'll try to use a console log or a system message.
-                // For now, I'll update the alert to console.error and let the user handle the UI feedback.
-                console.error("Game Start Error: ", error.message);
-            }
-        }
-        
-        function renderGameState(gameData) {
-            const myId = chatData.currentUser.id;
-            const messageInput = document.getElementById('message-input');
-            const messageForm = document.getElementById('message-form');
-
-            if (!gameData || !gameData.isActive) {
-                gameStatusContainer.style.display = 'none';
-                votingContainer.style.display = 'none';
-                startGameBtn.style.display = 'block';
-                messageForm.style.display = 'flex';
-                messageInput.disabled = false;
-                messageInput.placeholder = "Type a message...";
-                messageForm.onsubmit = sendMessage;
-                return;
-            }
-            
-            startGameBtn.style.display = 'none';
-            gameStatusContainer.style.display = 'block';
-
-            const myTopic = (myId === gameData.liarId) ? gameData.liarTopic : gameData.detectiveTopic;
-            gameTopic.textContent = `Your Topic: ${myTopic}`;
-
-            switch(gameData.phase) {
-                case 'describing':
-                    votingContainer.style.display = 'none';
-                    messageForm.style.display = 'flex';
-                    const currentTurnId = gameData.turnOrder[gameData.currentTurnIndex];
-                    const currentTurnName = gameData.players[currentTurnId].name;
-                    gamePhase.textContent = `It's ${currentTurnName}'s turn to describe...`;
-
-                    if (myId === currentTurnId) {
-                        messageInput.disabled = false;
-                        messageInput.placeholder = "Describe your experience...";
-                        messageForm.onsubmit = handleDescriptionSubmit;
-                    } else {
-                        messageInput.disabled = true;
-                        messageInput.placeholder = `Waiting for ${currentTurnName}...`;
-                        messageForm.onsubmit = (e) => e.preventDefault();
-                    }
-                    break;
-                
-                case 'voting':
-                    messageForm.style.display = 'none';
-                    votingContainer.style.display = 'block';
-                    gamePhase.textContent = "Time to vote! Who is the Liar?";
-                    renderVoteButtons(gameData);
-                    break;
-                
-                case 'reveal':
-                    messageForm.style.display = 'flex';
-                    messageInput.disabled = true;
-                    messageInput.placeholder = "Game over! Start a new game.";
-                    votingContainer.style.display = 'none';
-                    
-                    const liarName = gameData.players[gameData.liarId].name;
-                    gamePhase.innerHTML = `Game Over! The Liar was <b>${liarName}</b>.`;
-                    gameTopic.innerHTML = `Detective Topic: ${gameData.detectiveTopic} <br> Liar Topic: ${gameData.liarTopic}`;
-                    
-                    setTimeout(resetGame, 15000); // Reset game after 15 seconds
-                    break;
-            }
-        }
-        
-        async function handleDescriptionSubmit(e) {
-            e.preventDefault();
-            const text = messageInput.value.trim();
-            if(!text) return;
-            
-            const roomId = chatData.currentRoom;
-            const myId = chatData.currentUser.id;
-
-            await addDoc(collection(db, `rooms/${roomId}/messages`), {
-                text: text,
-                senderId: myId,
-                senderName: chatData.currentUser.name,
-                createdAt: serverTimestamp(),
-                type: 'user'
-            });
-            messageInput.value = '';
-
-            const gameDocRef = doc(db, `rooms/${roomId}/game/state`);
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const gameDoc = await transaction.get(gameDocRef);
-                    if (!gameDoc.exists()) throw "Game document not found!";
-                    
-                    let gameData = gameDoc.data();
-                    const nextTurnIndex = gameData.currentTurnIndex + 1;
-
-                    if(nextTurnIndex >= gameData.turnOrder.length) {
-                        transaction.update(gameDocRef, { phase: 'voting' });
-                        addGameMessage("Everyone has described their experience. It's time to vote for the Liar!");
-                    } else {
-                        const nextPlayerId = gameData.turnOrder[nextTurnIndex];
-                        const nextPlayerName = gameData.players[nextPlayerId].name;
-                        transaction.update(gameDocRef, { currentTurnIndex: nextTurnIndex });
-                        addGameMessage(`Next up is ${nextPlayerName}.`);
-                    }
-                });
-            } catch (error) {
-                console.error("Error advancing turn:", error);
-            }
-        }
-
-        function renderVoteButtons(gameData) {
-            votingContainer.innerHTML = '';
-            const myId = chatData.currentUser.id;
-            const myVote = gameData.votes[myId];
-            
-            for(const playerId in gameData.players) {
-                if (playerId === myId) continue;
-                const player = gameData.players[playerId];
-                const button = document.createElement('button');
-                button.className = 'vote-button';
-                button.textContent = `Vote for ${player.name}`;
-                
-                if(myVote) {
-                    button.disabled = true;
-                    if(myVote === playerId) {
-                       button.classList.add('voted');
-                       button.textContent = `You voted for ${player.name}`;
-                    }
-                } else {
-                    button.onclick = () => castVote(playerId);
-                }
-                votingContainer.appendChild(button);
-            }
-        }
-
-        async function castVote(targetPlayerId) {
-            const roomId = chatData.currentRoom;
-            const myId = chatData.currentUser.id;
-            const gameDocRef = doc(db, `rooms/${roomId}/game/state`);
-
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const gameDoc = await transaction.get(gameDocRef);
-                    if (!gameDoc.exists()) return;
-
-                    let gameData = gameDoc.data();
-                    if (gameData.phase !== 'voting') return;
-                    let votes = gameData.votes || {};
-                    if (votes[myId]) return;
-
-                    votes[myId] = targetPlayerId;
-                    transaction.update(gameDocRef, { votes: votes });
-                    
-                    const totalPlayers = Object.keys(gameData.players).length;
-                    const totalVotes = Object.keys(votes).length;
-
-                    if (totalVotes >= totalPlayers) {
-                        transaction.update(gameDocRef, { phase: 'reveal' });
-                        
-                        const liarId = gameData.liarId;
-                        const liarName = gameData.players[liarId].name;
-                        let votesForLiar = 0;
-                        Object.values(votes).forEach(vote => {
-                            if (vote === liarId) votesForLiar++;
-                        });
-
-                        const detectivesWon = votesForLiar > (totalVotes - votesForLiar);
-                        
-                        if (detectivesWon) {
-                            addGameMessage(`The Detectives win! They correctly identified ${liarName} as the Liar.`);
-                        } else {
-                            addGameMessage(`The Liar wins! ${liarName} successfully deceived the group.`);
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error("Error casting vote:", error);
-            }
-        }
-
-        async function resetGame() {
-            if (!chatData.currentRoom) return;
-            const gameDocRef = doc(db, `rooms/${chatData.currentRoom}/game/state`);
-            await deleteDoc(gameDocRef).catch(e => {});
-            addSystemMessage("The game has ended. Feel free to start a new one!");
+            // Placeholder for game logic
+            // In a real app, this would update the Firestore room document with game state
+            alert("Game start logic not yet implemented!");
         }
 
     </script>
