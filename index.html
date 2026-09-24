@@ -1,724 +1,192 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Shh Chat 🤫 - Anonymous Detective</title>
-
-    <link rel="apple-touch-icon" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="https://gomediashark.com/wp-content/uploads/2024/05/shushing-face.png">
-    
-    <style>
-       /* General Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', Arial, sans-serif;
-        }
-
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            background-color: #f0f2f5;
-        }
-
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Welcome Screen */
-        #welcome-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px;
-            background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        #welcome-screen h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-
-        #welcome-screen p {
-            margin-bottom: 30px;
-            color: #555;
-        }
-        
-        #connection-status {
-            margin-bottom: 20px;
-            color: #888;
-            font-style: italic;
-        }
-        
-        .error-message {
-            color: #d93025;
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .input-group {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 1rem;
-            text-align: center;
-            text-transform: uppercase;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .button-group button {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .button-group button:disabled {
-            background-color: #dcdcdc;
-            cursor: not-allowed;
-            color: #888;
-        }
-
-        #create-room-btn {
-            background-color: #4285F4;
-            color: white;
-        }
-         #create-room-btn:hover:not(:disabled) {
-             background-color: #357ae8;
-         }
-
-        #join-room-btn {
-            background-color: #34A853;
-            color: white;
-        }
-        #join-room-btn:hover:not(:disabled) {
-            background-color: #2c9c42;
-        }
-
-        /* Chat Container */
-        #chat-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background-color: #fff;
-            max-width: 800px; /* Optional: limit width on desktop */
-            margin: 0 auto;
-        }
-
-        header {
-            padding: 15px 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        
-        header h2 {
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        header h2 #room-code-display {
-            background-color: #e0e0e0;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 1rem;
-            user-select: all;
-        }
-        
-        #header-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        #leave-room-btn, #start-game-btn {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            background-color: #fff;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        #leave-room-btn:hover, #start-game-btn:hover {
-            background-color: #f1f1f1;
-        }
-        #start-game-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-        }
-
-        /* --- Game UI Styles --- */
-        #game-status-container {
-            padding: 10px 20px;
-            background-color: #e8f0fe;
-            border-bottom: 1px solid #d2e3fc;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #1967d2;
-            flex-shrink: 0;
-        }
-        #game-topic { font-weight: bold; }
-        #game-phase { margin-top: 5px; }
-
-        #voting-container {
-            padding: 15px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            border-top: 1px solid #e0e0e0;
-            background-color: #f8f9fa;
-        }
-        .vote-button {
-            padding: 10px 15px;
-            border: 1px solid #4285F4;
-            color: #4285F4;
-            background-color: white;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .vote-button:hover {
-            background-color: #4285F4;
-            color: white;
-        }
-        .vote-button.voted {
-             background-color: #d1e3ff;
-             border-color: #a8c7fa;
-             color: #174ea6;
-             cursor: not-allowed;
-        }
-
-        main {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #messages-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            display: flex;
-            flex-direction: column;
-            max-width: 80%;
-            align-self: flex-start;
-        }
-
-        .message-bubble {
-            padding: 10px 15px;
-            border-radius: 20px;
-            background-color: #e9e9eb;
-            word-wrap: break-word;
-        }
-        
-        .message-sender {
-            font-size: 0.8rem;
-            color: #65676b;
-            margin-bottom: 4px;
-            padding-left: 10px;
-        }
-
-        .my-message {
-            align-self: flex-end;
-        }
-
-        .my-message .message-bubble {
-            background-color: #4285F4;
-            color: white;
-        }
-
-        .my-message .message-sender {
-            align-self: flex-end;
-            padding-right: 10px;
-        }
-
-        .system-message, .game-message {
-            align-self: center;
-            text-align: center;
-            background-color: #f0f2f5;
-            color: #65676b;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            max-width: 90%;
-        }
-        .game-message {
-            background-color: #fff0c7;
-            color: #5d470a;
-            font-weight: 500;
-        }
-
-        #message-form {
-            display: flex;
-            padding: 15px;
-            border-top: 1px solid #e0e0e0;
-            background-color: #f8f9fa;
-            flex-shrink: 0;
-        }
-
-        #message-form input {
-            flex-grow: 1;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            font-size: 1rem;
-            margin-right: 10px;
-        }
-
-        #message-form button {
-            padding: 12px 20px;
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        /* Loading Spinner */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4285F4;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shh Chat 🤫</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f0f2f5; font-family: Arial, sans-serif; }
+    .card, #chat { width: min(100%, 800px); min-height: 100vh; background: white; }
+    .card { min-height: auto; width: min(92%, 420px); padding: 32px; border-radius: 18px; box-shadow: 0 10px 30px #0002; text-align: center; }
+    h1 { margin-top: 0; }
+    input, button { width: 100%; padding: 13px; border-radius: 9px; font-size: 1rem; }
+    input { margin: 7px 0; border: 1px solid #ccc; }
+    button { margin-top: 9px; border: 0; color: white; background: #4285f4; cursor: pointer; font-weight: bold; }
+    button.secondary { background: #34a853; }
+    button:disabled { background: #aaa; cursor: wait; }
+    #status { min-height: 22px; color: #666; margin: 15px 0; }
+    #error { color: #c5221f; min-height: 20px; }
+    #chat { display: none; flex-direction: column; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #ddd; }
+    header h2 { margin: 0; font-size: 1.1rem; }
+    header button { width: auto; margin: 0; padding: 8px 12px; background: white; color: #333; border: 1px solid #bbb; }
+    #messages { flex: 1; overflow-y: auto; padding: 20px; min-height: 55vh; }
+    .message { max-width: 80%; margin: 10px 0; padding: 10px 14px; border-radius: 16px; background: #e9e9eb; overflow-wrap: anywhere; }
+    .mine { margin-left: auto; color: white; background: #4285f4; }
+    .sender { display: block; font-size: .75rem; opacity: .7; margin-bottom: 4px; }
+    .system { margin: 12px auto; text-align: center; color: #666; font-size: .85rem; }
+    #message-form { display: flex; gap: 8px; padding: 15px; border-top: 1px solid #ddd; }
+    #message-form input { margin: 0; flex: 1; }
+    #message-form button { width: auto; margin: 0; }
+  </style>
 </head>
 <body>
+  <section id="welcome" class="card">
+    <h1>Shh Chat 🤫</h1>
+    <p>Create a room or join one with a room code.</p>
+    <div id="status">Connecting…</div>
+    <div id="error" role="alert"></div>
+    <input id="name" maxlength="30" placeholder="Your name" autocomplete="name">
+    <input id="room-code" maxlength="8" placeholder="Room code (for joining)" autocomplete="off">
+    <button id="create" type="button" disabled>Create new chat</button>
+    <button id="join" class="secondary" type="button" disabled>Join chat</button>
+  </section>
 
-    <div id="welcome-screen">
-        <h1>Shh Chat 🤫</h1>
-        <p>Join or create an anonymous chat room. No history, no accounts.</p>
-        <div id="connection-status">Connecting...</div>
-        <div id="error-message-display" class="error-message" style="display: none;"></div>
-        <div class="input-group">
-            <input type="text" id="display-name-input" placeholder="Enter Your Name">
-        </div>
-        <div class="input-group">
-            <input type="text" id="room-code-input" placeholder="Enter Room Code (e.g., ABCD)">
-        </div>
-        <div class="button-group">
-            <button id="create-room-btn" disabled>Create Room</button>
-            <button id="join-room-btn" disabled>Join Room</button>
-        </div>
-    </div>
+  <section id="chat">
+    <header>
+      <h2>Room: <span id="room-label"></span></h2>
+      <button id="leave" type="button">Leave</button>
+    </header>
+    <main id="messages"><div class="system">No messages yet.</div></main>
+    <form id="message-form">
+      <input id="message" placeholder="Type a message…" autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+  </section>
 
-    <div id="chat-container" style="display: none;">
-        <header>
-            <h2>Room: <span id="room-code-display"></span></h2>
-            <div id="header-buttons">
-                <button id="start-game-btn">Start Detective Game</button>
-                <button id="leave-room-btn">Leave</button>
-            </div>
-        </header>
-        <!-- Game UI -->
-        <div id="game-status-container" style="display: none;">
-            <div id="game-topic"></div>
-            <div id="game-phase"></div>
-        </div>
-        <main>
-            <div id="messages-container">
-                <!-- Messages will be dynamically inserted here -->
-            </div>
-        </main>
-        <div id="voting-container" style="display: none;">
-            <!-- Voting buttons will be dynamically inserted here -->
-        </div>
-        <form id="message-form">
-            <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
-            <button type="submit">Send</button>
-        </form>
-    </div>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+    import { getFirestore, collection, doc, getDoc, setDoc, addDoc, onSnapshot, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, query, where, deleteDoc, runTransaction, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // Using alias for Realtime Database's serverTimestamp to avoid 'serverTimestamp' declaration collision.
-        import { getDatabase, ref, onValue, set, onDisconnect, serverTimestamp as rtServerTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+    const firebaseConfig = {
+      apiKey: 'AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200',
+      authDomain: 'shh-chat-db9d0.firebaseapp.com',
+      projectId: 'shh-chat-db9d0',
+      storageBucket: 'shh-chat-db9d0.appspot.com',
+      messagingSenderId: '20040883450',
+      appId: '1:20040883450:web:833660405c634b2aaffd43'
+    };
 
-        // --- Firebase Config and Initialization ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBAXWKvlpwnzI9Lghj81d1_M1pIRbuM200", // Replace with your actual config
-            authDomain: "shh-chat-db9d0.firebaseapp.com",
-            databaseURL: "https://shh-chat-db9d0-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "shh-chat-db9d0",
-            storageBucket: "shh-chat-db9d0.appspot.com", // Corrected common typo: firebasestorage.app -> appspot.com for storageBucket
-            messagingSenderId: "20040883450",
-            appId: "1:20040883450:web:833660405c634b2aaffd43"
-        };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const $ = id => document.getElementById(id);
+    const welcome = $('welcome');
+    const chat = $('chat');
+    let user = null;
+    let roomId = null;
+    let unsubscribeMessages = null;
 
-        // Initialize Firebase services
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app); 
-        const db = getFirestore(app);
-        const rtdb = getDatabase(app);
+    function setError(message = '') { $('error').textContent = message; }
+    function setBusy(busy) {
+      $('create').disabled = busy || !user;
+      $('join').disabled = busy || !user;
+    }
+    function explainError(error) {
+      console.error(error);
+      if (error.code === 'permission-denied') return 'Firebase denied access. Check Firestore rules.';
+      if (error.code === 'auth/operation-not-allowed') return 'Enable Anonymous sign-in in Firebase Authentication.';
+      if (error.code === 'unavailable') return 'Firebase is temporarily unavailable. Try again.';
+      return error.message || 'Something went wrong. Try again.';
+    }
+    function newRoomCode() { return Math.random().toString(36).slice(2, 6).toUpperCase(); }
 
+    onAuthStateChanged(auth, currentUser => {
+      user = currentUser;
+      if (user) {
+        $('status').textContent = 'Ready';
+        setBusy(false);
+      } else {
+        $('status').textContent = 'Connecting…';
+        setBusy(true);
+        signInAnonymously(auth).catch(error => {
+          $('status').textContent = 'Connection failed';
+          setError(explainError(error));
+        });
+      }
+    });
 
-        // --- DOM Elements ---
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const chatContainer = document.getElementById('chat-container');
-        const displayNameInput = document.getElementById('display-name-input');
-        const roomCodeInput = document.getElementById('room-code-input');
-        const createRoomBtn = document.getElementById('create-room-btn');
-        const joinRoomBtn = document.getElementById('join-room-btn');
-        const leaveRoomBtn = document.getElementById('leave-room-btn');
-        const roomCodeDisplay = document.getElementById('room-code-display');
-        const messagesContainer = document.getElementById('messages-container');
-        const messageForm = document.getElementById('message-form');
-        const messageInput = document.getElementById('message-input');
-        const connectionStatus = document.getElementById('connection-status');
-        const errorMessageDisplay = document.getElementById('error-message-display');
+    async function openRoom(id, name) {
+      id = id.trim().toUpperCase();
+      name = name.trim();
+      if (!name) throw new Error('Enter your name first.');
+      if (!id) throw new Error('Enter a room code.');
 
-        // --- Game UI Elements ---
-        const startGameBtn = document.getElementById('start-game-btn');
-        const gameStatusContainer = document.getElementById('game-status-container');
-        const gameTopic = document.getElementById('game-topic');
-        const gamePhase = document.getElementById('game-phase');
-        const votingContainer = document.getElementById('voting-container');
+      const roomRef = doc(db, 'rooms', id);
+      const room = await getDoc(roomRef);
+      if (!room.exists()) throw new Error('Room not found. Create a new chat first.');
 
-        // --- App State ---
-        let chatData = {
-            currentUser: null,
-            currentRoom: null,
-            messageListeners: [],
-            presenceRef: null,
-        };
+      await setDoc(doc(db, 'rooms', id, 'users', user.uid), {
+        name, joinedAt: serverTimestamp(), isOnline: true
+      });
+      roomId = id;
+      $('room-label').textContent = id;
+      welcome.style.display = 'none';
+      chat.style.display = 'flex';
+      $('message').focus();
+      listenForMessages();
+    }
 
-        // --- Game State & Content ---
-        const TOPIC_PAIRS = [
-            { detective: "Going to the Beach", liar: "Going to a Public Pool" },
-            { detective: "Attending a fancy wedding", liar: "Attending a high school prom" },
-            { detective: "Camping in the forest", liar: "Attending a music festival" },
-            { detective: "Shopping at a supermarket", liar: "Shopping at a farmer's market" },
-            { detective: "Working as a librarian", liar: "Working at a bookstore" },
-            { detective: "Visiting an art museum", liar: "Visiting a history museum" },
-            { detective: "Flying on an airplane", liar: "Riding a long-distance train" }
-        ];
+    async function createRoom() {
+      const name = $('name').value;
+      const id = newRoomCode();
+      await setDoc(doc(db, 'rooms', id), { createdAt: serverTimestamp() });
+      await openRoom(id, name);
+    }
 
-        // --- Authentication Initialization Function ---
-        function initializeAuthAndUI() {
-             onAuthStateChanged(auth, user => {
-                if (user) {
-                    chatData.currentUser = { id: user.uid, name: '' };
-                    const urlParams = new URLSearchParams(window.location.search);
-                    if (urlParams.get('room')) {
-                        roomCodeInput.value = urlParams.get('room').toUpperCase();
-                    }
-                    // Enable UI now that we are authenticated
-                    connectionStatus.style.display = 'none';
-                    createRoomBtn.disabled = false;
-                    joinRoomBtn.disabled = false;
+    $('create').addEventListener('click', async () => {
+      setError(); setBusy(true);
+      try { await createRoom(); } catch (error) { setError(explainError(error)); setBusy(false); }
+    });
 
-                } else {
-                    signInAnonymously(auth).catch(error => {
-                        console.error("Anonymous sign-in failed:", error);
-                        connectionStatus.textContent = "Connection failed. Please refresh.";
-                    });
-                }
-            });
-        }
-        
-        // Call it immediately after everything is defined
-        initializeAuthAndUI();
+    $('join').addEventListener('click', async () => {
+      setError(); setBusy(true);
+      try { await openRoom($('room-code').value, $('name').value); } catch (error) { setError(explainError(error)); setBusy(false); }
+    });
 
-        // --- Event Listeners ---
-        createRoomBtn.addEventListener('click', createRoom);
-        joinRoomBtn.addEventListener('click', joinRoom);
-        leaveRoomBtn.addEventListener('click', leaveRoom);
-        messageForm.addEventListener('submit', sendMessage);
-        startGameBtn.addEventListener('click', startGame);
+    function listenForMessages() {
+      if (unsubscribeMessages) unsubscribeMessages();
+      const messagesQuery = query(collection(db, 'rooms', roomId, 'messages'), orderBy('timestamp'));
+      unsubscribeMessages = onSnapshot(messagesQuery, snapshot => {
+        const container = $('messages');
+        container.innerHTML = '';
+        if (snapshot.empty) container.innerHTML = '<div class="system">No messages yet.</div>';
+        snapshot.forEach(item => {
+          const data = item.data();
+          const element = document.createElement('div');
+          element.className = `message ${data.senderId === user.uid ? 'mine' : ''}`;
+          element.innerHTML = `<span class="sender"></span><span class="text"></span>`;
+          element.querySelector('.sender').textContent = data.senderId === user.uid ? 'You' : (data.senderName || 'Anonymous');
+          element.querySelector('.text').textContent = data.text || '';
+          container.appendChild(element);
+        });
+        container.scrollTop = container.scrollHeight;
+      }, error => setError(explainError(error)));
+    }
 
-        // --- Utility ---
-        function showWelcomeError(message) {
-            errorMessageDisplay.textContent = message;
-            errorMessageDisplay.style.display = 'block';
-        }
+    $('message-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const input = $('message');
+      const text = input.value.trim();
+      if (!text || !roomId || !user) return;
+      input.disabled = true;
+      try {
+        await addDoc(collection(db, 'rooms', roomId, 'messages'), {
+          text, senderId: user.uid, senderName: $('name').value.trim(), timestamp: serverTimestamp()
+        });
+        input.value = '';
+      } catch (error) { setError(explainError(error)); }
+      finally { input.disabled = false; input.focus(); }
+    });
 
-        // --- Core Functions ---
-        function generateRoomCode() {
-            return Math.random().toString(36).substring(2, 6).toUpperCase();
-        }
-
-        async function createRoom() {
-            const displayName = displayNameInput.value.trim();
-            if (!displayName) {
-                showWelcomeError("Please enter a name.");
-                return;
-            }
-            createRoomBtn.disabled = true; // Prevent double-clicks
-            joinRoomBtn.disabled = true;
-            try {
-                chatData.currentUser.name = displayName;
-                const roomId = generateRoomCode();
-                const roomRef = doc(db, 'rooms', roomId);
-                await setDoc(roomRef, { createdAt: serverTimestamp() });
-                await joinRoom(roomId);
-            } catch (error) {
-                console.error("Error creating room:", error);
-                showWelcomeError("Could not create room. Please try again.");
-                createRoomBtn.disabled = false;
-                joinRoomBtn.disabled = false;
-            }
-        }
-
-        async function joinRoom(providedRoomId = null) {
-            const displayName = displayNameInput.value.trim();
-            const roomId = (providedRoomId && typeof providedRoomId === 'string') ? providedRoomId : roomCodeInput.value.trim().toUpperCase();
-
-            if (!displayName || !roomId) {
-                showWelcomeError("Please enter your name and a room code.");
-                return;
-            }
-            
-            createRoomBtn.disabled = true;
-            joinRoomBtn.disabled = true;
-            errorMessageDisplay.style.display = 'none';
-            
-            try {
-                const roomRef = doc(db, 'rooms', roomId);
-                const roomDoc = await getDoc(roomRef);
-
-                if (!roomDoc.exists()) {
-                    showWelcomeError("Room not found!");
-                    welcomeScreen.style.display = 'flex';
-                    chatContainer.style.display = 'none';
-                    createRoomBtn.disabled = false;
-                    joinRoomBtn.disabled = false;
-                    return;
-                }
-
-                messagesContainer.innerHTML = '<div class="loader"></div>';
-                welcomeScreen.style.display = 'none';
-                chatContainer.style.display = 'flex';
-                
-                chatData.currentUser.name = displayName;
-                chatData.currentRoom = roomId;
-
-                const userRef = doc(db, `rooms/${roomId}/users/${chatData.currentUser.id}`);
-                await setDoc(userRef, { name: displayName, isOnline: true });
-
-                // Setup presence using RTDB alias: rtServerTimestamp
-                const userStatusRef = ref(rtdb, `status/${roomId}/${chatData.currentUser.id}`);
-                const presenceRef = ref(rtdb, `.info/connected`);
-                onValue(presenceRef, (snap) => {
-                    if (snap.val() === false) { return; }
-                    onDisconnect(userStatusRef).set({ isOnline: false, timestamp: rtServerTimestamp })
-                        .then(() => {
-                            set(userStatusRef, { isOnline: true, timestamp: rtServerTimestamp });
-                        });
-                });
-                
-                chatData.presenceRef = onValue(ref(rtdb, `status/${roomId}`), (snap) => {
-                    const statuses = snap.val();
-                    if(!statuses) return;
-                    const batch = writeBatch(db);
-                    Object.keys(statuses).forEach(uid => {
-                        const userDocRef = doc(db, `rooms/${roomId}/users/${uid}`);
-                        batch.update(userDocRef, { isOnline: statuses[uid].isOnline });
-                    });
-                    batch.commit().catch(e => {}); // Ignore minor errors if user doc isn't there yet
-                });
-                
-                // --- Load Room Data and Setup Listeners ---
-                roomCodeDisplay.textContent = roomId;
-                listenToRoomChanges(roomId);
-                listenToMessages(roomId);
-
-                createRoomBtn.disabled = false;
-                joinRoomBtn.disabled = false;
-
-            } catch (error) {
-                console.error("Error joining room:", error);
-                showWelcomeError("Could not join room. " + error.message);
-                welcomeScreen.style.display = 'flex';
-                chatContainer.style.display = 'none';
-                createRoomBtn.disabled = false;
-                joinRoomBtn.disabled = false;
-            }
-        } // End of joinRoom
-
-        // --- Chat/Game Listener and Renderer Functions ---
-        
-        function listenToRoomChanges(roomId) {
-            const usersCollectionRef = collection(db, `rooms/${roomId}/users`);
-            // This snapshot listener updates the list of users in the room
-            const unsubscribe = onSnapshot(usersCollectionRef, (snapshot) => {
-                const users = [];
-                let onlineUsersCount = 0;
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.isOnline) onlineUsersCount++;
-                    users.push({ id: doc.id, ...data });
-                });
-                console.log(`Current Users: ${onlineUsersCount} online.`, users);
-                // Placeholder for updating player list/game host UI
-            }, (error) => {
-                console.error("Error listening to room changes:", error);
-            });
-            chatData.messageListeners.push(unsubscribe);
-        }
-
-        function listenToMessages(roomId) {
-            const messagesCollectionRef = collection(db, `rooms/${roomId}/messages`);
-
-            const unsubscribe = onSnapshot(messagesCollectionRef, (snapshot) => {
-                const messages = [];
-                snapshot.forEach(doc => {
-                    messages.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Sort messages in memory by timestamp
-                messages.sort((a, b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0));
-                
-                renderMessages(messages);
-            }, (error) => {
-                console.error("Error listening to messages:", error);
-            });
-            chatData.messageListeners.push(unsubscribe);
-        }
-
-        function renderMessages(messages) {
-            messagesContainer.innerHTML = ''; // Clear existing
-            messages.forEach(msg => {
-                const isMyMessage = msg.senderId === chatData.currentUser.id;
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('message');
-                messageDiv.classList.add(isMyMessage ? 'my-message' : 'other-message');
-
-                if (msg.type === 'system') {
-                    messageDiv.className = 'system-message';
-                    messageDiv.textContent = msg.text;
-                } else if (msg.type === 'game') {
-                     messageDiv.className = 'game-message';
-                    messageDiv.textContent = msg.text;
-                } else { // type === 'chat'
-                    const senderSpan = document.createElement('div');
-                    senderSpan.classList.add('message-sender');
-                    senderSpan.textContent = isMyMessage ? 'You' : msg.senderName;
-                    
-                    const bubbleDiv = document.createElement('div');
-                    bubbleDiv.classList.add('message-bubble');
-                    bubbleDiv.textContent = msg.text;
-
-                    messageDiv.appendChild(senderSpan);
-                    messageDiv.appendChild(bubbleDiv);
-                }
-
-                messagesContainer.appendChild(messageDiv);
-            });
-            // Scroll to the latest message
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        async function sendMessage(event) {
-            event.preventDefault();
-            const messageText = messageInput.value.trim();
-            if (!chatData.currentRoom || !messageText || !chatData.currentUser) return;
-            
-            try {
-                await addDoc(collection(db, `rooms/${chatData.currentRoom}/messages`), {
-                    senderId: chatData.currentUser.id,
-                    senderName: chatData.currentUser.name,
-                    text: messageText,
-                    timestamp: serverTimestamp(),
-                    type: 'chat'
-                });
-                messageInput.value = '';
-            } catch (error) {
-                console.error("Error sending message:", error);
-            }
-        }
-        
-        async function leaveRoom() {
-            if (!chatData.currentRoom || !chatData.currentUser) return;
-
-            // 1. Unsubscribe from all listeners
-            chatData.messageListeners.forEach(unsubscribe => unsubscribe());
-            chatData.messageListeners = [];
-            
-            // 2. Clear RTDB presence listener if it was set
-            if (chatData.presenceRef) {
-                // onValue returns an unsubscribe function for RTDB
-                chatData.presenceRef(); 
-                chatData.presenceRef = null;
-            }
-            
-            // 3. Mark user offline in RTDB (force offline immediately, don't wait for onDisconnect)
-            try {
-                await set(ref(rtdb, `status/${chatData.currentRoom}/${chatData.currentUser.id}`), {
-                    isOnline: false,
-                    timestamp: rtServerTimestamp
-                });
-            } catch (error) {
-                console.error("Error setting offline status in RTDB:", error);
-            }
-            
-            // 4. Update UI/State
-            chatData.currentRoom = null;
-            welcomeScreen.style.display = 'flex';
-            chatContainer.style.display = 'none';
-            messagesContainer.innerHTML = '<div class="system-message">You have left the room.</div>';
-            roomCodeDisplay.textContent = '';
-            roomCodeInput.value = ''; // Clear room code for next join
-            
-            // Re-enable buttons
-            createRoomBtn.disabled = false;
-            joinRoomBtn.disabled = false;
-        }
-        
-        async function startGame() {
-            // Placeholder for game logic
-            // In a real app, this would update the Firestore room document with game state
-            alert("Game start logic not yet implemented!");
-        }
-
-    </script>
+    $('leave').addEventListener('click', () => {
+      if (unsubscribeMessages) unsubscribeMessages();
+      unsubscribeMessages = null; roomId = null;
+      chat.style.display = 'none'; welcome.style.display = 'block';
+      $('room-code').value = ''; setError(); setBusy(false);
+    });
+  </script>
 </body>
 </html>
